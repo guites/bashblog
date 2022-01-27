@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
+<channel><title>Blog do guilherme</title><link>https://guilhermegarcia.dev/blog/index.html</link>
+<description>programação e outras coisas menos úteis</description><language>en</language>
+<lastBuildDate>Wed, 26 Jan 2022 22:58:05 -0300</lastBuildDate>
+<pubDate>Wed, 26 Jan 2022 22:58:05 -0300</pubDate>
+<atom:link href="https://guilhermegarcia.dev/blog/feed.rss" rel="self" type="application/rss+xml" />
+<item><title>
+Post de teste!
+</title><description><![CDATA[
+
+<p><abbr title="muito grande; nem lí">mg;nl</abbr>: Aqui vai o texto que mostra o resumo da postagem.</p>
+
+<hr/>
+<p>Tags: <a href='tag_markdown.html'>markdown</a></p>
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/post-de-teste.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/post-de-teste.html'><span id='count-31183'></span></a>&nbsp;</p>
+]]></description><link>https://guilhermegarcia.dev/blog/post-de-teste.html</link>
+<guid>https://guilhermegarcia.dev/blog/./post-de-teste.html</guid>
+<dc:creator>Guilherme Garcia</dc:creator>
+<pubDate>Wed, 26 Jan 2022 22:53:58 -0300</pubDate></item>
+</channel></rss>
