@@ -163,6 +163,7 @@ Caso a variável não for indefinida, o valor não será substituido.
     echo ${var}
 
 output:
+
     Não ocorrerá substituição pois var é uma variável definida
     variavel definida
 
