@@ -1,0 +1,323 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="main.css" type="text/css" />
+<link rel="stylesheet" href="blog.css" type="text/css" />
+<link rel="alternate" type="application/rss+xml" title="Inscrever-se nesta página..." href="feed.rss" />
+<title>Coisas que eu não sabia sobre bash</title>
+<meta name='twitter:card' content='summary' />
+<meta name='twitter:site' content='@gui_garcia67' />
+<meta name='twitter:title' content='Coisas que eu não sabia sobre bash' />
+<meta name='twitter:description' content=" mg;nl: Compilei o aqui o resultado de uma noite analisando o código fonte do bashblog.  O bash tem muitas particularidades, principalmente pra quem tem um background em linguagens web. Neste post eu falo sobre:   Uso de exit status como condicional" />
+</head><body>
+<div id="divbodyholder">
+<div class="headerholder"><div class="header">
+<div id="title">
+<h1 class="nomargin"><a class="ablack" href="https://guilhermegarcia.dev/blog/index.html">Blog do guilherme</a></h1>
+<div id="description">programação e outras coisas menos úteis</div>
+</div></div></div>
+<div id="divbody"><div class="content">
+<!-- entry begin -->
+<h3><a class="ablack" href="coisas-que-eu-nao-sabia-sobre-bash.html">
+Coisas que eu não sabia sobre bash
+</a></h3>
+<!-- bashblog_timestamp: #202201300148.49# -->
+<div class="subtitle">Janeiro 30, 2022 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p><abbr title="muito grande; nem li">mg;nl</abbr>: Compilei o aqui o resultado de uma noite analisando o código fonte do <a href="https://github.com/cfenollosa/bashblog">bashblog</a>.</p>
+
+<p>O bash tem muitas particularidades, principalmente pra quem tem um background em linguagens web. Neste post eu falo sobre:</p>
+
+<ol>
+<li>Uso de exit status como condicional</li>
+<li>Redirecionamento de streams</li>
+<li>Parenteses duplos para comparação numérica</li>
+<li>Expansão de parametros e criação de substrings</li>
+</ol>
+
+<p>ps. com o quarto item eu consegui gerar um <a href="https://github.com/cfenollosa/bashblog/pull/168">pull request</a></p>
+
+<hr/>
+
+<p>Segue um resumo do que eu estudei baseado nas referências, que estão no fim da página.</p>
+
+<h2>Uso de exit status como condicional</h2>
+
+<p>O bash possui certos parametros, chamados <a href="http://www.gnu.org/software/bash/manual/bash.html#Special-Parameters">parametros especiais</a> que podem ser acessados dentro de um script.</p>
+
+<p>O parametro <code>$?</code> retorna o exit status do último programa executado. Um programa executado com sucesso retorna 0, enquanto um programa que tenha gerado erro retorna 1.</p>
+
+<p>por ex, digamos que eu esteja recebendo uma string passada em uma variável, e precise me certificar de que ela possui uma substring "bar".</p>
+
+<pre><code>STR="barbada"
+
+grep bar &lt;&lt;&lt; "$STR"
+
+if [ $? == 0 ]; then
+  echo "bar" está dentro de "$STR"
+fi
+
+STR2="batida"
+
+grep bar &lt;&lt;&lt; "$STR"
+
+if [ $? == 0 ]; then
+  echo "bar" está dentro de "$STR2"
+else
+  echo "bar" não está dentro de "$STR2"
+fi
+</code></pre>
+
+<p>output:</p>
+
+<pre><code>barbada
+
+"bar" está dentro de "barbada"
+
+"bar" não está dentro de "batida"
+</code></pre>
+
+<p>repare que o valor da primeira variável foi printado no console. Isso é devido ao comportamento padrão do comando <code>grep</code>. O que nos leva ao próximo tópico.</p>
+
+<h2>Redirecionamento de streams</h2>
+
+<p>Em sistemas UNIX, existem três tipos de <em>stream</em>, também chamados de <em>files</em>, pois podem ser tratados como arquivos <a href="https://en.wikipedia.org/wiki/Everything_is_a_file">(assim como os diretórios)</a>:</p>
+
+<p>o <em>stdin</em> se trata dos valores de entrada emitidos pelo teclado, o <em>stdout</em> são os valores emitidos no terminal, e o <em>stderr</em> são os erros. Também são chamados, respectivamente, de 0, 1 e 2.</p>
+
+<p>No exemplo acima, podemos utilizar o operador <code>&amp;&gt;</code> para redirecionar ambos <em>stdout</em> e <em>stderr</em>, e realizar nosso teste de forma silenciosa.</p>
+
+<pre><code>STR="barbada"
+
+grep bar &lt;&lt;&lt; "$STR" &amp;&gt; /dev/null
+
+if [ $? == 0 ]; then
+  echo "bar" está dentro de "$STR"
+fi
+</code></pre>
+
+<p>output:</p>
+
+<pre><code>"bar" está dentro de barbada
+</code></pre>
+
+<p>Este padrão é comum em scripts que geram um tratamento de erro customizado para o usuário.</p>
+
+<h2>Parenteses duplos para comparação numérica</h2>
+
+<p>O uso de parenteses duplos faz com que o bash crie um contexto onde os valores são interpretados como números e as palavras, como variáveis.</p>
+
+<p>Podemos nos utilizar disso para escrever expressões mais enxutas:</p>
+
+<pre><code>STR="barbada"
+
+grep bar &lt;&lt;&lt; "$STR" &amp;&gt; /dev/null
+
+(( $? == 0 )) &amp;&amp; echo "bar" está contida em "$STR"
+</code></pre>
+
+<p>output:</p>
+
+<pre><code>bar está contida em barbada
+</code></pre>
+
+<p>Para lógicas com <code>else</code>, podemos utilizar o operador condiconal OR <code>||</code>:</p>
+
+<pre><code>(( $? == 0 )) &amp;&amp; echo "foo" está contida em "$STR" || echo foo não está presente em "$STR"
+</code></pre>
+
+<p>Em situações mais complexas, o ideal é utilizar a sintaxe regular.</p>
+
+<h2>Expansão de parametros e criação de substrings</h2>
+
+<p>O tópico de <em>expansão de parametros</em> no bash é bem amplo.</p>
+
+<p>A expansão pode ser utilizada para:</p>
+
+<p><strong><code>${var}</code></strong> Substituir variáveis dentro de uma string:</p>
+
+<pre><code>var=" uma string"
+
+echo esta variável vai ser expandida em${var}
+</code></pre>
+
+<p>output:</p>
+
+<pre><code>esta variável vai ser expandida em uma string
+</code></pre>
+
+<p><strong><code>${var:offset}</code></strong> Gerar uma string, partindo de um offset:</p>
+
+<pre><code>var="Uma frase comprida"
+echo ${var:4}
+</code></pre>
+
+<p>output:</p>
+
+<pre><code>frase comprida
+</code></pre>
+
+<p><strong><code>${var:offset:length}</code></strong> Gerar um string, partindo de um offset e indicando um comprimento:</p>
+
+<pre><code>var="Uma frase comprida"
+echo ${var:4:5}
+</code></pre>
+
+<p>output:</p>
+
+<pre><code>frase
+</code></pre>
+
+<p><strong><code>${#var}</code></strong> Calcular a quantidade de caracteres em uma string:</p>
+
+<pre><code>var="Paralelepipedo"
+echo ${#var}
+</code></pre>
+
+<p>output:</p>
+
+<pre><code>14
+</code></pre>
+
+<p><strong><code>${var:=valor_substituicao}</code></strong> Atribuir valor a uma variável de forma condicional.</p>
+
+<p>O operador <code>:=</code> atribui o valor da direita para uma variável à esquerda, caso ela seja nula ou indefinida.</p>
+
+<pre><code># neste exemplo, var é indefinida
+valor_substituicao="caso essa seja nula ou indefinida."
+echo o valor da direita será passado para a variável da esquerda, ${var:=$valor_substituicao}
+echo ${var}
+</code></pre>
+
+<p>output:</p>
+
+<pre><code>o valor da direita será passado para a variável da esquerda, caso essa seja nula ou indefinida.
+caso essa seja nula ou indefinida.
+</code></pre>
+
+<p>Caso a variável não for indefinida, o valor não será substituido.</p>
+
+<pre><code># neste exemplo, var é definido
+var="variável definida"
+valor_substituicao="meu valor não será utilizado"
+echo Não ocorrerá substituição pois var é uma ${var}
+echo ${var}
+</code></pre>
+
+<p>output:
+    Não ocorrerá substituição pois var é uma variável definida
+    variavel definida</p>
+
+<p><strong><code>{var:-$valor_substituicao}</code></strong> Expandir um valor no lugar de uma variável <code>var</code> nula ou indifinada:</p>
+
+<p>O operador não atribui valores. Caso o valor de <code>var</code> seja nulo ou indefinido, o valor de <code>$valor_substituicao</code> será expandido, mas não será passado para <code>var</code>.</p>
+
+<pre><code>var_1="var_1 é uma variável definida"
+var_2="Eu não vou ser chamada, pois var_1 é definida"
+echo O valor da direita será passado para a variável da esquerda apenas se essa for indefinida.
+echo Isso não vai acontecer pois ${var_1:-$var_2}
+echo ${var_1}
+
+# neste exemplo, var_3 é indefinida
+var_2="valor expandido"
+echo Neste caso, var_2 vai ter seu {var_3:-$var_2}, mas não substituido.
+echo ${var_3}
+</code></pre>
+
+<p>output:</p>
+
+<pre><code>O valor da direita será passado para a variável da esquerda apenas se essa for indefinida.
+Isso não vai acontecer pois var_1 é uma variável definida
+var_1 é uma variável definida
+Neste caso, var_2 vai ter seu valor expandido, mas não substituido.
+</code></pre>
+
+<p><strong><code>${var#padrao}</code></strong> Deletar valores a partir do início de uma string <code>var</code>, removendo o menor padrão encontrado:</p>
+
+<p>O operador <code>${var#padrao}</code> busca pelo <code>padrao</code> dentro do valor de <code>var</code>, partindo do primeiro caractere. Caso encontre, ele realiza uma expansão, deletando o padrão encontrado.</p>
+
+<pre><code>var="Uma pequena oração."
+padrao="Uma"
+padrao_2="pequena"
+
+resultado=${var#${padrao}}
+echo $resultado
+
+resultado_2="${var#padrao_2}" # substituição não ocorre, pois o padrão deve coincidir com o início
+echo $resultado_2
+</code></pre>
+
+<p>output:</p>
+
+<pre><code>pequena oração.
+Uma pequena oração.
+</code></pre>
+
+<p>Neste caso, podemos utilizar como <code>padrao</code> algumas <a href="https://www.gnu.org/software/bash/manual/bash.html#Pattern-Matching">expressões especiais</a> (não chegam a ser expressões regulares completas).</p>
+
+<p><strong><code>${var##padrao}</code></strong> Deletar valores a partir do início de uma string <code>var</code>, removendo o maior padrão encontrado:</p>
+
+<p>Esta variação, com dois <code>##</code>, expande e remove a maior combinação possível com o padrão utilizado.</p>
+
+<p>Para que elas funcionem corretamente, é preciso ativar o <code>extended globbing</code>.</p>
+
+<pre><code>shopt -s extglob # ativa extensão para uso de globbing avançado
+
+zero_a_esquerda="001"
+resultado=${zero_a_esquerda##+(0)} # vai remover o máximo de zeros possível
+resultado_2=${zero_a_esquerda#+(0)} # vai remover o menor padrão possível (apenas um zero)
+
+frase_inicial="Eu virei uma frase, com pontuação."
+
+# vai substituir o máximo de letras e espaços, trava na primeira pontuação
+frase_final=${frase_inicial##+([[:alnum:]]|[[:blank:]])}
+
+# o uso de apenas um símbolo # indica para parar no menor padrão encontrado possível
+frase_final_2=${frase_inicial#+([[:alnum:]]|[[:blank:]])}
+shopt -u extglob # desativa extensão
+
+echo $resultado
+echo $resultado_2
+echo $frase_final
+echo $frase_final_2
+</code></pre>
+
+<p>output:</p>
+
+<pre><code>1
+
+01
+
+, com pontuação.
+
+u virei uma frase, com pontuação.
+</code></pre>
+
+<p>Abraço!</p>
+
+<p>referências:</p>
+
+<ol>
+<li><a href="https://tldp.org/LDP/Bash-Beginners-Guide/html/sect_07_01.html">https://tldp.org/LDP/Bash-Beginners-Guide/html/sect_07_01.html</a></li>
+<li><a href="https://tldp.org/LDP/abs/html/io-redirection.html">https://tldp.org/LDP/abs/html/io-redirection.html</a></li>
+<li><a href="https://www.quora.com/In-shell-scripting-why-do-we-need-double-parentheses-when-we-need-to-enclose-some-expression">https://www.quora.com/In-shell-scripting-why-do-we-need-double-parentheses-when-we-need-to-enclose-some-expression</a></li>
+<li><a href="http://www.gnu.org/software/bash/manual/bash.html#Special-Parameters">http://www.gnu.org/software/bash/manual/bash.html#Special-Parameters</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Everything_is_a_file">https://en.wikipedia.org/wiki/Everything_is_a_file</a></li>
+<li><a href="https://www.gnu.org/software/bash/manual/bash.html#Shell-Parameter-Expansion">https://www.gnu.org/software/bash/manual/bash.html#Shell-Parameter-Expansion</a></li>
+<li><a href="https://tldp.org/LDP/abs/html/parameter-substitution.html">https://tldp.org/LDP/abs/html/parameter-substitution.html</a></li>
+</ol>
+
+<p>Tags: <a href='tag_bash.html'>bash</a></p>
+<!-- text end -->
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/coisas-que-eu-nao-sabia-sobre-bash.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/coisas-que-eu-nao-sabia-sobre-bash.html'><span id='count-11644'></span></a>&nbsp;</p>
+<!-- entry end -->
+</div>
+<div id="footer">CC by-nc-nd <a href="https://twitter.com/gui_garcia67">Guilherme Garcia</a> &mdash; <a href="mailto:gui&#46;garcia67&#64;gmail&#46;com">gui&#46;garcia67&#64;gmail&#46;com</a><br/>
+Generated with <a href="https://github.com/cfenollosa/bashblog">bashblog</a>, a single bash script to easily create blogs like this one</div>
+</div></div>
+</body></html>

@@ -2,9 +2,34 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
 <channel><title>Blog do guilherme</title><link>https://guilhermegarcia.dev/blog/index.html</link>
 <description>programação e outras coisas menos úteis</description><language>en</language>
-<lastBuildDate>Thu, 27 Jan 2022 00:47:06 -0300</lastBuildDate>
-<pubDate>Thu, 27 Jan 2022 00:47:06 -0300</pubDate>
+<lastBuildDate>Sun, 30 Jan 2022 01:48:51 -0300</lastBuildDate>
+<pubDate>Sun, 30 Jan 2022 01:48:51 -0300</pubDate>
 <atom:link href="https://guilhermegarcia.dev/blog/feed.rss" rel="self" type="application/rss+xml" />
+<item><title>
+Coisas que eu não sabia sobre bash
+</title><description><![CDATA[
+
+<p><abbr title="muito grande; nem li">mg;nl</abbr>: Compilei o aqui o resultado de uma noite analisando o código fonte do <a href="https://github.com/cfenollosa/bashblog">bashblog</a>.</p>
+
+<p>O bash tem muitas particularidades, principalmente pra quem tem um background em linguagens web. Neste post eu falo sobre:</p>
+
+<ol>
+<li>Uso de exit status como condicional</li>
+<li>Redirecionamento de streams</li>
+<li>Parenteses duplos para comparação numérica</li>
+<li>Expansão de parametros e criação de substrings</li>
+</ol>
+
+<p>ps. com o quarto item eu consegui gerar um <a href="https://github.com/cfenollosa/bashblog/pull/168">pull request</a></p>
+
+<hr/>
+<p>Tags: <a href='tag_bash.html'>bash</a></p>
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/coisas-que-eu-nao-sabia-sobre-bash.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/coisas-que-eu-nao-sabia-sobre-bash.html'><span id='count-11644'></span></a>&nbsp;</p>
+]]></description><link>https://guilhermegarcia.dev/blog/coisas-que-eu-nao-sabia-sobre-bash.html</link>
+<guid>https://guilhermegarcia.dev/blog/./coisas-que-eu-nao-sabia-sobre-bash.html</guid>
+<dc:creator>Guilherme Garcia</dc:creator>
+<pubDate>Sun, 30 Jan 2022 01:48:49 -0300</pubDate></item>
 <item><title>
 Olá Mundo
 </title><description><![CDATA[
@@ -18,17 +43,17 @@ Olá Mundo
 ]]></description><link>https://guilhermegarcia.dev/blog/ola-mundo.html</link>
 <guid>https://guilhermegarcia.dev/blog/./ola-mundo.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
-<pubDate>Thu, 27 Jan 2022 00:45:14 -0300</pubDate></item>
+<pubDate>Sun, 30 Jan 2022 01:40:04 -0300</pubDate></item>
 <item><title>
 </title><description><![CDATA[
 ]]></description><link>https://guilhermegarcia.dev/blog/all_tags.html</link>
 <guid>https://guilhermegarcia.dev/blog/./all_tags.html</guid>
 <dc:creator></dc:creator>
-<pubDate>Wed, 26 Jan 2022 23:57:48 -0300</pubDate></item>
+<pubDate>Sun, 30 Jan 2022 01:40:04 -0300</pubDate></item>
 <item><title>
 </title><description><![CDATA[
 ]]></description><link>https://guilhermegarcia.dev/blog/all_posts.html</link>
 <guid>https://guilhermegarcia.dev/blog/./all_posts.html</guid>
 <dc:creator></dc:creator>
-<pubDate>Wed, 26 Jan 2022 23:57:48 -0300</pubDate></item>
+<pubDate>Sun, 30 Jan 2022 01:40:04 -0300</pubDate></item>
 </channel></rss>
