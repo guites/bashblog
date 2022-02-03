@@ -24,6 +24,8 @@ Caso você tenha dúvidas de como chegar nesse passo, recomendo [get-started](ht
 
 E substituir o código no arquivo _lib/main_ pelo que está na seção abaixo.
 
+O código completo pode ser consultado [neste gist](https://gist.github.com/guites/3d799bf707e9eaf17808382a0fecce04). Ali tambem tem as alterações necessárias no arquivo AndroidManifest.xml e pubspec.yaml .
+
 ## Overview do app
 
 Abaixo uma prévia do app funcionando:
