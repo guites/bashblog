@@ -104,11 +104,11 @@ Para instalá-la, são três passos.
                 sdk: flutter
             http: ^0.13.4 // ADICIONAR
 
-Usando o android studio, você pode clicar no botão "Pub get" para baixar a extensão.
+  Usando o android studio, você pode clicar no botão "Pub get" para baixar a extensão.
 
 2. Adicionar uma permissão para o aplicativo realizar requisições http.
 
-No `AndroidManifest.xml` do seu projeto, adicione a seguinte linha, logo abaixo da abertura da tag xml:
+  No `AndroidManifest.xml` do seu projeto, adicione a seguinte linha, logo abaixo da abertura da tag xml:
 
 
         <manifest xmlns:android="http://schemas.android.com/apk/res/android"
@@ -118,14 +118,12 @@ No `AndroidManifest.xml` do seu projeto, adicione a seguinte linha, logo abaixo 
 
 3. Importar bibliotecas em `main.dart`. 
 
-As importações são feitas nas primeiras linhas do arquivo:
+  As importações são feitas nas primeiras linhas do arquivo:
 
         import 'dart:convert';                     // ADICIONAR
         import 'dart:async';                       // ADICIONAR
         import 'package:flutter/material.dart';
         import 'package:http/http.dart' as http;   // ADICIONAR
-
-
 
 ### Buscando dados na API
 

@@ -134,34 +134,28 @@ muito boa: ele ensina a criar uma barra de busca, de uma fonte remota, usando as
     flutter:
         sdk: flutter
     http: ^0.13.4 // ADICIONAR
-</code></pre></li>
-</ol>
+</code></pre>
 
-<p>Usando o android studio, você pode clicar no botão "Pub get" para baixar a extensão.</p>
-
-<ol>
-<li>Adicionar uma permissão para o aplicativo realizar requisições http.</li>
-</ol>
+<p>Usando o android studio, você pode clicar no botão "Pub get" para baixar a extensão.</p></li>
+<li><p>Adicionar uma permissão para o aplicativo realizar requisições http.</p>
 
 <p>No <code>AndroidManifest.xml</code> do seu projeto, adicione a seguinte linha, logo abaixo da abertura da tag xml:</p>
 
-<pre><code>    &lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.example.searchbar_from_scratch"&gt;
-        &lt;!-- Required to fetch data from the internet. --&gt;             // ADICIONAR
-        &lt;uses-permission android:name="android.permission.INTERNET" /&gt; // ADICIONAR
-</code></pre>
-
-<ol>
-<li>Importar bibliotecas em <code>main.dart</code>. </li>
-</ol>
+<pre><code>&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.searchbar_from_scratch"&gt;
+    &lt;!-- Required to fetch data from the internet. --&gt;             // ADICIONAR
+    &lt;uses-permission android:name="android.permission.INTERNET" /&gt; // ADICIONAR
+</code></pre></li>
+<li><p>Importar bibliotecas em <code>main.dart</code>. </p>
 
 <p>As importações são feitas nas primeiras linhas do arquivo:</p>
 
-<pre><code>    import 'dart:convert';                     // ADICIONAR
-    import 'dart:async';                       // ADICIONAR
-    import 'package:flutter/material.dart';
-    import 'package:http/http.dart' as http;   // ADICIONAR
-</code></pre>
+<pre><code>import 'dart:convert';                     // ADICIONAR
+import 'dart:async';                       // ADICIONAR
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;   // ADICIONAR
+</code></pre></li>
+</ol>
 
 <h3>Buscando dados na API</h3>
 
@@ -589,7 +583,7 @@ a listagem descarta o filtro.</p>
 <p>Tags: <a href='tag_flutter.html'>flutter</a>, <a href='tag_dart.html'>dart</a></p>
 <!-- text end -->
 <p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/barra-de-buscas-e-consulta-a-api-com-flutter.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/barra-de-buscas-e-consulta-a-api-com-flutter.html'><span id='count-11668'></span></a>&nbsp;</p>
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/barra-de-buscas-e-consulta-a-api-com-flutter.html'><span id='count-6742'></span></a>&nbsp;</p>
 <!-- entry end -->
 </div>
 <div id="footer">CC by-nc-nd <a href="https://twitter.com/gui_garcia67">Guilherme Garcia</a> &mdash; <a href="mailto:gui&#46;garcia67&#64;gmail&#46;com">gui&#46;garcia67&#64;gmail&#46;com</a><br/>
