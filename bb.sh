@@ -76,6 +76,8 @@ global_variables() {
     # feed file (rss in this case)
     blog_feed="feed.rss"
     number_of_feed_articles="10"
+    # sitemaps file
+    sitemaps_file="sitemap.txt"
     # "cut" blog entry when putting it to index page. Leave blank for full articles in front page
     # i.e. include only up to first '<hr>', or '----' in markdown
     cut_do="cut"
@@ -388,6 +390,24 @@ twitter() {
     echo " data-via=\"$global_twitter_username\""
     echo ">$template_twitter_button</a>	<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=\"//platform.twitter.com/widgets.js\";fjs.parentNode.insertBefore(js,fjs);}}(document,\"script\",\"twitter-wjs\");</script>"
     echo "</p>"
+}
+
+# Check if the file is to be excluded from the site map
+# Excludes only components
+#
+# $1 the file
+#
+# Return 0 (bash return value 'true') if the input file is a component (footer, header, analytics)
+# or 1 (bash return value 'false') if it is a complete page
+is_included_in_sitemaps() {
+    name=${1#./}
+
+    case $name in
+    ( "$footer_file" | "$header_file" | "$global_analytics_file" )
+        return 0 ;;
+    esac
+
+    return 1
 }
 
 # Check if the file is a 'boilerplate' (i.e. not a post)
@@ -899,6 +919,18 @@ list_posts() {
     echo -e "$lines" | column -t -s "#"
 }
 
+# Generate site map file
+generate_sitemaps() {
+  echo -n "Generating sitemaa p"
+
+    {
+  while IFS='' read -r i; do
+    is_included_in_sitemaps "$i" && continue
+      echo "$global_url"/${i#./}
+  done < <(ls -t ./*.html)
+    } 3>&1 >"$sitemaps_file" 
+}
+
 # Generate the feed file
 make_rss() {
     echo -n "Making RSS "
@@ -1192,6 +1224,7 @@ do_main() {
     all_posts
     all_tags
     make_rss
+    generate_sitemaps
     delete_includes
 }
 
