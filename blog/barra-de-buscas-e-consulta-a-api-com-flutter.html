@@ -1,0 +1,596 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="main.css" type="text/css" />
+<link rel="stylesheet" href="blog.css" type="text/css" />
+<link rel="stylesheet" href="code.css" type="text/css" />
+<link rel="alternate" type="application/rss+xml" title="Inscrever-se nesta página..." href="feed.rss" />
+<title>Barra de buscas e consulta a API com Flutter</title>
+<meta name='twitter:card' content='summary' />
+<meta name='twitter:site' content='@gui_garcia67' />
+<meta name='twitter:title' content='Barra de buscas e consulta a API com Flutter' />
+<meta name='twitter:description' content=" mg;nl: Tutorial para criar um app em flutter que realiza requisições http numa API e filtra o resultado usando uma barra de busca.  Então essa semana eu comecei a aprender desenvolvimento de apps em Flutter.  Duas questões importantes em qualque" />
+</head><body>
+<div id="divbodyholder">
+<div class="headerholder"><div class="header">
+<div id="title">
+<h1 class="nomargin"><a class="ablack" href="https://guilhermegarcia.dev/blog/index.html">Blog do guilherme</a></h1>
+<div id="description">programação e outras coisas menos úteis</div>
+</div></div></div>
+<div id="divbody"><div class="content">
+<!-- entry begin -->
+<h3><a class="ablack" href="barra-de-buscas-e-consulta-a-api-com-flutter.html">
+Barra de buscas e consulta a API com Flutter
+</a></h3>
+<!-- bashblog_timestamp: #202202022210.37# -->
+<div class="subtitle">Fevereiro 02, 2022 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p><abbr title="muito grande; nem li">mg;nl</abbr>: Tutorial para criar um app em flutter que realiza requisições http numa API e filtra o resultado usando uma barra de busca.</p>
+
+<p>Então essa semana eu comecei a aprender desenvolvimento de apps em Flutter.</p>
+
+<p>Duas questões importantes em qualquer aplicativo, web ou mobile, é a possibilidade de acessar dados remotos, comumente em 
+formato JSON, e disponibilizar ao usuário uma busca, por nome ou palavras-chave.</p>
+
+<p>Dando uma procurada na net encontrei <a href="https://medium.com/flutter-community/parsing-complex-json-in-flutter-747c46655f51">este artigo</a>, com uma proposta
+muito boa: ele ensina a criar uma barra de busca, de uma fonte remota, usando as ferramentas incluídas no pacote básico do Flutter.  </p>
+
+<p>O artigo é um pouco datado (escrito ali por 2018) e utiliza algumas ferramentas já deprecadas.</p>
+
+<p>Neste post, vou analisar o processo do autor enquanto migro sua aplicação para a versão atual do Flutter (em janeiro/2022).</p>
+
+<hr/>
+
+<p>Vou partir do princípio de que você já tem o android studio instalado, com uma VM de um celular ou tablet, como o pixel X3, por exemplo.</p>
+
+<p>Caso você tenha dúvidas de como chegar nesse passo, recomendo <a href="https://docs.flutter.dev/get-started/codelab">get-started</a> do site do Flutter, mas a versão rápida é:</p>
+
+<pre><code>    flutter create barra_de_buscas
+</code></pre>
+
+<p>E substituir o código no arquivo <em>lib/main</em> pelo que está na seção abaixo.</p>
+
+<h2>Overview do app</h2>
+
+<p>Abaixo uma prévia do app funcionando:</p>
+
+<p><img src="./imgs/barra-de-buscas-e-consulta-a-api-com-flutter/output.gif" alt="Funcionamento do app completo" title="Funcionamento do app completo" /></p>
+
+<p>Nós iremos criar um StatefulWidget, que funcionará como uma página, que vai ter dentro dele tanto a barra de busca quanto a lista com os resultados.</p>
+
+<p>Ele precisa ser Stateful, pois terá seu estado atualizado baseado nos valores digitados na barra, que irão por sua vez atualizar a listagem, utilizando o método <code>setState()</code>.</p>
+
+<p>Antes de atualizarmos o estado, precisamos realizar uma requisição na API remota. Os dados recebidos serão tratados, e então passados para a listagem.</p>
+
+<p>A API utilizada é a <a href="https://dog.ceo/dog-api/documentation/">Dog API</a>, que disponibiliza acesso a um banco de dados de raças e subraças de cachorro, cada uma com uma lista de imagens representativa.</p>
+
+<h2>Inicio do projeto e instalação de dependencias.</h2>
+
+<p>Você pode iniciar criando um projeto em Flutter no android studio, ou copiar o código abaixo.</p>
+
+<p>Basicamente, removemos todos os comentários e o contador, e alteramos o widget MyHomePage para um novo SearchPage. Lembre-se de alterar também o _MyHomePageState para _SearchPageState.</p>
+
+<pre><code>    // Ponto de partida do app, em lib/main.dart
+
+    import 'package:flutter/material.dart';
+
+    void main() {
+      runApp(const MyApp());
+    }
+
+    class MyApp extends StatelessWidget {
+      const MyApp({Key? key}) : super(key: key);
+      @override
+      Widget build(BuildContext context) {
+        return MaterialApp(
+          title: 'Flutter Searchbar Http',
+          theme: ThemeData(
+            primarySwatch: Colors.grey
+          ),
+          home: const SearchPage(title: 'Flutter search bar!'),
+        );
+      }
+    }
+
+    class SearchPage extends StatefulWidget {
+      const SearchPage({Key? key, required this.title}) : super(key: key);
+      final String title;
+
+      @override
+      _SearchPageState createState() =&gt; _SearchPageState();
+    }
+
+    class _SearchPageState extends State&lt;SearchPage&gt; {
+      @override
+      Widget build(BuildContext context) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(widget.title),
+          ),
+          body: const Center(
+            child: Text('Meu app com barra de busca.'),
+          )
+        );
+      }
+    }
+</code></pre>
+
+<p>Para realizar as requisições http, precisamos de uma biblioteca que disponibilize essas funcionalidades.</p>
+
+<p>A extensão mais comum pra requisições http, em 2022, é o <a href="https://pub.dev/packages/http/install">http.dart</a>.</p>
+
+<p>Para instalá-la, são três passos.</p>
+
+<ol>
+<li><p>Adicionar a pacote no arquivo <code>pubspec.yaml</code>. Deve ficar da seguinte forma:</p>
+
+<pre><code>dependencies:
+    flutter:
+        sdk: flutter
+    http: ^0.13.4 // ADICIONAR
+</code></pre></li>
+</ol>
+
+<p>Usando o android studio, você pode clicar no botão "Pub get" para baixar a extensão.</p>
+
+<ol>
+<li>Adicionar uma permissão para o aplicativo realizar requisições http.</li>
+</ol>
+
+<p>No <code>AndroidManifest.xml</code> do seu projeto, adicione a seguinte linha, logo abaixo da abertura da tag xml:</p>
+
+<pre><code>    &lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.example.searchbar_from_scratch"&gt;
+        &lt;!-- Required to fetch data from the internet. --&gt;             // ADICIONAR
+        &lt;uses-permission android:name="android.permission.INTERNET" /&gt; // ADICIONAR
+</code></pre>
+
+<ol>
+<li>Importar bibliotecas em <code>main.dart</code>. </li>
+</ol>
+
+<p>As importações são feitas nas primeiras linhas do arquivo:</p>
+
+<pre><code>    import 'dart:convert';                     // ADICIONAR
+    import 'dart:async';                       // ADICIONAR
+    import 'package:flutter/material.dart';
+    import 'package:http/http.dart' as http;   // ADICIONAR
+</code></pre>
+
+<h3>Buscando dados na API</h3>
+
+<p>Vamos mostrar uma listagem das raças, disponíveis no endpoint 'https://dog.ceo/api/breeds/list/all' . O formato do JSON recebido é o seguinte:</p>
+
+<pre><code>    {
+        "message":{
+            "affenpinscher":[],
+            "african":[],
+            "airedale":[],
+            "akita":[],
+            "appenzeller":[],
+            "australian":[
+                "shepherd"
+            ],
+            "basenji":[],
+            "bulldog":[
+                "boston",
+                "english",
+                "french"
+            ],
+        "status":"success"
+    }
+</code></pre>
+
+<p>Os dados que queremos estão dentro da propriedade "message". Repare que o JSON tem um formato não muito usual: o nome da raça é a propriedade do objeto. Caso existam "subraças",
+elas são mostradas como o valor da propriedade, em formato de lista (array).</p>
+
+<p>Graças ao pacote http, podemos criar uma função que busque esses dados.</p>
+
+<p>O valor de retorno é uma classe <code>Future</code>. Essa classe é utilizada em qualquer operação assíncrona.</p>
+
+<p>Como os valores não estarão disponíveis imediatamente (existe uma demora entre realizar a requisição, o processamento no servidor remoto, e o recebimento dos dados no app),
+essa classe nos permite gerar diferentes layouts baseados na situação atual da requisição: podemos colocar um loader enquanto ela está carregando, um aviso caso ocorra um erro, etc.</p>
+
+<p>A função abaixo pode ser colocada no próprio arquivo main.</p>
+
+<pre><code>    Future&lt;dynamic&gt; fetchBreeds() async {
+      final response =
+          await http.get(Uri.parse('https://dog.ceo/api/breeds/list/all'));
+      if (response.statusCode == 200) {
+            var responseObject = jsonDecode(response.body)['message'];
+            return responseObject;
+      }
+      // Joga uma exceção caso o status não seja http 200
+      throw Exception('Erro ao carregar listagem de raças.');
+    }
+</code></pre>
+
+<p>Repare que definimos o tipo do retorno como <code>&lt;dynamic&gt;</code>. Isto é porque ainda não decidimos como vamos lidar com o resultado. O valor de <code>responseObject</code> que recebemos é no formato:</p>
+
+<p><img src="./imgs/barra-de-buscas-e-consulta-a-api-com-flutter/debuger_response1.png" alt="Imagem 1 - Objeto decodificado da requisição para /api/breeds/list/all" title="Imagem 1 - Objeto decodificado da requisição para /api/breeds/list/all" /></p>
+
+<p>Repare que o formato <code>chave =&gt; valor</code> persiste. O tipo do objeto é um <a href="https://api.dart.dev/stable/2.15.1/dart-collection/LinkedHashMap-class.html">LinkedHashMap</a>. Para facilitar 
+nossas operações, vamos transformá-lo numa lista contendo tanto o nome da propriedade (que representa a raça) quanto seu valor (que é a listagem de subraças, quando existir).</p>
+
+<p>Para isso, utilizamos os seguintes métodos:</p>
+
+<pre><code>      if (response.statusCode == 200) {
+            var responseObject = jsonDecode(response.body)['message'].entries.toList(); // ALTERAR
+            return responseObject;
+      }
+</code></pre>
+
+<p>O valor de <code>responseObject</code> vai ficar no formato:</p>
+
+<p><img src="./imgs/barra-de-buscas-e-consulta-a-api-com-flutter/debuger_response2.png" alt="Imagem 2 - Objeto decodificado transformado em lista" title="Imagem 2 - Objeto decodificado transformado em lista" /></p>
+
+<p>Repare que o tipo do resultado mudou para <code>_GrowableList</code>, o que nos permite usar os métodos necessários para filtrar os resultados.</p>
+
+<h4>Criando um modelo para os dados da API - Lista de Raças</h4>
+
+<p>Até agora, definimos o tipo do resultado da requisição como <code>&lt;dynamic&gt;</code>. Isso permite que qualquer tipo de valor seja utilizado, estruturado de qualquer forma.
+Com isso perdemos alguns dos <a href="https://dart.dev/guides/language/type-system">benefícios da linguagem Dart</a>, que não consegue verificar se os dados passados
+estão de acordo com o esperado.</p>
+
+<p>Por isso, vamos definir duas classes, uma que recebe uma listagem de raças (BreedsList) e uma que recebe uma única raça (Breed).</p>
+
+<pre><code>    class BreedsList {
+      final List&lt;Breed&gt; breeds;
+      BreedsList({
+        required this.breeds,
+      });
+      factory BreedsList.fromJson(List&lt;MapEntry&lt;String, dynamic&gt;&gt; parsedJson) {
+        List&lt;Breed&gt; breeds = &lt;Breed&gt;[];
+        breeds = parsedJson.map((i) =&gt; Breed.fromJson(i)).toList();
+        return BreedsList(breeds: breeds);
+      }
+    }
+</code></pre>
+
+<p>Esta classe, <code>BreedsList</code> representa a listagem que estamos recebendo da requisição http.</p>
+
+<p>Sua propriedade <code>breeds</code> é uma lista de objetos <code>Breed</code>, que vamos definir em seguida.</p>
+
+<p>Criamos também para essa classe um método <code>fromJson</code>, que recebe uma Lista de "MapEntries". Veja (na Imagem 2) que, ao transformarmos nosso objeto com os métodos <code>.entries.toList()</code>, é exatamente
+este o formato de cada item da lista:</p>
+
+<pre><code>5 = {MapEntry}MapEntry(australian: [sheperd]
+    key = "australian"
+    value={_GrowableList} size = 1
+        0 = "sheperd"
+</code></pre>
+
+<p>O primeiro valor do MapEntry é o nome da raça, por isso, uma <code>String</code>. O segundo valor é uma <code>List</code>, no exemplo acima, mas poderia ser um número, string, boolean, etc, por isso <code>dynamic</code>.</p>
+
+<h4>Criando um modelo para os dados da API - Raça</h4>
+
+<p>Cada Raça pode ser definida como contendo um nome e uma listagem de subraças.</p>
+
+<pre><code>    class Breed {
+      final String name;
+      final List&lt;dynamic&gt; subBreeds;
+
+      const Breed({
+        required this.name,
+        required this.subBreeds,
+      });
+
+      factory Breed.fromJson(json) {
+        return Breed(
+          name: json.key,
+          subBreeds: json.value,
+        );
+      }
+    }
+</code></pre>
+
+<p>Aqui também criamos um método <code>fromJson</code>, que pega, do json decodificado que nos é passado, o nome da propriedade (lembra que o nome da raça é a propriedade do objeto, no valor que recebemos da API?) e o seu valor (as subraças), passando eles como propriedades para cada objeto <code>Breed</code>.</p>
+
+<p>O método <code>fromJson</code> da classe <code>BreedList</code> transforma todos eles em uma lista, usando o método <code>toList()</code>.</p>
+
+<h4>Ajustando o retorno da função fetchBreeds()</h4>
+
+<p>Agora que definimos as classes utilizadas de modelo para os dados recebidos da API, podemos alterar o tipo do retorno da função <code>fetchBreeds()</code>.</p>
+
+<pre><code>    Future&lt;BreedsList&gt; fetchBreeds() async { // ALTERAR
+      final response =
+      await http.get(Uri.parse('https://dog.ceo/api/breeds/list/all'));
+      if (response.statusCode == 200) {
+        var responseObject = jsonDecode(response.body)['message'].entries.toList(); 
+        return BreedsList.fromJson(                                                 // ALTERAR
+            responseObject                                                          // ALTERAR
+        );
+      }
+      // Joga uma exceção caso o status não seja http 200
+      throw Exception('Erro ao carregar listagem de raças.');
+    }
+</code></pre>
+
+<h3>Disponibilizando dados ao carregar a home do app</h3>
+
+<p>Quando o usuário abrir o app, vamos carregar a página "SearchPage" por padrão. Precisamos realizar uma requisição para a nossa API e mostrar uma listagem
+dos resultados.</p>
+
+<p>O Flutter disponibiliza um método <code>initState()</code> que é disparado toda vez que um widget é carregado. Vamos adicioná-lo na nossa página.</p>
+
+<pre><code>    class _SearchPageState extends State&lt;SearchPage&gt; {
+        late Future&lt;BreedsList&gt; futureBreeds; // ADICIONAR
+
+        @override                             // ADICIONAR
+        void initState() {                    // ADICIONAR
+          super.initState();                  // ADICIONAR
+          futureBreeds = fetchBreeds();       // ADICIONAR
+        }                                     // ADICIONAR
+</code></pre>
+
+<p>O modificador <code>late</code> é usado para definir variáveis não nulas que serão inicializadas após sua declaração. Fazemos isso para manter <code>futureBreeds</code> no escopo da nossa página.</p>
+
+<h4>Renderizando a lista original</h4>
+
+<p>Como sabemos o formato de nossos dados, podemos mostrá-los para o usuário. Optei por um formato de lista.</p>
+
+<p>Uma particularidade das requisições http é o Widget <code>FutureBuilder</code>. Ele nos permite renderizar blocos diferentes dependendo do estado da requisição.</p>
+
+<p>Este Widget define o estado da requisição baseado numa variável que ele disponibiliza, a <code>snapshot</code>.</p>
+
+<p>Vamos modificar o <code>body</code> do método <code>build</code>, no nosso <code>_SearchPageState</code>.</p>
+
+<pre><code>    @override
+    Widget build(BuildContext context) {
+      return Scaffold(
+          appBar: AppBar(
+            title: Text(widget.title),
+          ),
+          body: FutureBuilder&lt;BreedsList&gt;(                                     // ALTERAR
+                future: futureBreeds,                                          // ADICIONAR
+                builder: (context, snapshot) {                                 // ADICIONAR
+                  if (snapshot.hasData) {                                      // ADICIONAR
+                    return _buildListOfBreeds(snapshot.data!.breeds);          // ADICIONAR
+                  } else if (snapshot.hasError) {                              // ADICIONAR
+                    return Text('${snapshot.error}');                          // ADICIONAR
+                  }                                                            // ADICIONAR
+                  return const Center(                                         // ADICIONAR
+                    child: CircularProgressIndicator(),                        // ADICIONAR
+                  );                                                           // ADICIONAR
+                }),                                                            // ADICIONAR
+      );
+    }
+</code></pre>
+
+<p>O <em>tipo</em> passado no Widget <code>FutureBuilder</code> é uma <code>&lt;BreedsList&gt;</code>, exatamente o retorno do nosso método <code>fetchBreeds()</code>.</p>
+
+<p>A propriedade <code>future: futureBreeds</code> indica que qual variável será observada para definir o estado do snapshot utilizado no método
+builder.</p>
+
+<p>Quando ela tiver dados, ou seja, tiver concluído a requisição, iremos chamar a função <code>_buildListOfBreeds(snapshot.data!.breeds)</code>, 
+que será definida a seguir.</p>
+
+<p>Caso não tiver dados, verificamos se a requisição retornou um erro. Neste caso, ele será printado na tela. O ideal é colocar uma mensagem 
+customizada, mas como estamos depurando o app, pode nos ajudar.</p>
+
+<p>Caso nenhuma das verificações acima passe, vamos renderizar um <code>CircularProgressIndicator()</code> centralizado, que é um loader padrão do Flutter.</p>
+
+<h4>Criando o Widget <code>_buildListOfBreeds</code></h4>
+
+<p>Você pode colocar o código abaixo antes da chamada ao método build na classe <code>_SearchPageState</code>.</p>
+
+<pre><code>    Widget _buildListOfBreeds(List&lt;Breed&gt; breedList) {
+      return ListView.builder(
+        padding: const EdgeInsets.all(16.0),
+        itemCount: breedList.length,
+        itemBuilder: (context, i) {
+          return Column(children: [
+            Text(breedList[i].name,
+                style:
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0)),
+            const Divider()
+          ]);
+        },
+      );
+    }
+</code></pre>
+
+<p>Com isso, a aparência do nosso app deve estar conforme a imagem abaixo.</p>
+
+<p>Talvez seja preciso realizar um <em>hot restart</em>, ou reiniciar o aplicativo, caso você receba um erro de variáveis 
+não iniciadas.</p>
+
+<p><img src="./imgs/barra-de-buscas-e-consulta-a-api-com-flutter/state_of_the_app1.png" alt="Imagem 3 - Aparência do app com listagem de raças" title="Imagem 3 - Aparência do app com listagem de raças" /></p>
+
+<h3>Definindo as variáveis necessárias</h3>
+
+<p>Nosso widget precisa guardar alguns dados, e para isso vamos definir algumas variáveis logo no início da classe _SearchPageState.</p>
+
+<pre><code>    class _SearchPageState extends State&lt;SearchPage&gt; {
+      late Future&lt;BreedsList&gt; futureBreeds;
+
+      /// Define o ícone inicial usado na barra de busca
+      IconData _searchIcon = Icons.search;                                                               // ADICIONAR
+
+      /// Define o título inicial da página
+      Widget _appBarTitle = const Text('Listagem de raças');                                             // ADICIONAR
+
+      /// Essa variável vai guardar o valor digitado na barra de busca
+      String _searchText = "";                                                                           // ADICIONAR
+
+      /// Esta variável vai guardar os valores filtrados, que devemos mostrar ao usuário na listagem
+      List&lt;Breed&gt; _filteredBreeds = [];                                                                  // ADICIONAR
+
+      @override
+      void initState() {
+          super.initState();
+          futureBreeds = fetchBreeds();
+</code></pre>
+
+<p>Nas próximas seções vamos verificar a utilidade de cada variável definida.</p>
+
+<h3>Adicionando a barra de busca no cabeçalho</h3>
+
+<p>O local onde o usuário irá digitar será o próprio cabeçalho do app.</p>
+
+<p>Cada página possui uma propriedade <code>AppBar</code>, onde podemos definir o título da página e colocar também alguns botões (chamados actions).</p>
+
+<p>Começaremos com um botão que permite ao usuário abrir a barra de busca.</p>
+
+<p>Adicione a seguinte função dentro da classe <code>_SearchPageState</code>.</p>
+
+<pre><code>    void _searchPressed() {
+      setState(() {
+        if (_searchIcon == Icons.search) {
+          _searchIcon = Icons.close;
+          /// Altera o título, inicialmente um widget de texto, para um TextField
+          _appBarTitle = const TextField(
+            decoration: InputDecoration(
+                prefixIcon: Icon(Icons.search), hintText: 'Busque por raças...'),
+          );
+        } else {
+          _searchIcon = Icons.search;
+          /// Altera o título novamente para um widget de texto
+          _appBarTitle = const Text('Listagem de raças');
+        }
+      });
+    }
+</code></pre>
+
+<p>Essa função verifica qual o ícone atual e, baseado no seu <code>IconData</code> (propriedade que define a imagem do ícone), altera tanto o 
+ícone quanto o título do app.</p>
+
+<p>Para que ela seja executada, precisamos ativá-la na propriedade <code>onPressed</code> do nosso ícone inicial.</p>
+
+<p>Vamos alterar o método <code>build</code> da nossa <code>_SearchPageState</code>.</p>
+
+<pre><code>    @override
+      Widget build(BuildContext context) {
+        return Scaffold(
+            appBar: AppBar(
+              title: _appBarTitle,              // ALTERAR
+              actions: &lt;Widget&gt;[                // ADICIONAR
+                IconButton(                     // ADICIONAR
+                  onPressed: _searchPressed,    // ADICIONAR
+                  icon: Icon(_searchIcon),      // ADICIONAR
+                )                               // ADICIONAR
+              ],                                // ADICIONAR
+            ),
+            body: FutureBuilder&lt;BreedsList&gt;(
+              future: futureBreeds,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return _buildListOfBreeds(snapshot.data!.breeds);
+                } else if (snapshot.hasError) {
+                  return Text('${snapshot.error}');
+                }
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              },
+            ),
+        );
+      }
+</code></pre>
+
+<p>Adiconar uma <code>action</code> na nossa <code>AppBar</code> cria o ícone com a funcionalidade definida em <code>onPressed</code>.</p>
+
+<p>Apertar o botão agora deve alternar entre o campo de busca, com o botão para fechar, e o ícone da lupa.</p>
+
+<p>Precisamos salvar o texto digitado pelo usuário para utilizá-lo no filtro.</p>
+
+<h3>Acessando os valores digitados na barra de busca</h3>
+
+<p>Para acessar o texto digitado, utilizamos a propriedade <code>onChanged</code> do <code>TextField</code>.</p>
+
+<p>Dessa forma, podemos atualizar a variável <code>_searchText</code> cada vez que o valor do campo de busca for alterado.</p>
+
+<pre><code>    void _searchPressed() {
+      setState(() {
+        if (_searchIcon == Icons.search) {
+          _searchIcon = Icons.close;
+          /// Altera o título, inicialmente um widget de texto, para um TextField
+          _appBarTitle = TextField(            // ALTERAR
+            onChanged: (text) {                // ADICIONAR
+              setState(() {                    // ADICIONAR
+                _searchText = text;            // ADICIONAR
+              });                              // ADICIONAR
+            },                                 // ADICIONAR
+            decoration: const InputDecoration( // ALTERAR
+                prefixIcon: Icon(Icons.search), hintText: 'Busque por raças...'),
+          );
+        } else {
+          _searchIcon = Icons.search;
+          _appBarTitle = const Text('Listagem de raças');
+          _searchText = "";                    // ADICIONAR
+        }
+      });
+    }
+</code></pre>
+
+<p>Repare que no bloco <code>else</code> estamos zerando o valor da <code>_searchText</code>. Isso significa que quando o usuário fechar a barra de busca,
+a listagem descarta o filtro.</p>
+
+<h3>Filtrando a listagem de raças</h3>
+
+<p>Precisamos de um método que, para qualquer string, encontre os nomes de raça, dentro da nossa listagem, que possuem esta string.</p>
+
+<p>Adicione a função abaixo dentro da <code>_SearchPageState</code>.</p>
+
+<pre><code>    List&lt;Breed&gt; _applySearchFilter(List&lt;Breed&gt; breeds) {
+      List&lt;Breed&gt; _filtered = [];
+      for (var i = 0; i &lt; breeds.length; i++) {
+        if (breeds[i].name.contains(_searchText.toLowerCase())) {
+          _filtered.add(breeds[i]);
+        }
+      }
+      return _filtered;
+    }
+</code></pre>
+
+<p>Podemos utilizar o fato das nossas <code>Breed</code>s estarem em formato de lista para realizar um for loop simples.</p>
+
+<p>Agora, precisamos utilizar esta função na nossa lista original, e passar o resultado como argumento dentro do bloco <code>FutureBuilder</code>.</p>
+
+<pre><code>    body: FutureBuilder&lt;BreedsList&gt;(
+      future: futureBreeds,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          final _filteredList = _applySearchFilter(snapshot.data!.breeds);  // ADICIONAR
+          if (_filteredList.isEmpty) {                                      // ADICIONAR
+            return const Center(child: Text("Nenhuma raça encontrada!"));   // ADICIONAR
+          }                                                                 // ADICIONAR
+          return _buildListOfBreeds(_filteredList);                         // ALTERAR
+        } else if (snapshot.hasError) {
+          return Text('${snapshot.error}');
+        }
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    ),
+</code></pre>
+
+<p>Adicionamos também um aviso, caso o filtro não retorne nenhum resultado.</p>
+
+<p><strong>Pronto!</strong> Temos um filtro funcional.</p>
+
+<p>Fontes:</p>
+
+<ul>
+<li><a href="https://dev.to/pktintali/late-variables-in-dart-dart-learning-series-1-2opf">https://dev.to/pktintali/late-variables-in-dart-dart-learning-series-1-2opf</a></li>
+<li><a href="https://dart.dev/guides/language/type-system">https://dart.dev/guides/language/type-system</a></li>
+<li><a href="https://api.dart.dev/stable/2.15.1/dart-core/Map-class.html">https://api.dart.dev/stable/2.15.1/dart-core/Map-class.html</a></li>
+<li><a href="https://api.dart.dev/stable/2.15.1/dart-collection/LinkedHashMap-class.html">https://api.dart.dev/stable/2.15.1/dart-collection/LinkedHashMap-class.html</a></li>
+<li><a href="https://docs.flutter.dev/cookbook/forms/text-field-changes#1-supply-an-onchanged-callback-to-a-textfield-or-a-textformfield">https://docs.flutter.dev/cookbook/forms/text-field-changes#1-supply-an-onchanged-callback-to-a-textfield-or-a-textformfield</a></li>
+</ul>
+
+<p>Tags: <a href='tag_flutter.html'>flutter</a>, <a href='tag_dart.html'>dart</a></p>
+<!-- text end -->
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/barra-de-buscas-e-consulta-a-api-com-flutter.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/barra-de-buscas-e-consulta-a-api-com-flutter.html'><span id='count-16804'></span></a>&nbsp;</p>
+<!-- entry end -->
+</div>
+<div id="footer">CC by-nc-nd <a href="https://twitter.com/gui_garcia67">Guilherme Garcia</a> &mdash; <a href="mailto:gui&#46;garcia67&#64;gmail&#46;com">gui&#46;garcia67&#64;gmail&#46;com</a><br/>
+Generated with <a href="https://github.com/cfenollosa/bashblog">bashblog</a>, a single bash script to easily create blogs like this one</div>
+</div></div>
+</body></html>

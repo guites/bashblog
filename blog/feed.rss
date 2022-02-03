@@ -2,9 +2,35 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
 <channel><title>Blog do guilherme</title><link>https://guilhermegarcia.dev/blog/index.html</link>
 <description>programação e outras coisas menos úteis</description><language>en</language>
-<lastBuildDate>Sun, 30 Jan 2022 21:44:45 -0300</lastBuildDate>
-<pubDate>Sun, 30 Jan 2022 21:44:45 -0300</pubDate>
+<lastBuildDate>Wed, 02 Feb 2022 22:13:45 -0300</lastBuildDate>
+<pubDate>Wed, 02 Feb 2022 22:13:45 -0300</pubDate>
 <atom:link href="https://guilhermegarcia.dev/blog/feed.rss" rel="self" type="application/rss+xml" />
+<item><title>
+Barra de buscas e consulta a API com Flutter
+</title><description><![CDATA[
+
+<p><abbr title="muito grande; nem li">mg;nl</abbr>: Tutorial para criar um app em flutter que realiza requisições http numa API e filtra o resultado usando uma barra de busca.</p>
+
+<p>Então essa semana eu comecei a aprender desenvolvimento de apps em Flutter.</p>
+
+<p>Duas questões importantes em qualquer aplicativo, web ou mobile, é a possibilidade de acessar dados remotos, comumente em 
+formato JSON, e disponibilizar ao usuário uma busca, por nome ou palavras-chave.</p>
+
+<p>Dando uma procurada na net encontrei <a href="https://medium.com/flutter-community/parsing-complex-json-in-flutter-747c46655f51">este artigo</a>, com uma proposta
+muito boa: ele ensina a criar uma barra de busca, de uma fonte remota, usando as ferramentas incluídas no pacote básico do Flutter.  </p>
+
+<p>O artigo é um pouco datado (escrito ali por 2018) e utiliza algumas ferramentas já deprecadas.</p>
+
+<p>Neste post, vou analisar o processo do autor enquanto migro sua aplicação para a versão atual do Flutter (em janeiro/2022).</p>
+
+<hr/>
+<p>Tags: <a href='tag_flutter.html'>flutter</a>, <a href='tag_dart.html'>dart</a></p>
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/barra-de-buscas-e-consulta-a-api-com-flutter.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/barra-de-buscas-e-consulta-a-api-com-flutter.html'><span id='count-16804'></span></a>&nbsp;</p>
+]]></description><link>https://guilhermegarcia.dev/blog/barra-de-buscas-e-consulta-a-api-com-flutter.html</link>
+<guid>https://guilhermegarcia.dev/blog/./barra-de-buscas-e-consulta-a-api-com-flutter.html</guid>
+<dc:creator>Guilherme Garcia</dc:creator>
+<pubDate>Wed, 02 Feb 2022 22:10:37 -0300</pubDate></item>
 <item><title>
 Coisas que eu não sabia sobre bash
 </title><description><![CDATA[
