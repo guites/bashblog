@@ -76,6 +76,8 @@ global_variables() {
     # feed file (rss in this case)
     blog_feed="feed.rss"
     number_of_feed_articles="10"
+    # sitemaps file
+    sitemaps_file="sitemap.txt"
     # "cut" blog entry when putting it to index page. Leave blank for full articles in front page
     # i.e. include only up to first '<hr>', or '----' in markdown
     cut_do="cut"
@@ -899,6 +901,19 @@ list_posts() {
     echo -e "$lines" | column -t -s "#"
 }
 
+# Generate site map file
+generate_sitemaps() {
+
+  echo -n "Generating sitemaps "
+
+    {
+    while read -r i; do
+      echo "$global_url"/$i
+    done < <(ls -t *.html)
+    } 3>&1 >"$sitemaps_file"
+
+}
+
 # Generate the feed file
 make_rss() {
     echo -n "Making RSS "
@@ -1193,6 +1208,7 @@ do_main() {
     all_tags
     make_rss
     delete_includes
+    generate_sitemaps
 }
 
 
