@@ -2,8 +2,8 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
 <channel><title>Blog do guilherme</title><link>https://guilhermegarcia.dev/blog/index.html</link>
 <description>programação e outras coisas menos úteis</description><language>en</language>
-<lastBuildDate>Sun, 06 Feb 2022 03:12:35 -0300</lastBuildDate>
-<pubDate>Sun, 06 Feb 2022 03:12:35 -0300</pubDate>
+<lastBuildDate>Sun, 06 Feb 2022 03:20:57 -0300</lastBuildDate>
+<pubDate>Sun, 06 Feb 2022 03:20:57 -0300</pubDate>
 <atom:link href="https://guilhermegarcia.dev/blog/feed.rss" rel="self" type="application/rss+xml" />
 <item><title>
 Mantendo data de criação de arquivos no git
@@ -19,7 +19,7 @@ já deve ter reparado que, cada vez que você clona o repositório, a data de cr
 <hr/>
 <p>Tags: <a href='tag_git.html'>git</a>, <a href='tag_bash.html'>bash</a></p>
 <p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/mantendo-data-de-criacao-de-arquivos-no-git.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/mantendo-data-de-criacao-de-arquivos-no-git.html'><span id='count-4541'></span></a>&nbsp;</p>
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/mantendo-data-de-criacao-de-arquivos-no-git.html'><span id='count-28974'></span></a>&nbsp;</p>
 ]]></description><link>https://guilhermegarcia.dev/blog/mantendo-data-de-criacao-de-arquivos-no-git.html</link>
 <guid>https://guilhermegarcia.dev/blog/./mantendo-data-de-criacao-de-arquivos-no-git.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
@@ -37,7 +37,7 @@ Automatizando a geração de site map
 <hr/>
 <p>Tags: <a href='tag_seo.html'>seo</a>, <a href='tag_bash.html'>bash</a>, <a href='tag_bashblog.html'>bashblog</a></p>
 <p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/automatizando-a-geracao-de-site-map.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/automatizando-a-geracao-de-site-map.html'><span id='count-23193'></span></a>&nbsp;</p>
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/automatizando-a-geracao-de-site-map.html'><span id='count-28856'></span></a>&nbsp;</p>
 ]]></description><link>https://guilhermegarcia.dev/blog/automatizando-a-geracao-de-site-map.html</link>
 <guid>https://guilhermegarcia.dev/blog/./automatizando-a-geracao-de-site-map.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
@@ -63,7 +63,7 @@ muito boa: ele ensina a criar uma barra de busca, de uma fonte remota, usando as
 <hr/>
 <p>Tags: <a href='tag_flutter.html'>flutter</a>, <a href='tag_dart.html'>dart</a></p>
 <p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/barra-de-buscas-e-consulta-a-api-com-flutter.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/barra-de-buscas-e-consulta-a-api-com-flutter.html'><span id='count-6742'></span></a>&nbsp;</p>
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/barra-de-buscas-e-consulta-a-api-com-flutter.html'><span id='count-3666'></span></a>&nbsp;</p>
 ]]></description><link>https://guilhermegarcia.dev/blog/barra-de-buscas-e-consulta-a-api-com-flutter.html</link>
 <guid>https://guilhermegarcia.dev/blog/./barra-de-buscas-e-consulta-a-api-com-flutter.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
@@ -88,7 +88,7 @@ Coisas que eu não sabia sobre bash
 <hr/>
 <p>Tags: <a href='tag_bash.html'>bash</a></p>
 <p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/coisas-que-eu-nao-sabia-sobre-bash.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/coisas-que-eu-nao-sabia-sobre-bash.html'><span id='count-8449'></span></a>&nbsp;</p>
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/coisas-que-eu-nao-sabia-sobre-bash.html'><span id='count-9601'></span></a>&nbsp;</p>
 ]]></description><link>https://guilhermegarcia.dev/blog/coisas-que-eu-nao-sabia-sobre-bash.html</link>
 <guid>https://guilhermegarcia.dev/blog/./coisas-que-eu-nao-sabia-sobre-bash.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
@@ -102,7 +102,7 @@ Olá Mundo
 <hr/>
 <p>Tags: <a href='tag_bashblog.html'>bashblog</a></p>
 <p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/ola-mundo.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/ola-mundo.html'><span id='count-26252'></span></a>&nbsp;</p>
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/ola-mundo.html'><span id='count-31190'></span></a>&nbsp;</p>
 ]]></description><link>https://guilhermegarcia.dev/blog/ola-mundo.html</link>
 <guid>https://guilhermegarcia.dev/blog/./ola-mundo.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
