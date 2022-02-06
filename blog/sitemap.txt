@@ -1,9 +1,11 @@
 https://guilhermegarcia.dev/blog/todas_tags.html
 https://guilhermegarcia.dev/blog/todos_posts.html
 https://guilhermegarcia.dev/blog/index.html
+https://guilhermegarcia.dev/blog/tag_git.html
+https://guilhermegarcia.dev/blog/tag_bash.html
+https://guilhermegarcia.dev/blog/mantendo-data-de-criacao-de-arquivos-no-git.html
 https://guilhermegarcia.dev/blog/tag_seo.html
 https://guilhermegarcia.dev/blog/tag_bashblog.html
-https://guilhermegarcia.dev/blog/tag_bash.html
 https://guilhermegarcia.dev/blog/automatizando-a-geracao-de-site-map.html
 https://guilhermegarcia.dev/blog/tag_flutter.html
 https://guilhermegarcia.dev/blog/tag_dart.html

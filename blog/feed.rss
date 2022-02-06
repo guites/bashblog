@@ -2,9 +2,28 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
 <channel><title>Blog do guilherme</title><link>https://guilhermegarcia.dev/blog/index.html</link>
 <description>programação e outras coisas menos úteis</description><language>en</language>
-<lastBuildDate>Sun, 06 Feb 2022 00:09:57 -0300</lastBuildDate>
-<pubDate>Sun, 06 Feb 2022 00:09:57 -0300</pubDate>
+<lastBuildDate>Sun, 06 Feb 2022 03:12:35 -0300</lastBuildDate>
+<pubDate>Sun, 06 Feb 2022 03:12:35 -0300</pubDate>
 <atom:link href="https://guilhermegarcia.dev/blog/feed.rss" rel="self" type="application/rss+xml" />
+<item><title>
+Mantendo data de criação de arquivos no git
+</title><description><![CDATA[
+
+<p><abbr title="muito grande; nem li">mg;nl</abbr>: Vamos desenvolver dois scripts, um pra adicionar a data da ultima alteração de um arquivo em forma de uma timestamp, evitando que ela seja perdida quando o arquivo é copiado ou movido, e outro para ordená-los através da data presente na timestamp. </p>
+
+<p>Se você está versionando seus arquivos com git, usando um remote como o <a href="https://about.gitlab.com/">gitlab</a>, <a href="https://github.com/">github</a> ou <a href="https://www.heroku.com/home">heroku</a>, 
+já deve ter reparado que, cada vez que você clona o repositório, a data de criação e modificação dos arquivos passa pro momento que você clonou.</p>
+
+<p>Vou apresentar nesse post os métodos que eu utilizo para persistir essa informação.</p>
+
+<hr/>
+<p>Tags: <a href='tag_git.html'>git</a>, <a href='tag_bash.html'>bash</a></p>
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/mantendo-data-de-criacao-de-arquivos-no-git.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/mantendo-data-de-criacao-de-arquivos-no-git.html'><span id='count-4541'></span></a>&nbsp;</p>
+]]></description><link>https://guilhermegarcia.dev/blog/mantendo-data-de-criacao-de-arquivos-no-git.html</link>
+<guid>https://guilhermegarcia.dev/blog/./mantendo-data-de-criacao-de-arquivos-no-git.html</guid>
+<dc:creator>Guilherme Garcia</dc:creator>
+<pubDate>Sun, 06 Feb 2022 03:07:55 -0300</pubDate></item>
 <item><title>
 Automatizando a geração de site map
 </title><description><![CDATA[

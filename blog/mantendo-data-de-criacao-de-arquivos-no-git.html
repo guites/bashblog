@@ -1,0 +1,233 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="main.css" type="text/css" />
+<link rel="stylesheet" href="blog.css" type="text/css" />
+<link rel="stylesheet" href="code.css" type="text/css" />
+<link rel="alternate" type="application/rss+xml" title="Inscrever-se nesta página..." href="feed.rss" />
+<title>Mantendo data de criação de arquivos no git</title>
+<meta name='twitter:card' content='summary' />
+<meta name='twitter:site' content='@gui_garcia67' />
+<meta name='twitter:title' content='Mantendo data de criação de arquivos no git' />
+<meta name='twitter:description' content=" mg;nl: Vamos desenvolver dois scripts, um pra adicionar a data da ultima alteração de um arquivo em forma de uma timestamp, evitando que ela seja perdida quando o arquivo é copiado ou movido, e outro para ordená-los através da data presente na " />
+</head><body>
+<div id="divbodyholder">
+<div class="headerholder"><div class="header">
+<div id="title">
+<h1 class="nomargin"><a class="ablack" href="https://guilhermegarcia.dev/blog/index.html">Blog do guilherme</a></h1>
+<div id="description">programação e outras coisas menos úteis</div>
+</div></div></div>
+<div id="divbody"><div class="content">
+<!-- entry begin -->
+<h3><a class="ablack" href="mantendo-data-de-criacao-de-arquivos-no-git.html">
+Mantendo data de criação de arquivos no git
+</a></h3>
+<!-- bashblog_timestamp: #202202060307.55# -->
+<div class="subtitle">Fevereiro 06, 2022 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p><abbr title="muito grande; nem li">mg;nl</abbr>: Vamos desenvolver dois scripts, um pra adicionar a data da ultima alteração de um arquivo em forma de uma timestamp, evitando que ela seja perdida quando o arquivo é copiado ou movido, e outro para ordená-los através da data presente na timestamp. </p>
+
+<p>Se você está versionando seus arquivos com git, usando um remote como o <a href="https://about.gitlab.com/">gitlab</a>, <a href="https://github.com/">github</a> ou <a href="https://www.heroku.com/home">heroku</a>, 
+já deve ter reparado que, cada vez que você clona o repositório, a data de criação e modificação dos arquivos passa pro momento que você clonou.</p>
+
+<p>Vou apresentar nesse post os métodos que eu utilizo para persistir essa informação.</p>
+
+<hr/>
+
+<p>Se ao dar push nos seus arquivos, eles estavam assim:</p>
+
+<pre><code>-rw-r--r--  1 guilhermegarcia  wheel   919 Feb  6 00:06 order_by_date.txt
+-rw-r--r--  1 guilhermegarcia  wheel  3316 Feb  6 00:06 looper.sh
+-rw-r--r--  1 guilhermegarcia  wheel    85 Feb  5 22:13 fev.html
+-rw-r--r--  1 guilhermegarcia  wheel   398 Feb  5 20:55 array.sh
+-rw-r--r--  1 guilhermegarcia  wheel   259 Feb  5 20:16 README.md
+-rw-r--r--  1 guilhermegarcia  wheel    79 Jan 27 00:45 20220127.html
+-rw-r--r--  1 guilhermegarcia  wheel    79 Jan 26 00:45 20220126.html
+-rw-r--r--  1 guilhermegarcia  wheel    80 Jan 25 00:45 20220125.html
+</code></pre>
+
+<p>Após clonar o repositório, eles provavelmente ficarão assim:</p>
+
+<pre><code>-rw-r--r--  1 guilhermegarcia  wheel   919 Feb  6 00:31 order_by_date.txt
+-rw-r--r--  1 guilhermegarcia  wheel  3316 Feb  6 00:31 looper.sh
+-rw-r--r--  1 guilhermegarcia  wheel    85 Feb  6 00:31 fev.html
+-rw-r--r--  1 guilhermegarcia  wheel   398 Feb  6 00:31 array.sh
+-rw-r--r--  1 guilhermegarcia  wheel   259 Feb  6 00:31 README.md
+-rw-r--r--  1 guilhermegarcia  wheel    79 Feb  6 00:31 20220127.html
+-rw-r--r--  1 guilhermegarcia  wheel    79 Feb  6 00:31 20220126.html
+-rw-r--r--  1 guilhermegarcia  wheel    80 Feb  6 00:31 20220125.html
+</code></pre>
+
+<p>Caso algum script seu dependa da data de criação ou alteração dos arquivos, eles não vão funcionar como o esperado.</p>
+
+<h2>Adicionando uma timestamp nos arquivos</h2>
+
+<p>Antes de perder essa informação (antes de subir no repositório), você pode utilizar um script simples pra adicionar uma marcação no final de cada arquivo.</p>
+
+<pre><code># arquivo set_timestamp.sh
+
+while read -r i; do
+  [[ $i == $0 ]] &amp;&amp; continue
+  created=$(date -r $i +"%Y%m%d%H%M.%S")
+  echo "timestamp: $created" &gt;&gt; $i
+done &lt; &lt;(ls -t)
+</code></pre>
+
+<p>Rodamos ele com <code>bash set_timestamp.sh</code>.</p>
+
+<p>A verificação <code>[[ $i == $0 ]] &amp;&amp; continue</code> impede que o script escreva em si mesmo. No bash, todo script tem um argumento, <code>$0</code>, que é seu próprio nome.</p>
+
+<p>A timestamp salva é no formato <code>YYYYMMDDHHMM.S</code>, por exemplo: 202202060046.13 para a data 06/02/2022 00:46:13. O motivo vai ficar mais claro quando formos ajustar a data dos arquivos.</p>
+
+<h2>Voltando a data original de modificação dos arquivos</h2>
+
+<p>Repare que executar o script alterou a data de todos os arquivos no diretório. Por sorte, com as timestamps salvas, podemos recuperar essa informação.</p>
+
+<p>Vamos criar um novo script pra realizar o ajuste.</p>
+
+<pre><code># arquivo fix_timestamp.sh
+
+while read -r i; do
+  [[ $i == $0 ]] &amp;&amp; continue
+  timestamp=$(sed -rn 's/^timestamp: (.*)$/\1/p' "$i")
+  touch -t $timestamp $i
+done &lt; &lt;(ls -t)
+</code></pre>
+
+<p>Rodando com <code>bash fix_timestamp.sh</code> a data de modificação vai ser recuperada para a original.</p>
+
+<p>O comando <code>touch -t</code> altera a data de modificação de um arquivo sem alterar seu conteúdo, e espera uma data no formato <code>YYYYMMDDHHMM.S</code>, o mesmo que utilizamos para gerar a timestamp acima.</p>
+
+<p>Porém ainda temos alguns problemas, por exemplo, se seus arquivos não forem de texto simples, a marcação no final pode gerar uma série de erros. </p>
+
+<h2>Timestamp baseada na extensão do arquivo</h2>
+
+<p>Podemos filtrar pela extensão e adicionar a marcação como um comentário, em função do tipo de arquivo.</p>
+
+<pre><code># arquivo set_timestamp.sh
+
+while read -r i; do
+  [[ $i == $0 ]] &amp;&amp; continue
+  created=$(date -r $i +"%Y%m%d%H%M.%S")
+    extension=${i##*.}                                    ## ADICIONAR
+    case $extension in                                    ## ADICIONAR
+      html) timestamp="&lt;!-- timestamp: $created --&gt;" ;;   ## ADICIONAR
+      sh) timestamp="# timestamp: $created" ;;            ## ADICIONAR
+      js) timestamp="// timestamp: $created" ;;           ## ADICIONAR
+      *) timestamp="timestamp: $created" ;;               ## ADICIONAR
+    esac                                                  ## ADICIONAR
+  echo "timestamp: $created" &gt;&gt; $i                        ## ALTERAR
+done &lt; &lt;(ls -t)
+</code></pre>
+
+<p>Definimos a extensão de cada arquivo usando uma <a href="https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html">substituição de parametros</a>, deletando todos os caracteres até chegar no ponto (.).</p>
+
+<p>Depois, com um switch case, podemos adicionar a marcação de comentário necessária pra cada tipo de arquivo.</p>
+
+<p>Agora, podemos alterar o script que ajusta a data de alteração de cada arquivo, mas uma outra possibilidade é listar os arquivos pela própria timestamp.</p>
+
+<h2>Unindo os dois processos em um único arquivo</h2>
+
+<p>Usando uma expressão regular mais completa, podemos em um unico script corrigir a data de alteração do arquivo, caso a timestamp exista, e, caso não exista, adicionar uma com a data da sua última modificação.</p>
+
+<pre><code># arquivo timestamp.sh
+
+while read -r i; do
+  [[ $i == $0 ]] &amp;&amp; continue
+  # pula p/ próxima iteração caso for um diretório
+  [[ -d $i ]] &amp;&amp; continue
+  timestamp=$(sed -rn 's/.*timestamp: ([0-9]{12}\.[0-9]{2}).*/\1/p' "$i")
+  # se a timestamp já existe, ajustamos o arquivo e pulamos p/ a próxima iteração
+  [[ -n $timestamp ]] &amp;&amp; touch -t $timestamp "$i" &amp;&amp; continue
+
+  # caso não exista, pegamos a data de modificação
+  created=$(date -r $i +"%Y%m%d%H%M.%S")
+
+  # formatamos a timestamp de acordo com a extensão
+  extension=${i##*.}
+  case $extension in
+    html) timestamp="&lt;!-- timestamp: $created --&gt;" ;;
+    sh) timestamp="# timestamp: $created" ;;
+    js) timestamp="^// timestamp: $created" ;;
+    *) timestamp="timestamp: $created" ;;
+  esac
+
+  # adicionamos ao arquivo
+  echo $timestamp &gt;&gt; $i
+
+done &lt; &lt;(ls -t)
+</code></pre>
+
+<p>Começamos buscando uma timestamp existente. A opção <code>-r</code> no sed nos permite utilizar expressões regulares.</p>
+
+<p>O formato que buscamos é uma sequência de quaisquer caracteres (<code>.*</code>) seguidos pela palavra <code>timestamp:</code>. Depois, usando os parenteses para definir um grupo de captura, queremos 12 digitos seguidos de um ponto, e mais dois digitos.</p>
+
+<p>Podemos referenciar o grupo de captura com <code>\1</code>. A opção <code>-n</code> indica que não queremos retornar o conteúdo (normalmente o sed retorna todo o texto do arquivo, com a substituição realizada), e por fim a flag <code>p</code> nos permite retornar apenas a linha na qual ocorreu a substituição.</p>
+
+<h2>Listando arquivos pela timestamp ao invés da data de modificação do arquivo</h2>
+
+<p>As alterações dos scripts acima partem do princípio de que você vai utilizar o comando <code>ls -t</code> para ordenar seus arquivos, alimentar scripts, etc.</p>
+
+<p>Caso você queria listá-los diretamente pela timestamp que adicionamos, independente do tempo de criação ou modificação, podemos usar uma combinação do comando <code>grep</code> com o comando <code>sort</code>.</p>
+
+<pre><code>list_files_by_timestamp() {
+  grep -s "timestamp: " * \ # (1)
+  | sed -nr 's/(:).*timestamp: ([0-9]{12}\.[0-9]{2}).*/\1\2/p' \ # (2)
+  | sort --field-separator=: --key=2 --stable --reverse \ # (3)
+  | sed -nr 's/^(.*):.*$/\1/p' # (4)
+}
+</code></pre>
+
+<p>Em (1) buscamos por todos os arquivos que possuem o texto "timestamp: " no diretório atual. A opção <code>-s</code> suprime erros, por exemplo se você tiver algum diretório, o grep retorna "grep: scripts: Is a directory".</p>
+
+<p>O output do comando grep é no formato:</p>
+
+<pre><code>20220125.html:&lt;!-- timestamp: 202202060046.13 --&gt;
+20220126.html:&lt;!-- timestamp: 202202020046.13 --&gt;
+20220127.html:&lt;!-- timestamp: 202202060046.13 --&gt;
+README.md:timestamp: 202202060117.25
+fev.html:&lt;!-- timestamp: 202202060117.37 --&gt;
+order_by_date.txt:timestamp: 202202060117.21
+</code></pre>
+
+<p>Em (2) adaptamos a expressão regular que usamos na seção anterior, dessa vez partindo dos dois pontos, pois precisamos manter o nome dos arquivos.</p>
+
+<p>Em (3) usamos o comando sort, passando a opção <code>--field-separator</code> para identificar diferentes campos através dos dois pontos <code>:</code>. Com a opção <code>--key=2</code> dizemos que o campo à direita dos dois pontos deve ser usado para ordenar o resultado.</p>
+
+<p>A opção <code>--reverse</code> coloca os resultados com o mais recente por primeiro.</p>
+
+<p>Em (4), usamos novamente uma expressão regular para remover as informações de data, visto que nosso interesse é no nome dos arquivos.</p>
+
+<h3>Considerações finais</h3>
+
+<p>Vimos como manter informações de criação e modificação de arquivos ao enviá-los para e cloná-los de um repositório remoto. </p>
+
+<p>Essas tecnicas também são válidas quando precisamos copiar arquivos, ou enviá-los via ssh, etc.</p>
+
+<p>Abraço!</p>
+
+<p>Fontes:</p>
+
+<ul>
+<li><a href="http://www.linfo.org/touch.html">http://www.linfo.org/touch.html</a></li>
+<li><a href="https://www.grymoire.com/Unix/Sed.html#uh-15b">https://www.grymoire.com/Unix/Sed.html#uh-15b</a></li>
+<li><a href="https://askubuntu.com/a/777456">https://askubuntu.com/a/777456</a></li>
+<li><a href="https://man7.org/linux/man-pages/man1/sort.1.html">https://man7.org/linux/man-pages/man1/sort.1.html</a></li>
+<li><a href="https://stackoverflow.com/a/29508361">https://stackoverflow.com/a/29508361</a></li>
+<li><a href="https://tldp.org/LDP/abs/html/assortedtips.html">https://tldp.org/LDP/abs/html/assortedtips.html</a></li>
+</ul>
+
+<p>Tags: <a href='tag_git.html'>git</a>, <a href='tag_bash.html'>bash</a></p>
+<!-- text end -->
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/mantendo-data-de-criacao-de-arquivos-no-git.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/mantendo-data-de-criacao-de-arquivos-no-git.html'><span id='count-4541'></span></a>&nbsp;</p>
+<!-- entry end -->
+</div>
+<div id="footer">CC by-nc-nd <a href="https://twitter.com/gui_garcia67">Guilherme Garcia</a> &mdash; <a href="mailto:gui&#46;garcia67&#64;gmail&#46;com">gui&#46;garcia67&#64;gmail&#46;com</a><br/>
+Generated with <a href="https://github.com/cfenollosa/bashblog">bashblog</a>, a single bash script to easily create blogs like this one</div>
+</div></div>
+</body></html>
