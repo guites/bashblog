@@ -1,0 +1,395 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="main.css" type="text/css" />
+<link rel="stylesheet" href="blog.css" type="text/css" />
+<link rel="stylesheet" href="code.css" type="text/css" />
+<link rel="alternate" type="application/rss+xml" title="Inscrever-se nesta página..." href="feed.rss" />
+<title>Automatizando a geração de site map</title>
+<meta name='twitter:card' content='summary' />
+<meta name='twitter:site' content='@gui_garcia67' />
+<meta name='twitter:title' content='Automatizando a geração de site map' />
+<meta name='twitter:description' content=" mg;nl: Vamos falar sobre o porquê e como adicionar um gerador de sitemap pro bashblog, atualizado sempre que um post for adicionado, editado ou removido.   Neste post vamos entender a importância de utilizar um sitemap e como ele pode ser gerado '" />
+</head><body>
+<div id="divbodyholder">
+<div class="headerholder"><div class="header">
+<div id="title">
+<h1 class="nomargin"><a class="ablack" href="https://guilhermegarcia.dev/blog/index.html">Blog do guilherme</a></h1>
+<div id="description">programação e outras coisas menos úteis</div>
+</div></div></div>
+<div id="divbody"><div class="content">
+<!-- entry begin -->
+<h3><a class="ablack" href="automatizando-a-geracao-de-site-map.html">
+Automatizando a geração de site map
+</a></h3>
+<!-- bashblog_timestamp: #202202060009.53# -->
+<div class="subtitle">Fevereiro 06, 2022 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p><abbr title="muito grande; nem li">mg;nl</abbr>: Vamos falar sobre o porquê e como adicionar um gerador de sitemap pro <a href="https://github.com/guites/bashblog">bashblog</a>, atualizado sempre que um post for adicionado, editado ou removido. </p>
+
+<p>Neste post vamos entender a importância de utilizar um sitemap e como ele pode ser gerado "manualmente" para sites estáticos como esse blog.</p>
+
+<p>Faço um panorama dos formatos de sitemap existente, suas diferenças, e depois proponho uma função, escrita em bash, para gerar um sitemap baseado numa listagem de arquivos html presentes num diretório. </p>
+
+<hr/>
+
+<h2>A importância de um sitemap</h2>
+
+<p>Os sitemaps são usados para auxílio na indexação. Com a enorme quantidade de sites existentes, sites podem ficar um tempo
+muito longo sem suas páginas indexadas pelos mecanismos de busca.</p>
+
+<p>Isso ocorre principalmente se o site em questão não possui muitos <a href="https://en.wikipedia.org/wiki/Backlink">backlinks</a>, ou seja, 
+não existem muitos outros sites que apontam pra ele.</p>
+
+<p>Como os links são pouco citados, acabam não entrando no radar dos bots de indexação, o que resultado no site ficar fora dos resultados de busca.</p>
+
+<p>O sitemap é uma forma padronizada de listar todos os recursos acessáveis de um site. Tanto o nome quanto a localização do arquivo é padronizada, o facilita seu descobrimento por um bot, como o bingbot, googlebot, etc.</p>
+
+<h2>Formatos válidos para um sitemap</h2>
+
+<p>A formatação do arquivo sitemap pode ser feita de diversas formas.</p>
+
+<ol>
+<li><p>Formato XML</p>
+
+<p>A formatação em XML é a mais flexível, pois permite a adição de parametros que indicam para os bots a última modificação de cada página, a frequência com a qual ela é alterada e também um nível de prioridade, de 0 a 1, interpretado de forma relativa pelo bot, para melhor compreender partes do site com conteúdo considerado mais expressivo.</p>
+
+<p>Um exemplo de sitemap em XML pode ser encontrado no site <a href="https://www.sitemaps.org/protocol.html">https://www.sitemaps.org/protocol.html</a></p>
+
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"&gt;
+   &lt;url&gt;
+      &lt;loc&gt;http://www.example.com/&lt;/loc&gt;
+      &lt;lastmod&gt;2005-01-01&lt;/lastmod&gt;
+      &lt;changefreq&gt;monthly&lt;/changefreq&gt;
+      &lt;priority&gt;0.8&lt;/priority&gt;
+   &lt;/url&gt;
+   &lt;url&gt;
+      &lt;loc&gt;http://www.example.com/catalog?item=12&amp;amp;desc=vacation_hawaii&lt;/loc&gt;
+      &lt;changefreq&gt;weekly&lt;/changefreq&gt;
+   &lt;/url&gt;
+   &lt;url&gt;
+      &lt;loc&gt;http://www.example.com/catalog?item=73&amp;amp;desc=vacation_new_zealand&lt;/loc&gt;
+      &lt;lastmod&gt;2004-12-23&lt;/lastmod&gt;
+      &lt;changefreq&gt;weekly&lt;/changefreq&gt;
+   &lt;/url&gt;
+&lt;/urlset&gt;
+</code></pre>
+
+<p>Repare o nível de especificidade das URLs. Para sites grandes, o arquivo sitemap pode ser fragmentado em mais de um, agrupando
+páginas de conteúdo parecido.</p>
+
+<p>Um bom exemplo é o <a href="https://www.sonymusic.com/sitemap_index.xml">sitemap do site da sony</a>, que
+possui um <em>sitemap_index.xml</em>, dentro do qual aponta para diversos sitemaps, cada com com uma listagem de urls pertencentes
+a um tópico diferente.</p>
+
+<pre><code>&lt;sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"&gt;
+  &lt;sitemap&gt;
+    &lt;loc&gt;https://www.sonymusic.com/post-sitemap.xml&lt;/loc&gt;
+    &lt;lastmod&gt;2022-01-25T17:10:59+00:00&lt;/lastmod&gt;
+  &lt;/sitemap&gt;
+  &lt;sitemap&gt;
+    &lt;loc&gt;https://www.sonymusic.com/videos-sitemap.xml&lt;/loc&gt;
+    &lt;lastmod&gt;2022-01-18T22:30:22+00:00&lt;/lastmod&gt;
+  &lt;/sitemap&gt;
+  &lt;sitemap&gt;
+    &lt;loc&gt;https://www.sonymusic.com/labels-sitemap.xml&lt;/loc&gt;
+    &lt;lastmod&gt;2020-08-20T16:29:06+00:00&lt;/lastmod&gt;
+  &lt;/sitemap&gt;
+  &lt;sitemap&gt;
+    &lt;loc&gt;https://www.sonymusic.com/artists-sitemap.xml&lt;/loc&gt;
+    &lt;lastmod&gt;2022-01-19T21:38:31+00:00&lt;/lastmod&gt;
+  &lt;/sitemap&gt;
+  &lt;sitemap&gt;
+    &lt;loc&gt;https://www.sonymusic.com/executives-sitemap.xml&lt;/loc&gt;
+    &lt;lastmod&gt;2021-11-29T22:00:44+00:00&lt;/lastmod&gt;
+  &lt;/sitemap&gt;
+  &lt;sitemap&gt;
+    &lt;loc&gt;https://www.sonymusic.com/category-sitemap.xml&lt;/loc&gt;
+    &lt;lastmod&gt;2022-01-25T17:10:59+00:00&lt;/lastmod&gt;
+  &lt;/sitemap&gt;
+&lt;/sitemapindex&gt;
+</code></pre>
+
+<p>Repare que, se você acessar a URL do sitemap pelo seu navegador, a formatação vai ser diferente dessa que eu mostro aqui. </p>
+
+<p>O seu navegador entende que se trata de um sitemap e o apresenta de uma forma mais legível.</p>
+
+<p>Você pode acessar a versão em texto do sitemap de qualquer site realizando uma requisição pela linha de comandos.</p>
+
+<p>Em um macos/linux, você pode utilizar algum dos comandos abaixo:</p>
+
+<pre><code>curl https://www.sonymusic.com/sitemap_index.xml
+
+
+## ou também
+
+
+wget -O - https://www.sonymusic.com/sitemap_index.xml
+</code></pre></li>
+<li><p>Formato RSS</p>
+
+<p>O Formato RSS, comumente usado em feeds de site, também pode ser utilizado como sitemap.</p>
+
+<p>Um exemplo desse tipo de arquivo é o <a href="https://guilhermegarcia.dev/blog/feed.rss">RSS aqui do blog</a>.</p>
+
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0"&gt;
+   &lt;channel&gt;
+    &lt;title&gt;Blog do guilherme&lt;/title&gt;
+    &lt;link&gt;https://guilhermegarcia.dev/blog/index.html&lt;/link&gt;
+    &lt;description&gt;programação e outras coisas menos úteis&lt;/description&gt;
+    &lt;language&gt;en&lt;/language&gt;
+    &lt;lastBuildDate&gt;Thu, 03 Feb 2022 08:10:13 -0300&lt;/lastBuildDate&gt;
+    &lt;pubDate&gt;Thu, 03 Feb 2022 08:10:13 -0300&lt;/pubDate&gt;
+    &lt;atom:link href="https://guilhermegarcia.dev/blog/feed.rss" rel="self" type="application/rss+xml" /&gt;
+    &lt;item&gt;
+       &lt;title&gt;Barra de buscas e consulta a API com Flutter&lt;/title&gt;
+       &lt;description&gt;&lt;![CDATA[&lt;p&gt;&lt;abbr title="muito grande; nem li"&gt;mg;nl&lt;/abbr&gt;: Tutorial para criar um app em flutter que realiza requisições http numa API e filtra o resultado usando uma barra de busca.&lt;/p&gt;
+      &lt;p&gt;Então essa semana eu comecei a aprender desenvolvimento de apps em Flutter.&lt;/p&gt;
+      &lt;!-- aqui teria todo o conteúdo do post, removi pra não tomar muito espaço --&gt;
+      &lt;hr/&gt;
+      &lt;p&gt;Tags: &lt;a href='tag_flutter.html'&gt;flutter&lt;/a&gt;, &lt;a href='tag_dart.html'&gt;dart&lt;/a&gt;&lt;/p&gt;
+      &lt;p id='twitter'&gt;&lt;a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/barra-de-buscas-e-consulta-a-api-com-flutter.html&amp;text=&amp;lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&amp;gt;&amp;via=gui_garcia67'&gt;Comentários? Tweet&lt;/a&gt;
+      &lt;a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/barra-de-buscas-e-consulta-a-api-com-flutter.html'&gt;&lt;span id='count-6742'&gt;&lt;/span&gt;&lt;/a&gt;&amp;nbsp;&lt;/p&gt;]]&gt;&lt;/description&gt;
+               &lt;link&gt;https://guilhermegarcia.dev/blog/barra-de-buscas-e-consulta-a-api-com-flutter.html&lt;/link&gt;
+               &lt;guid&gt;https://guilhermegarcia.dev/blog/./barra-de-buscas-e-consulta-a-api-com-flutter.html&lt;/guid&gt;
+               &lt;dc:creator&gt;Guilherme Garcia&lt;/dc:creator&gt;
+               &lt;pubDate&gt;Wed, 02 Feb 2022 22:10:37 -0300&lt;/pubDate&gt;
+    &lt;/item&gt;
+  &lt;/channel&gt;
+&lt;/rss&gt;
+</code></pre>
+
+<p>Os mecanismos de busca utilizam duas informações presentes nos feeds RSS para indexação: o campo <code>&lt;link&gt;</code> que indica a URL da página e o campo <code>&lt;pubDate&gt;</code>, que indica a ultima atualização da página.</p>
+
+<p>Enquanto o uso de um arquivo RSS como sitemap é perfeitamente válido, um ponto negativo é que os feeds costumam mostrar apenas os últimos 10 ou 15 posts, e muitas vezes omitem outras partes do site, listando
+apenas as postagens do blog.</p></li>
+<li><p>Arquivo de texto simples</p>
+
+<p>Esse é o formato mais simples. Se trata de uma listagem das URLs do site, divididas em uma por linha, sem nenhuma ordem específica. </p>
+
+<p>Exemplo:</p>
+
+<pre><code>https://guilhermegarcia.dev/blog/todos_posts.html
+https://guilhermegarcia.dev/blog/todas_tags.html
+https://guilhermegarcia.dev/blog/tag_flutter.html
+https://guilhermegarcia.dev/blog/tag_dart.html
+https://guilhermegarcia.dev/blog/tag_bashblog.html
+https://guilhermegarcia.dev/blog/tag_bash.html
+https://guilhermegarcia.dev/blog/ola-mundo.html
+https://guilhermegarcia.dev/blog/index.html
+https://guilhermegarcia.dev/blog/coisas-que-eu-nao-sabia-sobre-bash.html
+https://guilhermegarcia.dev/blog/barra-de-buscas-e-consulta-a-api-com-flutter.html
+</code></pre>
+
+<p>Esse arquivo tem informações suficientes para guiar a indexação do site por parte dos mecanismos de busca.</p>
+
+<p>Existem algumas limitações que devem ser levadas em conta:</p>
+
+<ul>
+<li>O arquivo deve ter uma URL por linha</li>
+<li>A URL deve ser especificada de forma completa, incluindo o protocolo (http ou https).</li>
+<li>Cada arquivo (sitemap1.txt, sitemap2.txt, etc) pode ter no máximo 50000(!) URLs e não mais do que 50MB. Passando esse limite, a listagem de URLs deve ser separada em multiplos arquivos de texto.</li>
+<li>O arquivo pode ser comprimido com gzip. Isso agiliza o acesso ao sitemap e reduz o consumo de banda. Para sites com muito acesso (e muitas URLs!), isso pode significar uma redução expressiva no custo da hospedagem.</li>
+</ul>
+
+<p>Este formato ser tão simples de ser gerado foi o motivo pelo qual eu escolhi utilizar ele aqui no blog. Na seção abaixo eu mostro como extendi o código do <a href="https://github.com/cfenollosa/bashblog">bashblog</a> para adicionar uma geração automática do arquivo sitemap com cada publicação.</p></li>
+</ol>
+
+<h2>Gerando um sitemap de forma automática</h2>
+
+<p>Para sites estáticos, gerar um sitemap é uma tarefa tranquila.</p>
+
+<p>Nesse exemplo vou usar bash, mas a mesma lógica pode ser aplicada a qualquer linguagem (php, node, etc).</p>
+
+<p>Como todas as páginas existem em formato .html na raíz do site, podemos primeiro localizá-las e fazer um laço.</p>
+
+<p>Podemos listar todos os arquivos no formato html passando a seguinte expressão no comando <code>ls</code>.</p>
+
+<pre><code>ls -t *.html
+</code></pre>
+
+<p>A flag <code>-t</code> ordena o resultado, colocando os arquivos modificados mais recentemente por primeiro.</p>
+
+<p>A expressão <code>*.html</code> restringe os resultados a arquivos no diretório presente, com a extensão .html.</p>
+
+<pre><code>todos_posts.html                                  tag_dart.html                                     ola-mundo.html                                    barra-de-buscas-e-consulta-a-api-com-flutter.html
+todas_tags.html                                   tag_bashblog.html                                 index.html
+tag_flutter.html                                  tag_bash.html                                     coisas-que-eu-nao-sabia-sobre-bash.html
+</code></pre>
+
+<p>Essa saída pode ser usada para alimentar um while loop. A sintaxe é a seguinte:</p>
+
+<pre><code>while read -r i; do
+  echo $i;
+done &lt; &lt;(ls -t *.html);
+</code></pre>
+
+<p>output</p>
+
+<pre><code>todos_posts.html
+todas_tags.html
+tag_flutter.html
+tag_dart.html
+tag_bashblog.html
+tag_bash.html
+ola-mundo.html
+index.html
+coisas-que-eu-nao-sabia-sobre-bash.html
+barra-de-buscas-e-consulta-a-api-com-flutter.html
+</code></pre>
+
+<p>Com este loop, podemos concatenar o nome do arquivo com a url do site, lembrando que os meus arquivos estão no diretório /blog.</p>
+
+<pre><code>while read -r i; do
+  echo "https://guilhermegarcia.dev/blog/"$i
+done &lt; &lt;(ls -t *.html);
+
+https://guilhermegarcia.dev/blog/todos_posts.html
+https://guilhermegarcia.dev/blog/todas_tags.html
+...
+</code></pre>
+
+<p>Agora só falta direcionar este output pra um arquivo, sitemap.txt .</p>
+
+<p>Dentro do while loop, podemos encapsular o output utilizando as chaves <code>{ }</code>.</p>
+
+<pre><code>{
+while read -r i; do
+    echo "https://guilhermegarcia.dev/blog"/$i
+done &lt; &lt;(ls -t *.html)
+} 3&gt;&amp;1 &gt;"sitemap.txt"
+</code></pre>
+
+<p><a href="https://guilhermegarcia.dev/blog/coisas-que-eu-nao-sabia-sobre-bash.html">Neste post</a> falei um pouco sobre redirecionamento de streams.</p>
+
+<p>Basicamente, os stream 0, 1 e 2 são reservados para os valores de entrada (emitidos pelo nosso teclado), os valores emitidos no terminal, e os valores de erro. Mas ainda temos os streams 3 ao 9, 
+que são atribuídos automaticamente para qualquer arquivo aberto. No bash, <a href="https://en.wikipedia.org/wiki/Everything_is_a_file">uma função é considerada como um arquivo</a>, e isso nos permite acessar os valores de
+saída do nosso loop.</p>
+
+<p>Pronto! Agora você tem em mãos um sitemap do seu site.</p>
+
+<h3>Adicionando o gerador de sitemap ao bashblog.</h3>
+
+<p>No bashblog, existem duas situações onde um novo arquivo é adicionado:</p>
+
+<ol>
+<li><p>Um novo post é publicado: isso gera um arquivo para o post, por exemplo, 'automatizando-a-geracao-de-site-map.html', além de um arquivo para cada tag do post.</p></li>
+<li><p>Um post existente é editado, e durante a edição uma tag inédita é adicionada. Isso gera um arquivo do tipo 'tag_minha_nova_tag.html'.</p></li>
+</ol>
+
+<p>Nestes dois casos eu preciso atualizar o sitemap existente.</p>
+
+<p>Inspecionando o código, existe uma função principal, <code>do_main()</code>, que organiza a lógica principal do programa.</p>
+
+<p>Dentro dela temos toda a lógica para lidar com os argumentos passados, gerar os arquivos de css, os componentes como header e footer, etc.</p>
+
+<p>No final da função, temos essa chamada de métodos em sequência:</p>
+
+<pre><code>do_main(){
+
+  # toda a lógica principal aqui ...
+
+  rebuild_index
+  all_posts
+  all_tags
+  make_rss
+  delete_includes
+}
+</code></pre>
+
+<p>Na lógica do bashblog, alguns métodos criam arquivos temporários, ( geralmente prefixados por ., por ex .header.html, .footer.html ) que são reaproveitados na hora
+de gerar os arquivos finais.</p>
+
+<p>Por isso, é importante chamar nossa função após a remoção desses arquivos, que é feito na função <code>delete_includes</code></p>
+
+<p>Adicione a função, agora formatada, dentro do arquivo.</p>
+
+<pre><code># Generate site map file
+generate_sitemaps() {
+
+  echo -n "Generating sitemaps "
+
+    {
+    while read -r i; do
+        echo "$global_url"/$i
+    done &lt; &lt;(ls -t *.html)
+    } 3&gt;&amp;1 &gt;"$sitemaps_file"
+
+}
+</code></pre>
+
+<p>Repare que trocamos a url do site por uma variável global, <code>global_url</code> e também o nome do arquivo para <code>sitemaps_file</code>. </p>
+
+<p>Com a função pronta, basta adicionar uma chamada em <code>do_main()</code>:</p>
+
+<pre><code>do_main(){
+
+  # toda a lógica principal aqui ...
+
+  rebuild_index
+  all_posts
+  all_tags
+  make_rss
+  delete_includes
+  generate_sitemaps # aqui !
+}
+</code></pre>
+
+<p>Pronto! Extendemos a funcionalidade do blog com sucesso.</p>
+
+<h2>Informações adicionais</h2>
+
+<p>Com o sitemap gerado, podemos enviá-lo diretamente para os mecanismos de busca.</p>
+
+<p>O google utiliza o <a href="https://search.google.com/search-console/about">search console</a>, enquanto o bing disponibiliza um <a href="https://www.bing.com/webmasters/">painel webmaster tools</a>.</p>
+
+<p>O processo é parecido, você cria uma conta, verifica o domínio através de um apontamento DNS, ou subindo um arquivo no servidor, e depois adiciona a URL do seu sitemap. Isso agiliza a indexação do site.</p>
+
+<p>O <a href="https://help.yahoo.com/kb/learn-submit-website-yahoo-robotstxt-directive-sln2213.html">Yahoo</a>, assim como outros mecanismos de busca que não oferecem um painel, podem localizar o sitemap mais facilmente
+se você adicionar um diretiva no seu arquivo robots.txt .</p>
+
+<pre><code># Dentro do arquivo robots.txt
+
+Sitemap: https://guilhermegarcia.dev/blog/sitemap.txt
+</code></pre>
+
+<p>Sobre a formatação do arquivo:</p>
+
+<p>A codificação do arquivo deve ser UTF-8.</p>
+
+<p>Os arquivos podem ter qualquer nome, estando de acordo com o padrão RFC-3986:</p>
+
+<p>Use codificação por centro (troque espaços por <code>%20</code>, aspas duplas <code>"</code> por <code>%22</code>, etc) nos seguintes caracteres: <code>!  *   '   (   )   ;   :   @   &amp;   =   +   $   ,   /   ?   #   [   ]</code></p>
+
+<p>O arquivo deve estar sempre no diretório de maior nível o qual o mecanismo de busca deve pesquisar. Por exemplo, se o meu sitemap está dentro do diretório blog/, ele não pode referenciar nenhuma url que esteja na raíz do projeto.</p>
+
+<p>Fontes:</p>
+
+<ul>
+<li><a href="https://github.com/cfenollosa/bashblog">https://github.com/cfenollosa/bashblog</a></li>
+<li><a href="https://developers.google.com/search/docs/advanced/sitemaps/overview?hl=pt-br">https://developers.google.com/search/docs/advanced/sitemaps/overview?hl=pt-br</a></li>
+<li><a href="https://www.sitemaps.org/protocol.html">https://www.sitemaps.org/protocol.html</a></li>
+<li><a href="https://www.bing.com/webmasters/help/sitemaps-3b5cf6ed">https://www.bing.com/webmasters/help/sitemaps-3b5cf6ed</a></li>
+<li><a href="https://developers.google.com/search/docs/advanced/sitemaps/build-sitemap?hl=pt-br">https://developers.google.com/search/docs/advanced/sitemaps/build-sitemap?hl=pt-br</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Backlink">https://en.wikipedia.org/wiki/Backlink</a></li>
+<li><a href="https://www.sonymusic.com/sitemap_index.xml">https://www.sonymusic.com/sitemap_index.xml</a></li>
+<li><a href="https://tldp.org/LDP/abs/html/io-redirection.html">https://tldp.org/LDP/abs/html/io-redirection.html</a></li>
+<li><a href="https://datatracker.ietf.org/doc/html/rfc3986#page-12">https://datatracker.ietf.org/doc/html/rfc3986#page-12</a></li>
+</ul>
+
+<p>Tags: <a href='tag_seo.html'>seo</a>, <a href='tag_bash.html'>bash</a>, <a href='tag_bashblog.html'>bashblog</a></p>
+<!-- text end -->
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/automatizando-a-geracao-de-site-map.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/automatizando-a-geracao-de-site-map.html'><span id='count-23193'></span></a>&nbsp;</p>
+<!-- entry end -->
+</div>
+<div id="footer">CC by-nc-nd <a href="https://twitter.com/gui_garcia67">Guilherme Garcia</a> &mdash; <a href="mailto:gui&#46;garcia67&#64;gmail&#46;com">gui&#46;garcia67&#64;gmail&#46;com</a><br/>
+Generated with <a href="https://github.com/cfenollosa/bashblog">bashblog</a>, a single bash script to easily create blogs like this one</div>
+</div></div>
+</body></html>
