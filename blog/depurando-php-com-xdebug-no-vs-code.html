@@ -1,0 +1,451 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="main.css" type="text/css" />
+<link rel="stylesheet" href="blog.css" type="text/css" />
+<link rel="stylesheet" href="code.css" type="text/css" />
+<link rel="alternate" type="application/rss+xml" title="Inscrever-se nesta página..." href="feed.rss" />
+<title>Depurando PHP com XDEBUG no VS Code</title>
+<meta name='twitter:card' content='summary' />
+<meta name='twitter:site' content='@gui_garcia67' />
+<meta name='twitter:title' content='Depurando PHP com XDEBUG no VS Code' />
+<meta name='twitter:description' content=" mg;nl: Neste post vamos configurar o XDEBUG e utilizar o VScode para depurar um script simples em PHP.  Muitas vezes a preguiça nos mantém presos ao var_dump e F5 como forma de depurar no PHP. Esse post serve como uma cola, misturei as informaçõ" />
+</head><body>
+<div id="divbodyholder">
+<div class="headerholder"><div class="header">
+<div id="title">
+<h1 class="nomargin"><a class="ablack" href="https://guilhermegarcia.dev/blog/index.html">Blog do guilherme</a></h1>
+<div id="description">programação e outras coisas menos úteis</div>
+</div></div></div>
+<div id="divbody"><div class="content">
+<!-- entry begin -->
+<h3><a class="ablack" href="depurando-php-com-xdebug-no-vs-code.html">
+Depurando PHP com XDEBUG no VS Code
+</a></h3>
+<!-- bashblog_timestamp: #202202122106.07# -->
+<div class="subtitle">Fevereiro 12, 2022 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p><abbr title="muito grande; nem li">mg;nl</abbr>: Neste post vamos configurar o XDEBUG e utilizar o VScode para depurar um script simples em PHP.</p>
+
+<p>Muitas vezes a preguiça nos mantém presos ao <code>var_dump</code> e F5 como forma de depurar no PHP. Esse post serve como uma cola, misturei as informações de alguns artigos e tutoriais que encontrei pela net, e adaptei pra incluir alguns detalhes que me confundiram quando fui configurar a minha máquina. As fontes estão no final do post.</p>
+
+<p>Este tutorial foi feito utilizando a versão 7.1 do PHP no macOS. Para outras versões, os passos são os mesmos mas as informações adicionadas diferem um pouco.</p>
+
+<hr/>
+
+<p>Você pode consultar <a href="https://getgrav.org/blog/macos-monterey-apache-mysql-vhost-apc">este post</a> para verificar qual versão do XDEBUG deve ser instalado com qual versão do PHP.</p>
+
+<h2>Instalação do XDEBUG e extensão VSCODE</h2>
+
+<p>Abaixo mostro o processo para instalação do XDEBUG em um ambiente macOS. No macOS, presumo que tanto o PHP quanto o APACHE foram instalados utilizando o brew.</p>
+
+<p>Com o XDEBUG instalado na máquina, vamos configurar a extensão do XDEBUG no VScode e depurar um script simples.</p>
+
+<h2>Instale o XDEBUG usando o pecl</h2>
+
+<p>Comece instalando o xdebug utilizando o <code>pecl</code>.</p>
+
+<pre><code>sphp 7.1
+pecl uninstall -r xdebug
+pecl install xdebug-2.9.8
+</code></pre>
+
+<p>Depois, remova a linha <code>zend_extension="xdebug.so"</code>, no topo do arquivo <code>php.ini</code>.</p>
+
+<pre><code>code /opt/homebrew/etc/php/7.1/php.ini
+
+zend_extension="xdebug.so" ## REMOVER ESTA LINHA
+[PHP]
+
+;;;;;;;;;;;;;;;;;;;
+; About php.ini   ;
+;;;;;;;;;;;;;;;;;;;
+; PHP's initialization file, generally called php.ini, is responsible for
+; configuring many of the aspects of PHP's behavior.
+
+; PHP attempts to find and load this configuration from a number of locations.
+; The following is a summary of its search order:
+</code></pre>
+
+<p>Após remover esta linha, adicione um novo arquivo de configuração para a biblioteca <code>xdebug.so</code>.</p>
+
+<pre><code>code /opt/homebrew/etc/php/7.1/conf.d/ext-xdebug.ini
+
+[xdebug]
+zend_extension="xdebug.so"
+xdebug.remote_enable=1
+xdebug.remote_autostart = 1 # essa linha permite o acesso ao xdebug pelo vscode, nos próximos passos
+xdebug.remote_host=localhost
+xdebug.remote_handler=dbgp
+xdebug.remote_port=9000 # essa é a porta onde o xdebug vai rodar seu debugger
+</code></pre>
+
+<p>Reinicie o apache com os comandos</p>
+
+<pre><code>brew services stop httpd; brew services start httpd
+</code></pre>
+
+<p>Instale o script para <a href="https://github.com/w00fz/xdebug-osx">ligar/desligar o xdebug</a> na sua máquina.</p>
+
+<pre><code>curl -L https://gist.githubusercontent.com/rhukster/073a2c1270ccb2c6868e7aced92001cf/raw/c1629293bcf628cd6ded20c201c4ef0a2fa79144/xdebug &gt; /opt/homebrew/bin/xdebug
+chmod +x /opt/homebrew/bin/xdebug
+</code></pre>
+
+<p>Utilize-o com:</p>
+
+<pre><code>xdebug on
+## ou
+xdebug off
+</code></pre>
+
+<p>Você pode verificar se a instalação do xdebug aconteceu sem erros utilizando o <a href="https://xdebug.org/wizard">installation wizard</a>.</p>
+
+<p>Copie o output do seu <code>php -i</code> e cole no site.</p>
+
+<p>Na linha de comandos:</p>
+
+<pre><code>xdebug on; php -i | pbcopy
+</code></pre>
+
+<p>Depois, abra o site, cole o valor no campo de texto, e clique em "Analyse my phpinfo() output" ( o pbcopy salva o output do comando no seu ctrl+v ).</p>
+
+<p>Um resultado parecido com este significa que deu tudo certo.</p>
+
+<pre><code>Installation Wizard
+Summary
+
+Xdebug installed: 2.9.8
+Server API: Command Line Interface
+Windows: no
+Zend Server: no
+PHP Version: 7.1.33
+Zend API nr: 320160303
+PHP API nr: 20160303
+Debug Build: no
+Thread Safe Build: no
+OPcache Loaded: yes
+Configuration File Path: /opt/homebrew/etc/php/7.1
+Configuration File: /opt/homebrew/etc/php/7.1/php.ini
+Extra Configuration Files Path: /opt/homebrew/etc/php/7.1/conf.d
+Extra Configuration Files:
+/opt/homebrew/etc/php/7.1/conf.d/ext-opcache.ini
+/opt/homebrew/etc/php/7.1/conf.d/ext-xdebug.ini
+Extensions directory: /opt/homebrew/lib/php/pecl/20160303
+
+You're already running the latest Xdebug version
+</code></pre>
+
+<h2>Configure o XDEBUG no VSCODE</h2>
+
+<p>Com o XDEBUG instalado no sistema, vamos configurar o ambiente para depuração no VSCODE.</p>
+
+<p>Como exemplo, vamos criar um projeto simples em php.</p>
+
+<p>Ajuste seu apache para servir os arquivos de uma pasta, onde o index.php terá apenas uma linha:</p>
+
+<pre><code>## arquivo index.php
+&lt;?php phpinfo(); ?&gt;
+</code></pre>
+
+<p>Abra o projeto usando o vscode, vá nas extensões e instale o PHP XDEBUG.</p>
+
+<p><img src="./imgs/depurando-php-com-xdebug-no-vs-code/xdebug_extension-fs8.png" alt="Instalando a extensão PHP XDEBUG no VSCODE" title="Instalando a extensão PHP XDEBUG no VSCODE" /></p>
+
+<p>Depois, selecionando seu arquivo index.php, clique em "Run and Debug" e "create a launch.json file".</p>
+
+<p>Digite PHP na barra de busca e clique.</p>
+
+<p>Um arquivo launch.json será criado no seu projeto, e você será redirecionado para editá-lo.</p>
+
+<pre><code>## dentro do diretório do projeto
+
+find .
+
+.
+./index.php
+./.vscode
+./.vscode/launch.json
+</code></pre>
+
+<p>O arquivo launch.json vai ter um conteúdo no formato:</p>
+
+<pre><code>{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Listen for Xdebug",
+            "type": "php",
+            "request": "launch",
+            "port": 9000 // alterar para 9000, a mesma porta definida na configuração do XDEBUG
+        },
+        {
+            "name": "Launch currently open script",
+            "type": "php",
+            "request": "launch",
+            "program": "${file}",
+            "cwd": "${fileDirname}",
+            "port": 0,
+            "runtimeArgs": [
+                "-dxdebug.start_with_request=yes"
+            ],
+            "env": {
+                "XDEBUG_MODE": "debug,develop",
+                "XDEBUG_CONFIG": "client_port=${port}"
+            }
+        },
+        {
+            "name": "Launch Built-in web server",
+            "type": "php",
+            "request": "launch",
+            "runtimeArgs": [
+                "-dxdebug.mode=debug",
+                "-dxdebug.start_with_request=yes",
+                "-S",
+                "localhost:0"
+            ],
+            "program": "",
+            "cwd": "${workspaceRoot}",
+            "port": 9003,
+            "serverReadyAction": {
+                "pattern": "Development Server \\(http://localhost:([0-9]+)\\) started",
+                "uriFormat": "http://localhost:%s",
+                "action": "openExternally"
+            }
+        }
+    ]
+}
+</code></pre>
+
+<p>Ele registra alguns scripts para ativar o servidor de debug.</p>
+
+<p>Repare que para cada objeto dentro de "configurations", será adicionado uma opção no menu do debugger.</p>
+
+<p><img src="./imgs/depurando-php-com-xdebug-no-vs-code/vscode_xdebug_configurations-fs8.png" alt="Opções no debugger do VSCODE" title="Opções no debugger do VSCODE" /></p>
+
+<p><strong>Atenção</strong>: você deve alterar o valor do "port", na opção "Listen for Xdebug", para a mesma porta definida na configuração do XDEBUG. No meu exemplo, utilizei a porta 9000.</p>
+
+<p>Vamos utilizar a opção "Listen for Xdebug" pois já temos um servidor php rodando com o apache.</p>
+
+<p>Inicie o processo selecionando "Listen for Xdebug" no dropdown e clicando no triangulo verde.</p>
+
+<p><img src="./imgs/depurando-php-com-xdebug-no-vs-code/vscode_start_debug-fs8.png" alt="Iniciar processo de debug no VSCODE" title="Iniciar processo de debug no VSCODE" /></p>
+
+<p>Se o menu com as opções aparecer, o processo iniciou corretamente.</p>
+
+<h2>Depure um programa de teste</h2>
+
+<p>No nosso arquivo index.php, podemos adicionar um breakpoint clicando duas vezes na margem da linha (o vscode mostra uma bolinha vermelha).</p>
+
+<p><img src="./imgs/depurando-php-com-xdebug-no-vs-code/vscode_add_breakpoint-fs8.png" alt="Adicionando breakpoints no VScode" title="Adicionando breakpoints no VScode" /></p>
+
+<p>Agora, atualizando a página no navegador, você deve ser jogado de volta para o VScode.</p>
+
+<p>Caso isto não ocorra, verifique:</p>
+
+<ol>
+<li><p>se criou corretamente o arquivo com as configurações do XDEBUG</p></li>
+<li><p>se colocou a mesma porta no processo do launch.json utilizada na configuração do XDEBUG</p></li>
+<li><p>se você reiniciou o apache utilizando <code>brew services stop httpd; brew services start httpd</code></p></li>
+</ol>
+
+<p>Observe que a página não carregou normalmente no navegador. Isto é porque nosso breakpoint travou a execução do programa.</p>
+
+<p>Você pode, no editor, apertar F10 para prosseguir para a próxima linha. Como nossa programa é simples, isso resolve a execução e carrega a página.</p>
+
+<p>Os comandos disponíveis são os seguintes:</p>
+
+<p><img src="./imgs/depurando-php-com-xdebug-no-vs-code/vscode_debug_toolbar-fs8.png" alt="Comandos disponíveis no depurador - VScode" title="Comandos disponíveis no depurador - VScode" /></p>
+
+<ul>
+<li>Continue / Pause F5</li>
+<li>Step Over F10</li>
+<li>Step Into F11</li>
+<li>Step Out ⇧F11</li>
+<li>Restart ⇧⌘F5 (ctrl+shift+F5 no linux)</li>
+<li>Stop ⇧F5</li>
+</ul>
+
+<h2>Depure uma requisição HTTP</h2>
+
+<p>Digamos que você esteja desenvolvendo uma integração com uma API.</p>
+
+<p>Vamos utilizar a API <a href="https://jsonplaceholder.typicode.com/">json placeholder</a> como exemplo.</p>
+
+<p>Nosso objetivo é importar uma listagem de usuários, e criar um Model para uma futura integração com banco de dados.</p>
+
+<p>Vamos começar realizando uma requisição no endpoint "/users".</p>
+
+<pre><code>&lt;?php
+
+$ch = curl_init("https://jsonplaceholder.typicode.com/users");
+curl_setopt($ch, CURLOPT_HEADER, 0);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+$users_json = curl_exec($ch); ## (1)
+if (curl_error($ch)) {
+    throw new Exception('Erro ao conectar com o serviço remoto.');
+}
+curl_close($ch);
+</code></pre>
+
+<p>Podemos, antes de prosseguir com o desenvolvimento, adicionar um breakpoint em (1).</p>
+
+<p><img src="./imgs/depurando-php-com-xdebug-no-vs-code/ex_breakpoint_1-fs8.png" alt="Exemplo breakpoint 1" title="Exemplo de breakpoint 1" /></p>
+
+<p>Acessando nossa página no navegador, somos jogados de volta para o VScode. Repare que a variável <code>$users_json</code> ainda está indefinida.</p>
+
+<p><img src="./imgs/depurando-php-com-xdebug-no-vs-code/ex_breakpoint_2-fs8.png" alt="Exemplo breakpoint 2" title="Exemplo breakpoint 2" /></p>
+
+<p>Para acessarmos seu valor, precisamos dar um "Step Over" (F10).</p>
+
+<p>Podemos utilizar o debug console para trabalhar a variável em tempo real, sem necessidade de atualizar a página com cada alteração.</p>
+
+<p><img src="./imgs/depurando-php-com-xdebug-no-vs-code/ex_breakpoint_3-fs8.png" alt="Exemplo breakpoint 3" title="Exemplo breakpoint 3" /></p>
+
+<p>Na imagem acima, utilizamos o console pra descobrir a estrutura do Model "User" que precisamos implementar.</p>
+
+<p>Dentro da raíz do projeto, crie um diretório "models", e dentro dele, um arquivo "User.php".</p>
+
+<p>Vamos estruturar de forma simples nossa classe, e criar um método <code>fromJson</code>, que recebe os dados no formato de array e os passa para as propriedades do nosso objecto.</p>
+
+<pre><code>&lt;?php
+## models/User.php
+class User
+{
+    /**
+     * @var int
+     */
+    private $id;
+
+    /**
+     * @var string
+     */
+    private $name;
+
+    /**
+     * @var string
+     */
+    private $username;
+
+    /**
+     * @var string
+     */
+    private $email;
+
+    /**
+     * @var stdClass
+     */
+    private $address;
+
+    /**
+     * @var string
+     */
+    private $phone;
+
+    /**
+     * @var string
+     */
+    private $website;
+
+    /**
+     * @var stdClass
+     */
+    private $company;
+
+    /**
+     * @param array $data
+     */
+    public function fromJson($data)
+    {
+        foreach ($data as $key =&gt; $value) {
+            $this-&gt;{$key} = $value;
+        }
+    }
+}
+</code></pre>
+
+<p>Lembre-se de importar nosso Model no arquivo index.php.</p>
+
+<p>Adicione uma iteração nos valores decodificados da requisição, e, usando o método <code>fromJson</code>, adicione novos objetos "User" em uma lista.</p>
+
+<pre><code>&lt;?php
+require('./models/User.php'); ## ADICIONAR
+
+$ch = curl_init("https://jsonplaceholder.typicode.com/users");
+curl_setopt($ch, CURLOPT_HEADER, 0);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+$users_json = curl_exec($ch);
+if (curl_error($ch)) {
+    throw new Exception('Erro ao conectar com o serviço remoto.');
+}
+curl_close($ch);
+$users_object = json_decode($users_json); ## ADICIONAR DAQUI PRA BAIXO
+$users_list = []; 
+foreach ($users_object as $object) {
+    $user = new User();
+    $user-&gt;fromJson($object);
+    $users_list[] = $user;
+}
+</code></pre>
+
+<p>Vamos adicionar dois breakpoints, um na decodificação do json recebido na requisição, e um no momento que chamarmos nosso método <code>fromJson</code>.</p>
+
+<p><img src="./imgs/depurando-php-com-xdebug-no-vs-code/ex_breakpoint_4-fs8.png" alt="Exemplo breakpoint 4" title="Exemplo breakpoint 4" /></p>
+
+<p>Na aba "breakpoints", no canto esquerdo inferior, marque também "Errors" e "Exceptions". Assim podemos depurar estes casos também pelo console do debugger.</p>
+
+<p>Ative o debugger clicando no triangulo verde, volte na página do projeto e dê um F5.</p>
+
+<p>Quando o processo for travado, dê um F10 ( Step Over ) e verifique que nossa variável <code>$users_object</code> está no formato esperado.</p>
+
+<p>Depois, dê um F5 ( Continue ) para o programa rodar até o próximo breakpoint.</p>
+
+<p>Confirme que a variável <code>$user</code> foi iniciada corretamente, com os valores nulos.</p>
+
+<p><img src="./imgs/depurando-php-com-xdebug-no-vs-code/ex_breakpoint_5-fs8.png" alt="Exemplo breakpoint 5" title="Exemplo breakpoint 5" /></p>
+
+<p>Neste breakpoint, vamos utilizar o F11 (Step Into). Isto deve nos levar para o arquivo User.php, dentro do método <code>fromJson</code>.</p>
+
+<p>Aperte F10 ( Step Over ) algumas vezes, e verifique o valor das variáveis internas do método.</p>
+
+<p><img src="./imgs/depurando-php-com-xdebug-no-vs-code/ex_breakpoint_6-fs8.png" alt="Exemplo breakpoint 6" title="Exemplo breakpoint 6" /></p>
+
+<p>Depois, utilize o ⇧F11 (Step Out) para voltar ao arquivo index.php.</p>
+
+<h2>Considerações finais</h2>
+
+<p>Verificamos como configurar o xdebug para uso de forma interativa no VScode.</p>
+
+<p>Os exemplos realizados foram simples, mas ilustram conceitos que podem facilitar a depuração de projetos complexos, onde um valor passa por diversas funções e métodos antes de ser jogado na tela através de um <code>var_dump</code>, por exemplo.</p>
+
+<p>Usando o Step Over, Step Into e Step Out, podemos verificar todas as etapas de um processo, e testar o comportamento de uma variável, manipulando ela no console, o que diminui o trabalho de alterar o arquivo e atualizar a página, que costuma ser o método tradicional de depurar no php.</p>
+
+<p>Abraço!</p>
+
+<p>Fontes: </p>
+
+<ul>
+<li><a href="https://getgrav.org/blog/macos-monterey-apache-mysql-vhost-apc">https://getgrav.org/blog/macos-monterey-apache-mysql-vhost-apc</a></li>
+<li><a href="https://stackify.com/php-debugging-guide/">https://stackify.com/php-debugging-guide/</a></li>
+<li><a href="https://code.visualstudio.com/docs/editor/debugging#_debug-actions">https://code.visualstudio.com/docs/editor/debugging#_debug-actions</a></li>
+<li><a href="https://stackoverflow.com/a/5398361">https://stackoverflow.com/a/5398361</a></li>
+</ul>
+
+<p>Tags: <a href='tag_vscode.html'>vscode</a>, <a href='tag_php.html'>php</a>, <a href='tag_debug.html'>debug</a></p>
+<!-- text end -->
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/depurando-php-com-xdebug-no-vs-code.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/depurando-php-com-xdebug-no-vs-code.html'><span id='count-10690'></span></a>&nbsp;</p>
+<!-- entry end -->
+</div>
+<div id="footer">CC by-nc-nd <a href="https://twitter.com/gui_garcia67">Guilherme Garcia</a> &mdash; <a href="mailto:gui&#46;garcia67&#64;gmail&#46;com">gui&#46;garcia67&#64;gmail&#46;com</a><br/>
+Generated with <a href="https://github.com/cfenollosa/bashblog">bashblog</a>, a single bash script to easily create blogs like this one</div>
+</div></div>
+</body></html>
