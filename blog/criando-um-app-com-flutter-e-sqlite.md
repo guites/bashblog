@@ -18,9 +18,7 @@ Neste post vou falar um pouco sobre integrar o uso de bancos de dado, em sqlite3
 
 O banco de dados de exercícios foi adaptado do projeto [wger](https://github.com/wger-project/wger).
 
-<del>Você pode acompanhar o andamento do projeto em <https://guilhermegarcia.dev/gym></del>
-
-\(O projeto ainda não foi publicado\).
+O código deste post pode ser encontrado no [branch main deste repositório](https://github.com/guites/flutter-gym-app/tree/main).
 
 <hr/>
 
@@ -227,6 +225,7 @@ Dentro do nosso arquivo `exercise.dart`, vamos colocar o seguinte código:
       int get id;
       String get license_author;
       String get status;
+      String get description;
       String get name;
       String get creation_date;
       int get language_id;
@@ -381,6 +380,7 @@ Dentro do diretório `api`, crie o arquivo `exercises.dart`.
           ..id = maps[index]['id']
           ..license_author = maps[index]['license_author']
           ..status = maps[index]['status']
+          ..description = maps[index]['description]
           ..name = maps[index]['name']
           ..creation_date = maps[index]['creation_date']
           ..language_id = maps[index]['language_id']

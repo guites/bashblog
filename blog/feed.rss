@@ -2,8 +2,8 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
 <channel><title>Blog do guilherme</title><link>https://guilhermegarcia.dev/blog/index.html</link>
 <description>programação e outras coisas menos úteis</description><language>en</language>
-<lastBuildDate>Mon, 21 Feb 2022 08:45:57 -0300</lastBuildDate>
-<pubDate>Mon, 21 Feb 2022 08:45:57 -0300</pubDate>
+<lastBuildDate>Sun, 27 Feb 2022 19:19:04 -0300</lastBuildDate>
+<pubDate>Sun, 27 Feb 2022 19:19:04 -0300</pubDate>
 <atom:link href="https://guilhermegarcia.dev/blog/feed.rss" rel="self" type="application/rss+xml" />
 <item><title>
 Criando um app com Flutter e sqlite
@@ -27,14 +27,12 @@ Criando um app com Flutter e sqlite
 
 <p>O banco de dados de exercícios foi adaptado do projeto <a href="https://github.com/wger-project/wger">wger</a>.</p>
 
-<p><del>Você pode acompanhar o andamento do projeto em <a href="https://guilhermegarcia.dev/gym">https://guilhermegarcia.dev/gym</a></del></p>
-
-<p>(O projeto ainda não foi publicado).</p>
+<p>O código deste post pode ser encontrado no <a href="https://github.com/guites/flutter-gym-app/tree/main">branch main deste repositório</a>.</p>
 
 <hr/>
 <p>Tags: <a href='tag_flutter.html'>flutter</a>, <a href='tag_api.html'>api</a></p>
 <p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/criando-um-app-com-flutter-e-sqlite.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/criando-um-app-com-flutter-e-sqlite.html'><span id='count-23'></span></a>&nbsp;</p>
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/criando-um-app-com-flutter-e-sqlite.html'><span id='count-11456'></span></a>&nbsp;</p>
 ]]></description><link>https://guilhermegarcia.dev/blog/criando-um-app-com-flutter-e-sqlite.html</link>
 <guid>https://guilhermegarcia.dev/blog/./criando-um-app-com-flutter-e-sqlite.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
