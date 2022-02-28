@@ -1,0 +1,3 @@
+graph myapp {
+  MyApp -- {ExercisesPage, HomePage, GymTabPage}
+}

@@ -1,0 +1,13 @@
+digraph fluxo_provider {
+  nodesep=1.5
+  ranksep=1.5
+
+  a [label=<Provider<br/><font color='red'>LanguageController</font>>]
+
+  a -> MyApp [dir=both, color=red];
+  MyApp -> ExercisesPage [color=red, label="_languageId"];
+  MyApp -> HomePage [dir=both, color=red, label="_languageId"];
+
+  MyApp -> GymTabPage;
+
+}

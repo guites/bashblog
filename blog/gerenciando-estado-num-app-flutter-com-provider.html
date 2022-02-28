@@ -1,0 +1,756 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="main.css" type="text/css" />
+<link rel="stylesheet" href="blog.css" type="text/css" />
+<link rel="stylesheet" href="code.css" type="text/css" />
+<link rel="alternate" type="application/rss+xml" title="Inscrever-se nesta página..." href="feed.rss" />
+<title>Gerenciando estado num app Flutter com Provider</title>
+<meta name='twitter:card' content='summary' />
+<meta name='twitter:site' content='@gui_garcia67' />
+<meta name='twitter:title' content='Gerenciando estado num app Flutter com Provider' />
+<meta name='twitter:description' content=" mg;nl: Neste post vamos implementar o plugin Provider num app em Flutter, para comunicar valores de estado através do aplicativo. Vamos também otimizar a estrutura de um app já existente e entender o uso de controllers no ambito do provider.  Dan" />
+</head><body>
+<div id="divbodyholder">
+<div class="headerholder"><div class="header">
+<div id="title">
+<h1 class="nomargin"><a class="ablack" href="https://guilhermegarcia.dev/blog/index.html">Blog do guilherme</a></h1>
+<div id="description">programação e outras coisas menos úteis</div>
+</div></div></div>
+<div id="divbody"><div class="content">
+<!-- entry begin -->
+<h3><a class="ablack" href="gerenciando-estado-num-app-flutter-com-provider.html">
+Gerenciando estado num app Flutter com Provider
+</a></h3>
+<!-- bashblog_timestamp: #202202281527.22# -->
+<div class="subtitle">Fevereiro 28, 2022 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p><abbr title="muito grande; nem li">mg;nl</abbr>: Neste post vamos implementar o plugin <a href="https://pub.dev/packages/provider">Provider</a> num app em Flutter, para comunicar valores de estado através do aplicativo. Vamos também otimizar a estrutura de um app já existente e entender o uso de controllers no ambito do provider.</p>
+
+<p>Dando sequência ao que começamos <a href="https://guilhermegarcia.dev/blog/criando-um-app-com-flutter-e-sqlite.html">neste post</a>, vamos seguir desenvolvendo nosso app de acadêmia.</p>
+
+<p>No fim do post anterior, nosso app consistia em um seletor de linguagem e, ao trocarmos a linguagem, atualizavamos os valores da nossa listagem de exercícios.</p>
+
+<p>Neste post, vamos implementar o plugin <a href="https://pub.dev/packages/provider">Provider</a> para gerenciar o estado global do nosso app, assim como subdividir o código em uma estrura mais intuitiva, mostrando como podemos implementar o <code>Provider</code> para uma única, ou múltiplas, classes.</p>
+
+<p>O código finalizado desta postagem pode ser baixado <a href="https://github.com/guites/flutter-gym-app/tree/select_exercises">neste branch do repositório</a>.</p>
+
+<hr/>
+
+<h2>Overview do projeto</h2>
+
+<p>Nosso objetivo neste post é deixar o app da seguinte forma:</p>
+
+<p><a title="Clique para ver em formato de vídeo" href="./imgs/gerenciando-estado-num-app-flutter-com-provider/full_app_compress.mov"><img src="./imgs/gerenciando-estado-num-app-flutter-com-provider/full_app_compress.png" alt="Funcionamento do app com carrinho" title="" /></a></p>
+
+<p>Para isso, vamos seguir os seguintes passos:</p>
+
+<ol>
+<li>Separar o código em uma estrura de pages ( lógica de renderização ) e controllers ( lógica de estado do app ).</li>
+<li>Implementar o plugin Provider para acessar valores comuns em diferentes widgets e pages.</li>
+<li>Adicionar um sistema de "carrinho", onde o usuário pode selecionar diferentes exercícios de uma listagem.</li>
+</ol>
+
+<h2>Re estruturando o código - páginas</h2>
+
+<p>Nessa nova versão do app, teremos três páginas:</p>
+
+<ol>
+<li>HomePage: Permite ao usuário escolher a linguagem utilizada no app.</li>
+<li>ExercisesPage: Mostra a listagem dos exercícios ao usuário. Ao clicar em um exercício, adiciona-o a listagem do carrinho (que vamos chamar de GymTab)</li>
+<li>GymTabPage: Tem a funcionalidade de um carrinho. Mostra a listagem dos exercícios selecionados pelo usuário. Permite removê-los da listagem.</li>
+</ol>
+
+<p>Estas três páginas terão o mesmo nível hierárquico, ou seja, as três serão dependentes diretas do nosso Widget principal, <code>MyApp</code>.</p>
+
+<p>Vamos iniciar ajustando nosso arquivo <code>main.dart</code>.</p>
+
+<p>Utilizaremos o conceito de rotas para direcionar o usuário para diferentes páginas.</p>
+
+<pre><code>class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
+  // This widget is the root of your application.
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Workout app',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      initialRoute: '/',
+      routes: {
+        '/': (context) =&gt; const HomePage(title: 'Home'), // (1)
+        '/exercises': (context) =&gt; const ExercisesPage(title: 'Exercises'),
+        '/gym-tab': (context) =&gt; const GymTabPage(title: 'Gym Tab'),
+      },
+    );
+  }
+}
+</code></pre>
+
+<p>Em (1), definimos a rota '/' como nosso <code>HomePage</code> Widget. Optei por renomeá-lo (era MyHomePage).</p>
+
+<p>Criamos uma rota para cada página mencionada acima. Definimos como página inicial ( nossa <code>initialRoute</code> ), a rota equivalente à <code>HomePage</code>.</p>
+
+<p>Depois, vamos criar um novo diretório, <code>pages</code>, onde será colocado todo código referente a renderização das páginas.</p>
+
+<h3>Criando o arquivo para <code>HomePage</code></h3>
+
+<p>Vamos pegar nosso <code>HomePage</code> Widget (antigo <code>MyHomePage</code> caso você tenha acompanhado a parte 1 deste post), e movê-lo para um novo arquivo, <code>pages/home_page.dart</code>.</p>
+
+<pre><code>import 'package:flutter/material.dart';
+import 'package:workout_app/api/languages.dart';
+import 'package:workout_app/models/language.dart';
+
+class HomePage extends StatefulWidget {
+  const HomePage({Key? key, required this.title}) : super(key: key);
+
+  final String title;
+
+  @override
+  State&lt;HomePage&gt; createState() =&gt; _HomePageState();
+}
+
+class _HomePageState extends State&lt;HomePage&gt; {
+
+  int _selectedLanguage = 2;
+
+  List&lt;DropdownMenuItem&lt;int&gt;&gt; createDropdownItems(snapshot) {
+    List&lt;DropdownMenuItem&lt;int&gt;&gt; items = [];
+    snapshot.data.forEach((Language item) {
+      items.add(DropdownMenuItem&lt;int&gt;(
+        child: Text(item.full_name),
+        value: item.id,
+      ));
+    });
+    return items;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: Text(widget.title),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: &lt;Widget&gt;[
+              Text(
+                'The gym',
+                style: Theme.of(context).textTheme.headline3,
+              ),
+              const Divider(),
+              const Text(
+                'Choose a language',
+              ),
+              FutureBuilder(
+                future: languages(),
+                builder:
+                    (BuildContext context, AsyncSnapshot&lt;dynamic&gt; snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    return DropdownButton(
+                      value: _selectedLanguage,
+                      onChanged: (int? newValue) {
+                        setState(() {
+                          _selectedLanguage = newValue!;
+                        });
+                      },
+                      items: createDropdownItems(snapshot),
+                    );
+                  }
+                  return const Text('Ocorreu um erro!');
+                },
+              ),
+              TextButton(onPressed: () { // (1)
+                Navigator.pushNamed(context, '/exercises');
+              }, child: const Text('Go to Exercises Page'))
+            ],
+          ),
+        ),
+      );
+  }
+}
+</code></pre>
+
+<p>Repare que diminuímos o código da página. A <code>HomePage</code> será responsável apenas por definir a linguagem do aplicativo. Por isso, mantemos apenas um dos nossos <code>FutureBuilder</code>.</p>
+
+<p>Em (1), adicionamos um botão que nos redireciona para a página dos exercícios. Lá será renderizada a listagem que tinhamos antes na nossa Home.</p>
+
+<p>Repare que clicar neste botão nos gera um erro, pois ainda não criamos o arquivo para a rota <code>/exercises</code>.</p>
+
+<p>Lembre-se de adicionar o import no seu <code>main.dart</code>:</p>
+
+<pre><code>import 'package:flutter/material.dart';
+import 'package:workout_app/pages/home_page.dart'; // ADICIONAR
+
+void main() {
+  runApp(const MyApp());
+}
+</code></pre>
+
+<h3>Criando o arquivo para <code>ExercisesPage</code></h3>
+
+<p>Vamos criar um novo arquivo, <code>pages/exercises_page.dart</code>, onde será colocado o código responsável pela listagem dos exercícios na linguagem escolhida.</p>
+
+<pre><code>import 'package:flutter/material.dart';
+import 'package:workout_app/api/exercises.dart';
+
+class ExercisesPage extends StatefulWidget {
+  const ExercisesPage({Key? key, required this.title}) : super(key: key);
+
+  final String title;
+
+  @override
+  _ExercisesPageState createState() =&gt; _ExercisesPageState();
+}
+
+class _ExercisesPageState extends State&lt;ExercisesPage&gt; {
+  int _selectedLanguage = 2; // (1)
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: Text(widget.title),
+          actions: [
+            IconButton(
+              onPressed: () =&gt; Navigator.pushNamed(context, '/gym-tab'), // (2)
+              icon: const Icon(Icons.list_alt_rounded),
+            ),
+          ],
+        ),
+        body: Column(
+          children: [
+            FutureBuilder(
+              future: exercises(_selectedLanguage),
+              builder: (BuildContext context, AsyncSnapshot&lt;dynamic&gt; snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                if (snapshot.connectionState == ConnectionState.done) {
+                  return Expanded(
+                    child: ListView.builder(
+                        itemCount: snapshot.data.length,
+                        itemBuilder: (context, index) {
+                          return ListTile(
+                            title: Text(snapshot.data[index].name),
+                          );
+                        }),
+                  );
+                }
+                return const Text('Ocorreu um erro!');
+              },
+            ),
+          ],
+        ));
+  }
+}
+</code></pre>
+
+<p>Nesta página, adicionamos o restante do código que estava anteriormente no nosso <code>main.dart</code>.</p>
+
+<p>Quando o usuário acessá-la, rodamos nossa requisição ao banco de dados, e, através do <code>FutureBuilder</code>, renderizamos os resultados.</p>
+
+<p>Repare que em (1), o valor da linguagem está hard coded, ou seja, independente do valor escolhido na <code>HomePage</code>, vamos renderizar sempre os exercícios com o <code>language_id</code> 2, em inglês. Vamos resolver este problema mais adiante, utilizando o <code>Provider</code>.</p>
+
+<p>Em (2), adicionamos um botão em nossa <code>AppBar</code>, que direciona o usuário para a página com os exercícios selecionados (nossa <code>GymTab</code>). Vamos agora criar este arquivo.</p>
+
+<p>Lembre-se de adicionar o import em <code>main.dart</code>:</p>
+
+<pre><code>import 'package:flutter/material.dart';
+import 'package:workout_app/pages/exercises_page.dart'; // ADICIONAR
+import 'package:workout_app/pages/home_page.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+</code></pre>
+
+<p>Vamos agora criar nosso arquivo para a listagem dos exercícios selecionados.</p>
+
+<h3>Criando o arquivo para <code>GymTabPage</code></h3>
+
+<p>Este arquivo por enquanto vai mostrar uma mensagem estática. Na próxima sessão, vamos ver como passar os dados dos exercícios selecionados para listá-los aqui.</p>
+
+<p>Crie o arquivo em <code>pages/gym_tab_page.dart</code></p>
+
+<pre><code>import 'package:flutter/material.dart';
+
+class GymTabPage extends StatelessWidget {
+  final String title;
+
+  const GymTabPage({Key? key, required this.title}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
+      ),
+      body: Column(
+        children: const [
+          Expanded(
+            child: Center(
+              child: Text('You haven\'t picked any exercises yet!'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+</code></pre>
+
+<p>E adicione o import em <code>main.dart</code></p>
+
+<pre><code>import 'package:flutter/material.dart';
+import 'package:workout_app/pages/exercises_page.dart';
+import 'package:workout_app/pages/gym_tab_page.dart'; // ADICIONAR
+import 'package:workout_app/pages/home_page.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+</code></pre>
+
+<p>Com a estrutura das páginas prontas, vamos criar nossos <code>controllers</code>, que serão utilizados para guardar os valores de estado do aplicativo, como a linguagem escolhida e os exercícios selecionados.</p>
+
+<h2>Re estruturando o código - controllers</h2>
+
+<p>Como reparamos na seção anterior, nossa <code>HomePage</code> e nossa <code>ExercisesPage</code> ambas possuem uma variável <code>_selectedLanguage</code>, que é isolada uma da outra.</p>
+
+<p>Precisamos também de uma forma de comunicar os exercícios selecionados pelo usuário em <code>ExercisesPage</code>, para mostrá-los em <code>GymTabPage</code>.</p>
+
+<h3>Criando o <code>LanguageController</code></h3>
+
+<p>Para mantermos uma congruência entre a linguagem escolhida, vamos criar uma classe especializada, <code>LanguageController</code>.</p>
+
+<p>Seu único objetivo será informar e guardar o valor da linguagem escolhida pelo usuário.</p>
+
+<p>Crie um diretório, <code>controller</code>, e dentro dele, o arquivo <code>language_controller</code>.</p>
+
+<pre><code>import 'package:flutter/material.dart';
+
+class LanguageController extends ChangeNotifier { // (1)
+  /// Variável privada, só pode ser acessada internamente por esta classe
+  int _languageId = 2; // defaults to english
+
+  /// Método getter, permite acesso a linguagem atual pelas views
+  int get currentLanguage =&gt; _languageId;
+
+  /// Método setter utilizado para atualizar o valor da linguagem atual
+  int setLanguage(int langId) {
+    _languageId = langId;
+    notifyListeners(); // (2)
+    return _languageId;
+  }
+
+}
+</code></pre>
+
+<p>Repare que nossa classe extende a classe <code>ChangeNotifier</code> (1). Isso vai nos permiter integrá-la com o plugin <code>Provider</code>.</p>
+
+<p>Em (2), ao utilizarmos o método <code>setLanguage</code>, atualizamos o valor da variável privada <code>_languageId</code> e chamamos a função <code>notifyListeners()</code>. Esta função vai avisar todos os widgets dependentes do nosso <code>LanguageController</code> para renderizar seu componentes novamente.</p>
+
+<p>Agora vamos criar o controller para os exercícios, e depois vamos conectá-los utilizando o <code>Provider</code>.</p>
+
+<h3>Criando o <code>GymTabController</code></h3>
+
+<p>O objetivo desta classe é manter uma listagem de exercícios. Quando o usuário selecionar um na listagem (ExercisesPage), ele deve ser adicionado, e quando o usuário removê-lo (GymTabPage), ele deve ser subtraído da lista.</p>
+
+<p>Esta classe também vai extender <code>ChangeNotifier</code>, pois vai ser utilizada em diferentes páginas do nosso app.</p>
+
+<p>Crie, em <code>controller</code>, o arquivo <code>gym_tab_controller.dart</code>.</p>
+
+<pre><code>import 'dart:collection';
+
+import 'package:flutter/material.dart';
+import 'package:workout_app/models/exercise.dart';
+
+class GymTabController extends ChangeNotifier {
+  /// Internal, private state of the cart.
+  final List&lt;Exercise&gt; _exercises = []; // (1)
+
+  /// An unmodifiable view of the items in the cart.
+  UnmodifiableListView&lt;Exercise&gt; get exercises =&gt; UnmodifiableListView(_exercises); // (2)
+
+  /// The current quantity of exercises
+  int get exerciseCount =&gt; _exercises.length;
+
+  /// Adds [exercise] to cart. This and [removeAll] are the only ways to modify the
+  /// cart from the outside.
+  void add(Exercise exercise) {
+    _exercises.add(exercise);
+    // This call tells the widgets that are listening to this model to rebuild.
+    notifyListeners();
+  }
+
+  void remove(Exercise exercise) {
+    _exercises.remove(exercise);
+    notifyListeners();
+  }
+
+  /// Removes all items from the cart.
+  void removeAll() {
+    _exercises.clear();
+    // This call tells the widgets that are listening to this model to rebuild.
+    notifyListeners();
+  }
+}
+</code></pre>
+
+<p>Em (1), criamos uma listagem, como uma variável interna à classe, para manter os exercícios selecionados pelo usuário.</p>
+
+<p>Em (2), criamos um <code>Getter</code>, para acessar a lista de exercícios fora da classe.</p>
+
+<p>Os outros métodos lidam com a adição e remoção dos itens (todos eles <Exercise>) da listagem.</p>
+
+<h2>Implementando o plugin Provider</h2>
+
+<p>Para que possamos "compartilhar" valores entre diversos Widgets no nosso app, precisamos de algum plugin para gestão de estado.</p>
+
+<p>Optei pelo Provider pois é o indicado nos tutoriais do flutter. Outra opção seria, por exemplo, a biblioteca <a href="https://bloclibrary.dev/#/">bloc</a>. </p>
+
+<p>Para utilizar o Provider, vamos adicionar a seguinte linha no nosso <code>pubspec.yaml</code>:</p>
+
+<pre><code>dependencies:
+  flutter:
+    sdk: flutter
+  sqflite:
+  path:
+  built_value: ^8.1.4
+  built_collection: ^5.1.1
+  provider: ^6.0.2 # ADICIONAR
+</code></pre>
+
+<p>Depois, rode um <code>flutter pub get</code> na raíz do projeto.</p>
+
+<p>Até então, a estrutura do nosso projeto é a seguinte:</p>
+
+<p><img src="./imgs/gerenciando-estado-num-app-flutter-com-provider/myapp.svg" alt="Estrutura do app sem provider" title="" /></p>
+
+<h3>Consumindo valores do <code>LanguageController</code></h3>
+
+<p>Vamos adicionar um Widget provider, de forma a comunicar os valores da nossa <code>LanguageController</code> entre <code>ExercisesPage</code>, <code>HomePage</code> e <code>MyApp</code>.</p>
+
+<p><img src="./imgs/gerenciando-estado-num-app-flutter-com-provider/lang_controller.svg" alt="Estrutura do app com provider" title="" /></p>
+
+<p>Repare que temos uma seta unidirecional entre <code>MyApp</code> e <code>ExercisesPage</code>, ou seja, apenas consumimos o valor de <code>_languageId</code> na nossa listagem de exercícios, enquanto a seta é bidirecional entre <code>HomePage</code> e <code>MyApp</code>, ou seja, este é o Widget no qual podemos alterar o seu valor.</p>
+
+<p>Começamos colocando nosso Widget <code>MaterialApp</code> dentro de um <code>Provider</code>, no método <code>build</code> em <code>main.dart</code>.</p>
+
+<pre><code>class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
+  // This widget is the root of your application.
+  @override
+  Widget build(BuildContext context) { // ADICIONAR PROVIDER ABAIXO
+    return Provider(
+      create: (_) =&gt; LanguageController(),
+      child: MaterialApp(
+        title: 'Workout app',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        initialRoute: '/',
+        routes: {
+          '/': (context) =&gt; const HomePage(title: 'Home'), // (1)
+          '/exercises': (context) =&gt; const ExercisesPage(title: 'Exercises'),
+          '/gym-tab': (context) =&gt; const GymTabPage(title: 'Gym Tab'),
+        },
+      ),
+    );
+  }
+}
+</code></pre>
+
+<p>Agora, vamos adicionar um Widget <code>Consumer</code> em <code>pages/home_page.dart</code>, para termos acesso à classe da qual a página depende.</p>
+
+<pre><code> @override
+  Widget build(BuildContext context) {
+    return Consumer&lt;LanguageController&gt;( // ADICIONAR
+      builder: (context, languageController, child) =&gt; Scaffold( // ALTERAR
+          appBar: AppBar(
+            title: Text(widget.title),
+          ),
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: &lt;Widget&gt;[
+              ...
+              ..
+              .
+</code></pre>
+
+<p>Podemos acessar o <code>LanguageController</code> dentro do nosso método build.</p>
+
+<p>Não precisamos mais da variável interna <code>_selectedLanguage</code>:</p>
+
+<pre><code>class _HomePageState extends State&lt;HomePage&gt; {
+
+  int _selectedLanguage = 2; // REMOVER
+</code></pre>
+
+<p>Vamos alterar a função de callback ao alterar a linguagem no dropdown.</p>
+
+<pre><code>            FutureBuilder(
+              future: languages(),
+              builder:
+                  (BuildContext context, AsyncSnapshot&lt;dynamic&gt; snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                if (snapshot.connectionState == ConnectionState.done) {
+                  return DropdownButton(
+                    value: languageController.currentLanguage, // ALTERAR
+                    onChanged: (int? newValue) {
+                      setState(() {
+                        languageController.setLanguage(newValue!); // ALTERAR
+                      });
+                    },
+                    items: createDropdownItems(snapshot),
+                  );
+                }
+                return const Text('Ocorreu um erro!');
+              },
+</code></pre>
+
+<p>Agora, os valores são passados via <code>Provider</code>, e atualizam o valor da classe através do método <code>setLanguage</code>.</p>
+
+<p>Nosso próximo passo é utilizar esse valor na nossa <code>ExercisesPage</code>.</p>
+
+<p>Como nosso Widget <code>ExercisesPage</code> está "abaixo" do <code>Provider&lt;LanguageController&gt;</code> ( confira o arquivo <code>main.dart</code> ), e nós precisamos de apenas um valor da classe, ( _languageId ), podemos utilizar a função <code>context.select</code>.</p>
+
+<p>Esta função faz com que nosso Widget seja recriado apenas quando esta propriedade específica seja alterada.</p>
+
+<p>Em <code>pages/exercises_page.dart</code>, altere as seguintes linhas:</p>
+
+<pre><code>class _ExercisesPageState extends State&lt;ExercisesPage&gt; {
+  int _selectedLanguage = 2; // DELETAR
+
+  @override
+  Widget build(BuildContext context) {
+    final int appCurrentLanguage = context.select&lt;LanguageController, int&gt;( // ADICIONAR
+      // Estamos apenas interessados no valor atual de [currentLanguage]
+        (languageController) =&gt; languageController.currentLanguage,
+    );
+    return Scaffold(
+        appBar: AppBar(
+          title: Text(widget.title),
+          actions: [
+            IconButton(
+              onPressed: () =&gt; Navigator.pushNamed(context, '/gym-tab'),
+              icon: const Icon(Icons.list_alt_rounded),
+            ),
+          ],
+        ),
+        body: Column(
+          children: [
+            FutureBuilder(
+              future: exercises(appCurrentLanguage), // ALTERAR
+              builder: (BuildContext context, AsyncSnapshot&lt;dynamic&gt; snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                ...
+                ..
+                .
+</code></pre>
+
+<p>Agora, o id da linguagem passado no nosso <code>FutureBuilder</code> será sempre o valor atual do nosso <code>LanguageController</code>.</p>
+
+<p>Você pode verificar o funcionamento fazendo um hot restart do seu app.</p>
+
+<p><a title="Clique para ver em formato de vídeo" href="./imgs/gerenciando-estado-num-app-flutter-com-provider/language_change_compress.mov"><img src="./imgs/gerenciando-estado-num-app-flutter-com-provider/language_change.png" alt="Alterando linguagem no app" title="" /></a></p>
+
+<h3>Selecionando exercícios e consumindo o <code>GymTabController</code></h3>
+
+<p>Agora que nosso seletor de linguagem funciona corretamente, podemos passar para o uso do "carrinho", ou seja, selecionar exercícios em <code>ExercisesPage</code> e visualizá-los em <code>GymTabPage</code>.</p>
+
+<p>Para isso, precisamos alterar a forma como utilizamos o <code>Provider</code> em nosso <code>main.dart</code>.</p>
+
+<p>Vamos alterá-lo para um <code>MultiProvider</code>, e passaremos os controllers como uma listagem.</p>
+
+<p>Em <code>main.dart</code>:</p>
+
+<pre><code>class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
+  // This widget is the root of your application.
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+      // ALTERAR
+      providers: [
+        // ADICIONAR
+        ChangeNotifierProvider(
+          create: (context) =&gt; GymTabController(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) =&gt; LanguageController(),
+        ),
+      ],
+      child: MaterialApp(
+        title: 'Workout app',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        initialRoute: '/',
+        routes: {
+          '/': (context) =&gt; const HomePage(title: 'Home'), // (1)
+          '/exercises': (context) =&gt; const ExercisesPage(title: 'Exercises'),
+          '/gym-tab': (context) =&gt; const GymTabPage(title: 'Gym Tab'),
+        },
+      ),
+    );
+  }
+}
+</code></pre>
+
+<p>Desta forma, podemos escalar nosso App para o uso de quantos Providers for necessário.</p>
+
+<p>Agora, em <code>ExercisesPage</code>, vamos adicionar, para cada item da listagem, um botão que chama o método <code>add</code> do nosso <code>GymTabController</code>.</p>
+
+<p>Adicione o seguinte código no final da página, após o fechamento da <code>class _ExercisesPageState</code>:</p>
+
+<pre><code>class _AddButton extends StatelessWidget {
+  final Exercise exercise;
+
+  const _AddButton({required this.exercise, Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    // The context.select() method will let you listen to changes to
+    // a *part* of a model. You define a function that "selects" (i.e. returns)
+    // the part you're interested in, and the provider package will not rebuild
+    // this widget unless that particular part of the model changes.
+    //
+    // This can lead to significant performance improvements.
+    final bool isInGymTab = context.select&lt;GymTabController, bool&gt;(
+      // Here, we are only interested whether [exercise] is inside the gym tab.
+      (gymTab) =&gt; gymTab.exercises.contains(exercise),
+    );
+
+    return TextButton(
+      onPressed: isInGymTab
+          ? null
+          : () {
+              // If the item is not in cart, we let the user add it.
+              // We are using context.read() here because the callback
+              // is executed whenever the user taps the button. In other
+              // words, it is executed outside the build method.
+              var gymTab = context.read&lt;GymTabController&gt;();
+              gymTab.add(exercise);
+            },
+      style: ButtonStyle(
+        overlayColor: MaterialStateProperty.resolveWith&lt;Color?&gt;((states) {
+          if (states.contains(MaterialState.pressed)) {
+            return Theme.of(context).primaryColor;
+          }
+          return null; // Defer to the widget's default.
+        }),
+      ),
+      child: isInGymTab
+          ? const Icon(Icons.check, semanticLabel: 'ADDED')
+          : const Text('ADD'),
+    );
+  }
+}
+</code></pre>
+
+<p>Utilizamos aqui a mesma função, <code>context.select</code>, para acessarmos apenas uma propriedade de <code>GymTabController</code>, a lista <code>exercises</code>.</p>
+
+<p>Vamos adicionar um Widget <code>_addButton</code> para cada <code>ListTile</code>.</p>
+
+<pre><code>  child: ListView.builder(
+      itemCount: snapshot.data.length,
+      itemBuilder: (context, index) {
+        return ListTile(
+          title: Text(snapshot.data[index].name),
+          trailing: _AddButton(exercise: snapshot.data[index]), // ADICIONAR
+        );
+      }),
+</code></pre>
+
+<p>Passamos como parametro o valor retornado pelo <code>FutureBuilder</code>, no index atual da geração do nosso <code>ListView.builder</code>.</p>
+
+<p>Neste ponto, nossos exercícios já estão sendo adicionados à listagem do controller, mas ainda não criamos o método para sua visualização em <code>GymTabPage</code>.</p>
+
+<p>Vamos voltar para <code>GymTabPage</code> e adicionar um noso Widget, que cuide da renderização da listagem.</p>
+
+<p>Adicione, em <code>pages/gym_tab_page.dart</code>, após o fechamento da classe <code>class GymTabPage</code>.</p>
+
+<pre><code>class _TabList extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    // This gets the current state of GymTabController and also tells Flutter
+    // to rebuild this widget when GymTabController notifies listeners (in other words,
+    // when it changes).
+    final GymTabController gymTab = context.watch&lt;GymTabController&gt;(); // (1)
+
+    return gymTab.exerciseCount &gt; 0
+        ? ListView.builder(
+        itemCount: gymTab.exerciseCount,
+        itemBuilder: (context, index) =&gt; ListTile(
+            leading: const Icon(Icons.done),
+            trailing: IconButton(
+              icon: const Icon(Icons.remove_circle_outline),
+              onPressed: () =&gt; gymTab.remove(gymTab.exercises[index]), // (2)
+            ),
+            title: Text(gymTab.exercises[index].name)))
+        : const Center(child: Text('You haven\'t picked any exercises yet!'));
+  }
+}
+</code></pre>
+
+<p>Em (1), utilizamos o <code>context.watch</code> para forçar este Widget a ser reconstruído sempre que os valores do <code>GymTabController</code> forem alterados.</p>
+
+<p>Em (2), utilizamos o método <code>GymTabController.remove</code>, que definimos anteriormente, para remover os exercícios da listagem.</p>
+
+<p>Agora temos a funcionalidade de carrinho finalizada!</p>
+
+<h2>Considerações finais</h2>
+
+<p>Neste post vimos algumas formas diferentes de utilizar o plugin <code>Provider</code> para gestão de estado em aplicativos Flutter. </p>
+
+<p>Verificamos que existem diferentes funções que permitem acessar os dados de uma classe de forma parcial, recriando nosso Widgets apenas quando valores específicos são alterados, diminuindo o trabalho realizado pelo app.</p>
+
+<p>Implementamos, através do <code>GymTabController</code>, a lógica de adição de itens ao carrinho, muito recorrente na criação de apps, independente do seu objetivo.</p>
+
+<p>Abraço!</p>
+
+<p>Fontes:</p>
+
+<ul>
+<li><a href="https://pub.dev/packages/provider">https://pub.dev/packages/provider</a></li>
+<li><a href="https://docs.flutter.dev/development/data-and-backend/state-mgmt/simple">https://docs.flutter.dev/development/data-and-backend/state-mgmt/simple</a></li>
+<li><a href="https://docs.flutter.dev/development/data-and-backend/state-mgmt/ephemeral-vs-app">https://docs.flutter.dev/development/data-and-backend/state-mgmt/ephemeral-vs-app</a></li>
+</ul>
+
+<p>Tags: <a href='tag_flutter.html'>flutter</a></p>
+<!-- text end -->
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/gerenciando-estado-num-app-flutter-com-provider.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/gerenciando-estado-num-app-flutter-com-provider.html'><span id='count-13735'></span></a>&nbsp;</p>
+<!-- entry end -->
+</div>
+<div id="footer">CC by-nc-nd <a href="https://twitter.com/gui_garcia67">Guilherme Garcia</a> &mdash; <a href="mailto:gui&#46;garcia67&#64;gmail&#46;com">gui&#46;garcia67&#64;gmail&#46;com</a><br/>
+Generated with <a href="https://github.com/cfenollosa/bashblog">bashblog</a>, a single bash script to easily create blogs like this one</div>
+</div></div>
+</body></html>

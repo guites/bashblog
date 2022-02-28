@@ -1,8 +1,9 @@
 https://guilhermegarcia.dev/blog/todas_tags.html
 https://guilhermegarcia.dev/blog/todos_posts.html
 https://guilhermegarcia.dev/blog/index.html
-https://guilhermegarcia.dev/blog/tag_api.html
 https://guilhermegarcia.dev/blog/tag_flutter.html
+https://guilhermegarcia.dev/blog/gerenciando-estado-num-app-flutter-com-provider.html
+https://guilhermegarcia.dev/blog/tag_api.html
 https://guilhermegarcia.dev/blog/criando-um-app-com-flutter-e-sqlite.html
 https://guilhermegarcia.dev/blog/tag_vscode.html
 https://guilhermegarcia.dev/blog/tag_php.html
