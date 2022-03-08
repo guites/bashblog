@@ -2,9 +2,36 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
 <channel><title>Blog do guilherme</title><link>https://guilhermegarcia.dev/blog/index.html</link>
 <description>programação e outras coisas menos úteis</description><language>en</language>
-<lastBuildDate>Mon, 28 Feb 2022 15:27:26 -0300</lastBuildDate>
-<pubDate>Mon, 28 Feb 2022 15:27:26 -0300</pubDate>
+<lastBuildDate>Tue, 08 Mar 2022 00:44:36 -0300</lastBuildDate>
+<pubDate>Tue, 08 Mar 2022 00:44:36 -0300</pubDate>
 <atom:link href="https://guilhermegarcia.dev/blog/feed.rss" rel="self" type="application/rss+xml" />
+<item><title>
+OAuth2 pela linha de comando em Dart
+</title><description><![CDATA[
+
+<p><abbr title="muito grande; nem li">mg;nl</abbr>: vamos criar um app que autentica o usuário no GitHub via OAuth2 pela linha de comando, utilizando Dart.</p>
+
+<p>Se você já utilizou aplicações como o heroku-cli, já experienciou o processo de autenticação OAuth2 pela linha de comando.</p>
+
+<p>Você inicia o processo com um comando, por exemplo</p>
+
+<pre><code>    heroku login
+</code></pre>
+
+<p>E é direcionado para uma página da web onde você confirma as permissões necessárias para o aplicativo, digitando um login e senha.</p>
+
+<p>Depois, a página mostra uma mensagem de que tudo ocorreu bem, e que você pode voltar para a linha de comando.</p>
+
+<p>Neste post vamos ver como esse processo pode ser realizado utilizando Dart, criando um aplicativo que lista os repositórios da sua conta no GitHub.</p>
+
+<hr/>
+<p>Tags: <a href='tag_dart.html'>dart</a>, <a href='tag_github.html'>github</a>, <a href='tag_oauth2.html'>oauth2</a>, <a href='tag_api.html'>api</a></p>
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/oauth2-pela-linha-de-comando-em-dart.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/oauth2-pela-linha-de-comando-em-dart.html'><span id='count-7667'></span></a>&nbsp;</p>
+]]></description><link>https://guilhermegarcia.dev/blog/oauth2-pela-linha-de-comando-em-dart.html</link>
+<guid>https://guilhermegarcia.dev/blog/./oauth2-pela-linha-de-comando-em-dart.html</guid>
+<dc:creator>Guilherme Garcia</dc:creator>
+<pubDate>Tue, 08 Mar 2022 00:44:01 -0300</pubDate></item>
 <item><title>
 Gerenciando estado num app Flutter com Provider
 </title><description><![CDATA[

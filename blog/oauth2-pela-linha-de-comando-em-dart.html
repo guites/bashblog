@@ -1,0 +1,645 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="main.css" type="text/css" />
+<link rel="stylesheet" href="blog.css" type="text/css" />
+<link rel="stylesheet" href="code.css" type="text/css" />
+<link rel="alternate" type="application/rss+xml" title="Inscrever-se nesta página..." href="feed.rss" />
+<title>OAuth2 pela linha de comando em Dart</title>
+<meta name='twitter:card' content='summary' />
+<meta name='twitter:site' content='@gui_garcia67' />
+<meta name='twitter:title' content='OAuth2 pela linha de comando em Dart' />
+<meta name='twitter:description' content=" mg;nl: vamos criar um app que autentica o usuário no GitHub via OAuth2 pela linha de comando, utilizando Dart.  Se você já utilizou aplicações como o heroku-cli, já experienciou o processo de autenticação OAuth2 pela linha de comando.  Você" />
+</head><body>
+<div id="divbodyholder">
+<div class="headerholder"><div class="header">
+<div id="title">
+<h1 class="nomargin"><a class="ablack" href="https://guilhermegarcia.dev/blog/index.html">Blog do guilherme</a></h1>
+<div id="description">programação e outras coisas menos úteis</div>
+</div></div></div>
+<div id="divbody"><div class="content">
+<!-- entry begin -->
+<h3><a class="ablack" href="oauth2-pela-linha-de-comando-em-dart.html">
+OAuth2 pela linha de comando em Dart
+</a></h3>
+<!-- bashblog_timestamp: #202203080044.01# -->
+<div class="subtitle">março 08, 2022 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p><abbr title="muito grande; nem li">mg;nl</abbr>: vamos criar um app que autentica o usuário no GitHub via OAuth2 pela linha de comando, utilizando Dart.</p>
+
+<p>Se você já utilizou aplicações como o heroku-cli, já experienciou o processo de autenticação OAuth2 pela linha de comando.</p>
+
+<p>Você inicia o processo com um comando, por exemplo</p>
+
+<pre><code>    heroku login
+</code></pre>
+
+<p>E é direcionado para uma página da web onde você confirma as permissões necessárias para o aplicativo, digitando um login e senha.</p>
+
+<p>Depois, a página mostra uma mensagem de que tudo ocorreu bem, e que você pode voltar para a linha de comando.</p>
+
+<p>Neste post vamos ver como esse processo pode ser realizado utilizando Dart, criando um aplicativo que lista os repositórios da sua conta no GitHub.</p>
+
+<hr/>
+
+<h2>Overview do projeto</h2>
+
+<p>Você pode acessar o código completo do projeto <a href="https://github.com/guites/dart-github-app">aqui</a></p>
+
+<p>O fluxo do nosso aplicativo vai ser o seguinte:</p>
+
+<ol>
+<li><p>Usuário roda o comando necessário, <code>dart oauth_server</code>.</p></li>
+<li><p>Nosso app abre uma página na web para realização de login e confirmar autorizações (esta url vai ser gerada no momento em que criarmos o app no github).</p></li>
+<li><p>Usuário é direcionado para uma URL de callback. Para recebermos esse redirecionamento, vamos criar um servidor em dart que consegue servir uma página na URL definida.</p></li>
+<li><p>Utilizamos os dados recebidos com o redirecionamento para realizar uma requisição POST na API do GitHub, recebendo em troca um <em>access Token</em>.</p></li>
+<li><p>Com o <em>access Token</em> em mãos, vamos acessar os repositórios do usuário, desenvolvendo a lógica do nosso app.</p></li>
+</ol>
+
+<p>Para isso, o primeiro passo é a criação do aplicativo OAuth 2 no Github.</p>
+
+<p>( se você não conhece a linguagem dart, uma boa introdução é o <a href="https://dart.dev/">site oficial</a>)</p>
+
+<h2>Criando o APP no Github</h2>
+
+<p>Você vai precisar de uma conta no GitHub.</p>
+
+<p>Acesse <a href="https://github.com/settings/applications/new">este link</a> e coloque as informações necessárias para cadastro do app.</p>
+
+<p>O nome e a descrição são livres, mas preste atenção nos campos <em>Homepage URL</em> e <em>Authorization callback URL</em>, pois eles serão utilizados no recebimento dos dados de autenticação do usuário.</p>
+
+<p><img src="./imgs/oauth2-pela-linha-de-comando-em-dart/oauth_app_creation.png" alt="Tela de criação do aplicativo no GitHub" title="Tela de criação do aplicativo no GitHub" /></p>
+
+<p>Optei por <em>localhost:4041</em>, mas qualquer porta em localhost pode ser utilizada, como veremos adiante.</p>
+
+<p>Ao clicar em <em>register application</em>, você será direcionado para uma tela com seu <em>Client ID</em> e uma opção para gerar seu <em>Client Secret</em>.</p>
+
+<p>Gere o seu segredo e salve os dois valores.</p>
+
+<p><img src="./imgs/oauth2-pela-linha-de-comando-em-dart/oauth_tokens.jpg" alt="Tokens gerados para o app GitHub" title="Tokens gerados para o app GitHub" /></p>
+
+<p><strong>Importante</strong>: Não compartilhe seus tokens, e cuide para não adicioná-los ao seu repositório. Com esses dados, outras aplicações podem se passar pela sua, e ter acesso aos dados dos seus usuário.</p>
+
+<h2>Iniciando o projeto e abrindo o navegador para autenticação</h2>
+
+<p>O processo de autenticação na API do GitHub (e em APIs utilizando OAuth2 em geral) começa direcionando o usuário a uma URL, própria da sua aplicação.</p>
+
+<p>No GitHub, a URL para início da autenticação é no formato</p>
+
+<pre><code>    https://github.com/login/oauth/authorize?scope={escopo}&amp;client_id={seu_client_id}
+</code></pre>
+
+<p>O parâmetro <code>scope</code> define quais permissões de acesso nossa aplicação vai receber do usuário.</p>
+
+<p>Você pode ver uma listagem completa dos escopos existentes <a href="https://docs.github.com/en/developers/apps/building-oauth-apps/scopes-for-oauth-apps#available-scopes">aqui</a>.</p>
+
+<p>No nosso app, vamos utilizar apenas uma, <code>repo</code>. Ou seja, queremos acessar as informações de repositórios públicos e privados do nosso usuário.</p>
+
+<p>O parâmetro <code>client_id</code> é o ID único da sua aplicação, gerado na etapa anterior.</p>
+
+<p>Precisamos de uma forma de direcionar nosso usuário para esta URL.</p>
+
+<p>Vamos começar criando um arquivo na raíz do nosso projeto, <code>oauth_server.dart</code>. Este será o ponto de partida da nossa aplicação.</p>
+
+<pre><code>    String clientId = 'seu-client-id'; // (1)
+    String sentScopes = 'repo';
+    String authorizationUrl =
+        'https://github.com/login/oauth/authorize?scope=$sentScopes&amp;client_id=$clientId';
+    void main() {
+      BrowserHandler.launchBrowser(authorizationUrl); // (2)
+    }
+</code></pre>
+
+<p>Nossa função <code>main</code> vai definir o fluxo de eventos.</p>
+
+<p>Em (1), vamos preencher o valor do nosso <code>client_id</code>.</p>
+
+<p>A variável <code>sentScopes</code> vai guardar os escopos que estamos enviando na URL.</p>
+
+<p>Em seguida, em (2), vamos utilizar um método <code>launchBrowser</code> para abrir o navegador no computador do usuário na URL que criamos acima.</p>
+
+<p>Precisamos criar esta classe, <code>BrowserHandler</code>, e também o método.</p>
+
+<p>Crie um novo diretório, <code>helpers</code>, e, dentro dele, um arquivo <code>browser_handler.dart</code>.</p>
+
+<pre><code>        // source https://stackoverflow.com/a/33033633/18081350
+        import "dart:io";
+
+        class BrowserHandler {
+
+          static final String _userPlatform = Platform.operatingSystem; // (1)
+
+          static void launchBrowser(String url) { // (2)
+            bool fail = false;
+            switch (_userPlatform) { // (3)
+              case "linux":
+                Process.run("xdg-open", [url]);
+                break;
+              case "macos":
+                Process.run("open", [url]);
+                break;
+              case "windows":
+                Process.run("explorer", [url]);
+                break;
+              default:
+                fail = true;
+                break;
+            }
+
+            if (!fail) {
+              print("Acessando $url através do navegador...");
+            } else {
+              print("Por favor, acesse a URL abaixo pelo seu navegador: ");
+              print(url);
+            }
+          }
+
+        }
+</code></pre>
+
+<p>Esta classe utiliza o pacote <code>dart:io</code> para verificar o sistema operacional do usuário, em (1).</p>
+
+<p>Depois, em (2), criamos um método estático que utiliza um <code>switch-case</code> (3), e, dependendo do sistema, roda o processo equivalente para abertura do navegador usando <code>Process.run</code>.</p>
+
+<p>Com nossa classe criada, vamos importá-la em <code>main.dart</code>.</p>
+
+<pre><code>    import 'helpers/browser_handler.dart';
+</code></pre>
+
+<p>Agora, podemos testar nosso app rodando pela linha de comando, na raíz do projeto:</p>
+
+<pre><code>    dart oauth_server.dart
+</code></pre>
+
+<p>Seu navegador deve redirecioná-lo para uma tela como esta:</p>
+
+<p><img src="./imgs/oauth2-pela-linha-de-comando-em-dart/authorize_screen.jpg" alt="Tela de autenticação" title="Tela de autorização" /></p>
+
+<p>Repare um output no seu terminal, na forma:</p>
+
+<pre><code>    Acessando https://github.com/login/oauth/authorize?scope=repo&amp;client_id=47222bc3922bc180da0e através do navegador...
+</code></pre>
+
+<p>Se você autorizar a aplicação, clicando no botão verde, será redirecionado para uma página com erro de conexão. Isto é porque ainda não criamos a página que receberá o código para acesso.</p>
+
+<p>Repare, na URL, a presença de um parâmetro <code>code</code>:</p>
+
+<pre><code>    http://localhost:4041/authorization-code?code=7e1e0c7b89ae6e2495a8
+</code></pre>
+
+<p>Se você <strong>não autorizar</strong> a aplicação, será direcionado para uma página com a seguinte URL:</p>
+
+<pre><code>    http://localhost:4041/authorization-code?error=access_denied&amp;error_description=The+user+has+denied+your+application+access.&amp;error_uri=https%3A%2F%2Fdocs.github.com%2Fapps%2Fmanaging-oauth-apps%2Ftroubleshooting-authorization-request-errors%2F%23access-denied
+</code></pre>
+
+<p>Neste caso, vamos utilizar o parâmetro <code>error=access_denied</code> para identificar que o usuário não nos concedeu a autorização.</p>
+
+<p>Nosso próximo passo será um servidor para receber esse redirecionamento e utilizar o <code>code</code>.</p>
+
+<h2>Criando um servidor para a URL de callback</h2>
+
+<p>Vamos criar em <code>helpers</code>, <code>server_handler.dart</code>, uma classe responsável por iniciar um servidor Http e gerar as respostas necessárias às requisições recebidas.</p>
+
+<pre><code>    import 'dart:io';
+    import 'package:http/http.dart';
+
+    class ServerHandler {
+      late HttpServer _server;
+      int _port = 4041;
+      Future&lt;HttpServer&gt; createServer() async {
+        final address = InternetAddress.loopbackIPv4;
+        _server = await HttpServer.bind(address, _port);
+        return _server;
+      }
+    }
+</code></pre>
+
+<p>Dessa forma, nossa classe consegue iniciar um servidor Http na porta definida por <code>_port</code>, mas precisamos definir uma resposta às requisições recebidas.</p>
+
+<p>Repare também na variável <code>_server</code>. Vamos usá-la para guardar uma referência ao servidor iniciado, para que possamos finalizá-lo quando necessário.</p>
+
+<p>Quando nossos usuários forem direcionados, a URL <code>http://localhost:4041</code> vai receber um <code>GET</code>. Vamos começar por ele.</p>
+
+<p>Adicione os seguintes métodos na classe <code>ServerHandler</code>.</p>
+
+<pre><code>      Future&lt;void&gt; handleRequests(HttpServer server) async {
+        await for (HttpRequest request in server) { // (1)
+          switch (request.method) {
+            case 'GET':
+              _handleGet(request);
+              break;
+          }
+        }
+      }
+
+      void _handleGet(HttpRequest request) async {
+        final Uri uri = request.uri;
+        final String path = uri.path; // (2)
+
+        switch (path) {
+          case '/authorization-code': // (3)
+            // adicionar lógica para extrair o código da URL
+            break;
+        }
+      }
+</code></pre>
+
+<p>Em (1), o método <code>handleRequests</code> coloca o servidor em modo de "espera": criamos uma conexão que aguarda qualquer requisição.</p>
+
+<p>Com um <code>switch-case</code>, verificamos o método da requisição e, caso for um <code>GET</code>, chamamos nosso método <code>_handleGet</code> passando os dados da requisição como parâmetro.</p>
+
+<p>Em <code>_handleGet</code>, pegamos a URL da requisição, ( no caso do redirecionamento após autorizar no github, seria <code>http://localhost:4041/authorization-code?code=7e1e0c7b89ae6e2495a8</code> ) e pegamos apenas o <code>path</code>, ou seja, a parte entre o fim do nome do domínio e o início dos parâmetros ( no caso da URL de redirecionamento, <code>authorization-code</code> ).</p>
+
+<p>Sendo esse path o esperado, podemos colocar nossa lógica para extrair o valor do código recebido.</p>
+
+<pre><code>    void _handleGet(HttpRequest request) async {
+        final Uri uri = request.uri;
+        final String path = uri.path;
+
+        switch (path) {
+          case '/authorization-code':
+            final Map&lt;String, String&gt; authParams = uri.queryParameters;
+            final authCode = authParams['code'];
+            break;
+        }
+    }
+</code></pre>
+
+<p>Utilizamos a propriedade <code>queryParameters</code> da nossa <code>uri</code>, que retorna um <code>Map</code>, onde a chave é o nome do parâmetro.</p>
+
+<p>Vimos, porém, que o usuário pode não nos conceder a autorização. Neste caso, precisamos mostrar uma tela explicando o motivo do erro.</p>
+
+<p>Vamos adicionar a seguinte verificação no nosso método:</p>
+
+<pre><code>        switch (path) {
+          case '/authorization-code':
+            final Map&lt;String, String&gt; authParams = uri.queryParameters;
+
+            // independente de erro ou sucesso,
+            // vamos renderizar uma página html para o usuário
+            request.response.headers.contentType = ContentType.html;
+
+            // caso não tenhamos recebido o parâmetro [code]
+            if (!authParams.containsKey('code')) {
+              if (authParams.containsKey('error')) {
+                if (authParams['error'] == 'access_denied') {
+                  // usuário não concedeu permissões
+                  request.response
+                    ..write('''
+                      &lt;h1&gt;Permissão não concedida!&lt;/h1&gt;
+                      &lt;p&gt;Você precisa autorizar nossa aplicação junto ao GitHub para utilizar nossas funcionalidades.&lt;/p&gt;
+                    ''')
+                    ..close();
+                  return _server.close();
+                }
+                // erro desconhecido
+                request.response
+                  ..write('''
+                      &lt;h1&gt;Ocorreu um erro!&lt;/h1&gt;
+                      &lt;p&gt;Ocorreu um erro ao autorizar o uso da aplicação. Por favor, inicie o processo novamente.&lt;/p&gt;
+                    ''')
+                  ..close();
+                return _server.close();
+              }
+            }
+
+            final authCode = authParams['code'];
+            break;
+        }
+</code></pre>
+
+<p>Primeiro definimos que o tipo da resposta enviada pelo nosso servidor local vai ser html.</p>
+
+<p>Depois, verificamos se o usuário recebeu na URL o parâmetro <code>code</code>.</p>
+
+<p>Caso não tenha recebido, podem ser dois casos: o usuário negou as permissões, o que resulta no envio do parâmetro <code>error=access_denied</code>, ou algum outro erro desconhecido.</p>
+
+<p>No segundo caso, vamos tratar todos com uma mesma mensagem pedindo para tentar novamente.</p>
+
+<p>Independente do ocorrido, vamos finalizar a execução do servidor com o método <code>_server.close()</code>.</p>
+
+<p>Agora, caso tenhamos recebido nosso <code>code</code>, de acordo com a <a href="https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps#2-users-are-redirected-back-to-your-site-by-github">documentação da API do GitHub</a> precisamos realizar uma requisição POST</p>
+
+<pre><code>    POST https://github.com/login/oauth/access_token
+</code></pre>
+
+<p>Na qual enviamos o <code>code</code> junto com nossos <code>client_id</code> e <code>client_secret</code>, recebendo em troca um <code>access_token</code>, utilizado para autenticar as requisições em nome do nosso usuário.</p>
+
+<h2>Conseguindo o <code>access_token</code> do usuário</h2>
+
+<p>Com o Dart, podemos criar uma requisição HTTP facilmente com o pacote <code>http.dart</code>.</p>
+
+<p>Para adicionar este pacote, crie, na raíz do seu projeto, um arquivo <code>pubspec.yaml</code>.</p>
+
+<pre><code>    name: oauth_server
+    environment:
+        sdk: '&gt;=2.12.0 &lt;3.0.0' # versão 2.12 habilita null safety
+</code></pre>
+
+<p>Com o arquivo criado, podemos adicionar nossa dependência, usando</p>
+
+<pre><code>    dart pub add http
+</code></pre>
+
+<p>Repare que seu <code>pubspec.yaml</code> foi atualizado com a linha</p>
+
+<pre><code>    dependencies: 
+      http: ^0.13.4
+</code></pre>
+
+<p>Agora, vamos importar o pacote em <code>server_handler.dart</code>, e adicionar a lógica da requisição no nosso método <code>_handleGet</code>.</p>
+
+<p>Esta requisição vai precisar dos dados de <code>client_id</code> e <code>client_secret</code>. Como eles foram definidos no nosso <code>main.dart</code>, vamos
+passá-los como argumentos no construtor da nossa classe <code>ServerHandler</code>.</p>
+
+<pre><code>    import 'dart:io';
+    import 'package:http/http.dart'; // ADICIONAR
+    import 'dart:convert'; // ADICIONAR
+
+    class ServerHandler {
+        final String _clientId;                             // ADICIONAR
+        final String _clientSecret;                         // ADICIONAR
+        ServerHandler(this._clientId, this._clientSecret);  // ADICIONAR
+        late HttpServer _server;
+        final int _port = 4041;
+        String _accessTokenUrl = 'https://github.com/login/oauth/access_token'; // ADICIONAR
+        ...
+        ...
+        ...
+</code></pre>
+
+<p>Com acesso aos nossos <em>tokens</em>, podemos criar nossa requisição HTTP.</p>
+
+<p>Vamos utilizar o método <code>post</code>, que aceita como parâmetros a URL da requisição, os cabeçalhos e o corpo da requisição.</p>
+
+<pre><code>    final authCode = authParams['code'];
+
+    final tokenRequest = await post(
+      Uri.parse(_accessTokenUrl),
+      headers: {
+        "Accept": "application/json",
+      },
+      body: {
+        "client_id": _clientId,
+        "client_secret": _clientSecret,
+        "code": authCode,
+      },
+    );
+
+    break;
+</code></pre>
+
+<p>Agora que realizamos nossa requisição, enviando os valores para o servidor do github, vamos receber nosso <code>access_token</code>.</p>
+
+<p>O ideal nesta etapa seria verificar o código de resposta da requisição, onde 200 indica requisição bem sucedida, 400 indica erro
+nos dados enviados, etc.</p>
+
+<p>Acontece que o GitHub retorna status 200 mesmo que os dados enviados não estejam corretos. Para nos certificarmos de que tudo ocorreu bem, podemos verificar se a requisição retornou o campo 'error', e, neste caso, avisar o usuário.</p>
+
+<p>Caso o campo 'error' venha vazio, podemos checar se o valor de 'access_token' foi recebido, e, neste caso, finalizar o processo de autenticação.</p>
+
+<pre><code>        final tokenObject = json.decode(tokenRequest.body);
+
+        // github retorna http 200 quando ocorre erro!
+
+        if (tokenObject.containsKey('error')) {
+          request.response
+            ..write('''
+            &lt;h1&gt; Ocorreu um erro!&lt;/h1&gt;
+            &lt;p&gt;Por favor, verifique se as permissões necessárias foram concedidas.&lt;/p&gt;
+            ''')
+            ..close();
+          return _server.close();
+        }
+
+        if (tokenObject.containsKey('access_token')) {
+          request.response
+            ..write('''
+            &lt;h1&gt; Autenticação realizada com sucesso! &lt;/h1&gt;
+            &lt;p&gt;Você já pode voltar para a linha de comando.&lt;/p&gt;
+            ''')
+            ..close();
+          return _server.close();
+        }
+
+        break;
+</code></pre>
+
+<h3>Implementando a criação de servidor na função <code>main</code></h3>
+
+<p>Agora que desenvolvemos nossa classe <code>ServerHandler</code>, vamos chamá-la na função <code>main</code>, e testar seu funcionamento.</p>
+
+<p>Em <code>oauth_server.dart</code>, adicione:</p>
+
+<pre><code>    import 'helpers/browser_handler.dart';
+    import 'helpers/server_handler.dart'; // ADICIONAR
+    import 'dart:io'; // ADICIONAR
+
+    String clientId = '47222bc3922bc180da0e';
+    String clientSecret = 'cb32e0058343ee20c8e4d16cb1dc740ecec5c812'; // ADICIONAR
+    String sentScopes = 'repo';
+    String authorizationUrl =
+        'https://github.com/login/oauth/authorize?scope=$sentScopes&amp;client_id=$clientId';
+    void main() async {
+      final ServerHandler serverHandler = ServerHandler(clientId, clientSecret);
+      final HttpServer server = await serverHandler.createServer();
+      print('Servidor iniciado: ${server.address} port ${server.port}');
+      BrowserHandler.launchBrowser(authorizationUrl);
+      await serverHandler.handleRequests(server);
+    }
+</code></pre>
+
+<p>Rodando o programa com <code>dart oauth_server.dart</code>, teremos dois outputs:</p>
+
+<p>Ao permitir acesso à aplicação:</p>
+
+<p><img src="./imgs/oauth2-pela-linha-de-comando-em-dart/permission_granted.png" alt="Tela de permissão concedida" title="Tela de permissão concedida" /></p>
+
+<p>Ao recusar permissão:</p>
+
+<p><img src="./imgs/oauth2-pela-linha-de-comando-em-dart/permission_denied.png" alt="Tela de permissão recusada" title="Tela de permissão recusada" /></p>
+
+<p>Perfeito! Agora podemos utilizar nosso token nas requisições subsequentes.</p>
+
+<h2>Guardando o access token e utilizando um singleton</h2>
+
+<p>Quando o usuário nos permite acesso, recebemos o seguinte <em>payload</em> na nossa requisição POST:</p>
+
+<pre><code>    {"access_token":"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","token_type":"bearer","scope":"repo"}
+</code></pre>
+
+<p>Para termos acesso ao token fora da classe <code>ServerHandler</code>, vamos criar um <em>model</em> <code>TokenModel</code>, que vai receber as informações do token.</p>
+
+<p>Ele vai ter uma chave para cada campo passível de recebimento da API.</p>
+
+<p>Crie um diretório <code>models</code> e, dentro dele, <code>token_model.dart</code>:</p>
+
+<p>Este arquivo vai possuir duas classes, <code>UniqueToken</code> e  <code>TokenModel</code>.</p>
+
+<p><code>TokenModel</code>, como dito acima, vai guardar os valores (ou o erro) recebido da API.</p>
+
+<p>A classe <code>UniqueToken</code> vai ser utilizada como um <em>singleton</em>, ou seja, vai ser utilizada para que possamos acessar, de qualquer lugar do projeto, a mesma instância de <code>TokenModel</code>.</p>
+
+<p>Utilizamos uma lógica parecida no post <a href="https://guilhermegarcia.dev/blog/criando-um-app-com-flutter-e-sqlite.html">Criando um app com Flutter e sqlite</a>, na seção <em>Configurando o acesso ao banco de dados</em>.</p>
+
+<pre><code>    class TokenModel {
+      String? accessToken;
+      String? tokenType;
+      String? scope;
+      String? error;
+
+      TokenModel({this.accessToken, this.tokenType, this.scope, this.error});
+
+      factory TokenModel.fromJson(parsedJson) {
+        return TokenModel(
+            accessToken: parsedJson['access_token'],
+            tokenType: parsedJson['token_type'],
+            scope: parsedJson['scope'],
+            error: parsedJson['error']);
+      }
+    }
+</code></pre>
+
+<p>O método <code>factory TokenModel.fromJson</code>, recebe um valor json decodificado (parsedJson), e retorna uma instância <code>TokenModel</code> a partir dele.</p>
+
+<p>Já em nosso singleton, vamos verificar se ele já foi inicializado e, em caso negativo, utilizar o método <code>fromJson</code>, passando o retorno da API como argumento.</p>
+
+<pre><code>    class UniqueToken {
+      static final UniqueToken _token = UniqueToken._internal();
+      UniqueToken._internal();
+
+      bool initialized = false;
+      static UniqueToken get instance =&gt; _token;
+      static late TokenModel _tokenModel;
+
+      TokenModel tokenModel([parsedJson = null]) {
+        if (initialized) {
+          return _tokenModel;
+        }
+        _tokenModel = TokenModel.fromJson(parsedJson);
+        initialized = true;
+        return _tokenModel;
+      }
+    }
+</code></pre>
+
+<p>Caso o singleton já tenha sido inicializado, retornamos a instância existente, ao invés de criar uma nova.</p>
+
+<p>Com os nossos models criados, vamos importá-los, primeiramente, em <code>helpers/server_handler.dart</code>.</p>
+
+<pre><code>    import 'dart:convert';
+    import 'dart:io';
+    import 'package:http/http.dart';
+    import '../models/token_model.dart'; // ADICIONAR
+</code></pre>
+
+<p>A ideia é inicializar nosso <code>UniqueToken</code>, passando o json que recebemos da API, através do método <code>tokenModel</code>.</p>
+
+<pre><code>    if (tokenObject.containsKey('access_token')) {
+      final token = UniqueToken.instance.tokenModel(tokenObject); // ADICIONAR
+      request.response
+        ..write('''
+        &lt;h1&gt; Autenticação realizada com sucesso! &lt;/h1&gt;
+        &lt;p&gt;Você já pode voltar para a linha de comando.&lt;/p&gt;
+        ''')
+        ..close();
+      return _server.close();
+    }
+</code></pre>
+
+<h2>Realizando uma requisição autenticada</h2>
+
+<p>Agora que podemos acessar nosso token, vamos criar um método para listar os repositórios do nosso usuário autenticado.</p>
+
+<p>Crie um diretório <code>requests</code> e, dentro dele, <code>repositories.dart</code>:</p>
+
+<pre><code>    import 'dart:convert';
+    import '../models/token_model.dart';
+
+    import 'package:http/http.dart' as http;
+
+    getUserRepositories(TokenModel tokenModel) async {
+      final http.Client client = http.Client();
+      final String requestUrl = 'https://api.github.com/user/repos';
+      final http.Response response = await client.get(
+        Uri.parse(requestUrl),
+        headers: {
+          "Accept": "application/vnd.github.v3+json",
+          "Authorization": "token ${tokenModel.accessToken}",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List&lt;dynamic&gt; responseObject = jsonDecode(response.body);
+        responseObject.forEach((repo) =&gt; print(repo['html_url']));
+      }
+    }
+</code></pre>
+
+<p>Vamos definir apenas uma função, que recupera os repositórios, públicos e privados, do usuário autenticado.</p>
+
+<p>Caso a requisição seja realizada com sucesso, vamos printar a URL destes repositórios no terminal.</p>
+
+<p>Para utilizarmos a função, vamos adicionar em <code>oauth_server.dart</code>:</p>
+
+<pre><code>    import 'helpers/browser_handler.dart';
+    import 'helpers/server_handler.dart';
+    import 'models/token_model.dart';
+    import 'requests/repositories.dart'; // ADICIONAR
+    import 'dart:io';
+</code></pre>
+
+<p>E, no método <code>main</code>:</p>
+
+<pre><code>    void main() async {
+      final ServerHandler serverHandler = ServerHandler(clientId, clientSecret);
+      final HttpServer server = await serverHandler.createServer();
+      print('Servidor iniciado: ${server.address} port ${server.port}');
+      BrowserHandler.launchBrowser(authorizationUrl);
+      await serverHandler.handleRequests(server);
+      final TokenModel token = UniqueToken.instance.tokenModel();
+      getUserRepositories(token); // ADICIONAR
+    }
+</code></pre>
+
+<p>Pronto! Agora temos acesso aos dados do usuário autenticado.</p>
+
+<h2>Considerações finais</h2>
+
+<p>Neste post vimos como autenticar um usuário através do processo OAuth2 pela linha de comandos, utilizando a linguagem Dart.</p>
+
+<p>Utilizamos como exemplo a API do GitHub, mas esse processo pode ser generalizado para qualquer API que utilize OAuth2.</p>
+
+<p>Alguns pontos que não foram explorados são: </p>
+
+<ul>
+<li>persistir os dados do usuário utilizando um banco de dados: isso evita que o usuário precise autenticar no github toda vez que utilizar o aplicativo.</li>
+<li>gerar um binário executável: permite uso do app por usuários que não possuem a VM do Dart instalada na máquina.</li>
+</ul>
+
+<p>Abraço!</p>
+
+<p>Fontes:</p>
+
+<ul>
+<li><a href="https://devcenter.heroku.com/articles/heroku-cli#get-started-with-the-heroku-cli">https://devcenter.heroku.com/articles/heroku-cli#get-started-with-the-heroku-cli</a></li>
+<li><a href="https://dart.dev/null-safety/understanding-null-safety">https://dart.dev/null-safety/understanding-null-safety</a></li>
+<li><a href="https://api.dart.dev/stable/2.16.1/dart-io/HttpServer-class.html">https://api.dart.dev/stable/2.16.1/dart-io/HttpServer-class.html</a> </li>
+<li><a href="https://docs.github.com/en/rest">https://docs.github.com/en/rest</a></li>
+<li><a href="https://docs.github.com/en/rest/reference/repos#list-repositories-for-the-authenticated-user">https://docs.github.com/en/rest/reference/repos#list-repositories-for-the-authenticated-user</a></li>
+</ul>
+
+<p>Tags: <a href='tag_dart.html'>dart</a>, <a href='tag_github.html'>github</a>, <a href='tag_oauth2.html'>oauth2</a>, <a href='tag_api.html'>api</a></p>
+<!-- text end -->
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/oauth2-pela-linha-de-comando-em-dart.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/oauth2-pela-linha-de-comando-em-dart.html'><span id='count-7667'></span></a>&nbsp;</p>
+<!-- entry end -->
+</div>
+<div id="footer">CC by-nc-nd <a href="https://twitter.com/gui_garcia67">Guilherme Garcia</a> &mdash; <a href="mailto:gui&#46;garcia67&#64;gmail&#46;com">gui&#46;garcia67&#64;gmail&#46;com</a><br/>
+Generated with <a href="https://github.com/cfenollosa/bashblog">bashblog</a>, a single bash script to easily create blogs like this one</div>
+</div></div>
+</body></html>
