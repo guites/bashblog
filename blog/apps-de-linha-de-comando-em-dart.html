@@ -1,0 +1,1096 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="main.css" type="text/css" />
+<link rel="stylesheet" href="blog.css" type="text/css" />
+<link rel="stylesheet" href="code.css" type="text/css" />
+<link rel="alternate" type="application/rss+xml" title="Inscrever-se nesta página..." href="feed.rss" />
+<title>Apps de linha de comando em dart</title>
+<meta name='twitter:card' content='summary' />
+<meta name='twitter:site' content='@gui_garcia67' />
+<meta name='twitter:title' content='Apps de linha de comando em dart' />
+<meta name='twitter:description' content=" mg;nl: Vamos dar sequência ao app iniciado neste post, explorando ferramentas da linguagem dart para tornar nosso aplicativo mais interativo, lendo e escrevendo input do usuário e arquivos, assim como permitindo ao usuário escolher entre possibil" />
+</head><body>
+<div id="divbodyholder">
+<div class="headerholder"><div class="header">
+<div id="title">
+<h1 class="nomargin"><a class="ablack" href="https://guilhermegarcia.dev/blog/index.html">Blog do guilherme</a></h1>
+<div id="description">programação e outras coisas menos úteis</div>
+</div></div></div>
+<div id="divbody"><div class="content">
+<!-- entry begin -->
+<h3><a class="ablack" href="apps-de-linha-de-comando-em-dart.html">
+Apps de linha de comando em dart
+</a></h3>
+<!-- bashblog_timestamp: #202203212249.43# -->
+<div class="subtitle">Março 21, 2022 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p><abbr title="muito grande;nem li">mg;nl</abbr>: Vamos dar sequência ao app iniciado <a href="https://guilhermegarcia.dev/blog/oauth2-pela-linha-de-comando-em-dart.html">neste post</a>, explorando ferramentas da linguagem dart para tornar nosso aplicativo mais interativo, lendo e escrevendo input do usuário e arquivos, assim como permitindo ao usuário escolher entre possibilidades que alteram o fluxo do app.</p>
+
+<p>No <a href="https://guilhermegarcia.dev/blog/oauth2-pela-linha-de-comando-em-dart.html">post anterior</a> desenvolvemos um aplicativo que autentica o usuário através do protocolo OAuth2, e, com as permissões concedidas, gera uma listagem dos seus repositórios, públicos e privados, com o link para acessá-los no GitHub.</p>
+
+<p>Neste post, vamos extender algumas dessas funcionalidades, focando em tornar sua utilização mais fácil e intuitíva, facilitando o processo de configuração e partindo do princípio que o usuário final não possui conhecimentos de programação.</p>
+
+<p>Se você quiser ir programando junto, nosso ponto de partida é o <a href="https://github.com/guites/dart-github-app/tree/oauth2_flux">branch oauth2_flux deste repositório</a>.</p>
+
+<p>O código finalizado pode ser encontrado no branch <a href="https://github.com/guites/dart-github-app/tree/add_models">add_models</a></p>
+
+<hr/>
+
+<h2>Overview do projeto</h2>
+
+<p>Vamos seguir os seguintes passos ao longo deste post:</p>
+
+<ol>
+<li>Salvar informações sensíveis em um arquivo <em>.env</em>.</li>
+<li>Verificar se as configurações necessárias foram definidas e, em caso negativo, pedir seu preenchimento através de input do usuário.</li>
+<li>Na listagem dos repositórios do usuário, permitir que ele possa selecioná-los, mostrando seus <em>issues</em> em aberto.</li>
+</ol>
+
+<h2>Salvando informações no .env</h2>
+
+<p>O uso do arquivo <em>.env</em> é uma prática popular na programação, pois permite que que informações sensíveis, que não devem ser compartilhadas, não sejam compartilhadas através de softwares de versionamento de código, como o <em>git</em> ou <em>svn</em>.</p>
+
+<p>A ideia consiste em guardar dados como o <em>client_secret</em> e <em>client_id</em> de uma aplicação OAuth em um arquivo de texto, ao invés de colocá-lo diretamente no código.</p>
+
+<p>Assim, você pode versionar seus arquivos de código e adicionar o arquivo com as informações (normalmente chamado <em>.env</em>) ao <em>.gitignore</em>.</p>
+
+<p>Vamos criar uma classe responsável por cuidar da lógica de leitura e escrita em disco, e também por segurar na memória os valores lidos do arquivo <em>.env</em>.</p>
+
+<p>Crie, dentro de <code>helpers</code>, o arquivo <code>environment_handler.dart</code>.</p>
+
+<p>Nele, vamos utilizar o mesmo formato <em>Singleton</em> utilizado no nosso <code>TokenModel</code>, mas com uma diferença: ele vai ser inicializado com um método estático <code>loadEnv</code>, que puxa os valores do disco, ao invés de um <code>factory</code>.</p>
+
+<pre><code>    import 'dart:convert';
+    import 'dart:io';
+
+    class EnvironmentHandler {
+    Map _vars; // propriedade privada que vai guardar um Map com o nome e valor das variáveis presentes no .env
+    EnvironmentHandler._(this._vars);
+
+    // método estático utilizado para inicializar a classe
+    static Future&lt;EnvironmentHandler&gt; loadEnv(String filePath, List requiredKeys) async {
+
+    }
+</code></pre>
+
+<p>Nosso método recebe dois parâmetros, <code>filePath</code>, que nos permite manter mais de um <code>.env</code> no projeto (<code>.env.test</code>, <code>.env.dev</code>, etc)  e <code>requiredKeys</code>, que define quais chaves, caso não estiverem preenchidas no <code>.env</code>, nós vamos pedir ao usuário para fornecer.</p>
+
+<pre><code>    static Future&lt;EnvironmentHandler&gt; loadEnv(String filePath, List requiredKeys) async {
+        // verifica se o arquivo .env existe
+        File envFile = File(filePath);
+        if (!await envFile.exists()) {
+            // não existe, deve ser criado
+            await envFile.create();
+        }
+
+        // variável para salvar os valores do .env baseado nas requiredKeys recebidas
+        final Map varsFromFile = {for (var v in requiredKeys) v: false};
+
+        // inicia stream de leitura no .env
+        Stream&lt;String&gt; lines = envFile
+            .openRead()
+            .transform(utf8.decoder)
+            .`transform(const LineSplitter());
+</code></pre>
+
+<p>Nós iniciamos uma variável <code>varsFromFile</code> para usar de referência, mais abaixo, e testar se os valores foram corretamente fornecidos.</p>
+
+<p>Em dart, a leitura de um arquivo nos retorna um objeto <code>Stream</code>, que pode receber diversas transformações (<code>transform</code>s). Neste caso, vamos passar a codificação desejada (UTF-8) e utilizar o <code>LineSplitter</code>. Isso nos permite iterar sobre as linhas.</p>
+
+<pre><code>    await for (var line in lines) {
+        var keyVal = line.split('=');
+        if (keyVal.length == 1) { // (1)
+            throw Exception('O arquivo .env deve ser no formato CHAVE=VALOR !!');
+        }
+
+        if (keyVal[1].trim().isEmpty) {
+            // valor não foi preenchido, alertar usuário para preenchimento
+            stdout.writeln('Digite seu ${keyVal[0]}: ');
+            final input = stdin.readLineSync();
+            if (input == null) {
+                throw Exception(
+                    'Você precisa preencher o valor de ${keyVal[0]} no seu arquivo .env !');
+            }
+            varsFromFile[keyVal[0]] = input.trim(); // (2)
+        } else {
+            // valor já foi preenchido
+            varsFromFile[keyVal[0]] = keyVal[1].trim(); // (2)
+        }
+    }
+</code></pre>
+
+<p>Iterando sobre as linhas, em (1), verificamos se elas estão no formato <code>CHAVE=VALOR</code>.</p>
+
+<p>Existindo a chave sem o valor preenchido, vamos utilizar a função <code>input</code> para aguardar um preenchimento por parte do usuário.</p>
+
+<p>Por exemplo, um arquivo <code>.env</code> preenchido com:</p>
+
+<pre><code>    SEGREDO=
+</code></pre>
+
+<p>Vai resultar em:</p>
+
+<pre><code>    &gt; dart run
+    Building package executable...
+    Built oauth_server:oauth_server.
+    Digite seu SEGREDO:
+</code></pre>
+
+<p>Em (2), passamos o valor da chave para nossa variável <code>varsFromFile</code>. No próximo passo, vamos verificar se os valores obrigatórios foram preenchidos.</p>
+
+<pre><code>    // verifica se as chaves obrigatórias estão presentes
+    if (varsFromFile.containsValue(false)) {
+        // gera uma lista com o nome das variáveis faltantes
+        var emptyVar =
+            varsFromFile.keys.where((k) =&gt; varsFromFile[k] == false).toList();
+        for (var i = 0; i &lt; emptyVar.length; i++) {
+            // alerta usuário para preencher as variáveis faltantes
+            stdout.writeln('Digite seu ${emptyVar[i]}: ');
+            final input = stdin.readLineSync();
+            if (input == null || input.trim().isEmpty) {
+            throw Exception(
+                'Você precisa preencher a variável ${emptyVar[i]} no seu arquivo $filePath !!');
+            }
+            varsFromFile[emptyVar[i]] = input.trim();
+        }
+    }
+</code></pre>
+
+<p>Caso nenhuma exceção seja jogada até aqui, o preenchimento ocorreu de forma correta.</p>
+
+<p>Podemos agora sobrescrever o arquivo <code>.env</code> com os novos valores.</p>
+
+<pre><code>        // sobrescreve valores no arquivo .env
+        IOSink sink = envFile.openWrite();
+        varsFromFile.forEach((k, v) =&gt; {sink.write('$k=$v\n')});
+        sink.close();
+
+        return EnvironmentHandler._(varsFromFile);
+    } // fim do método loadEnv
+</code></pre>
+
+<p>Repare que nós retornamos uma instância da nossa classe <code>EnvironmentHandler</code>, passando como argumento os valores lidos do <code>.env</code> e preenchidos pelo usuário.</p>
+
+<p>Precisamos de mais um método na nossa classe, que nos permita retornar o valor de cada chave do <code>.env</code>.</p>
+
+<pre><code>String getVar(String key) {
+    if (!_vars.containsKey(key)) {
+    throw Exception(
+        '$key não foi definida! Verifique se ela consta no seu arquivo .env .');
+    }
+    return _vars[key];
+}
+</code></pre>
+
+<p>Agora, podemos iniciá-lo no nosso <code>oauth_server.dart</code>.</p>
+
+<pre><code>    import 'helpers/browser_handler.dart';
+    import 'helpers/server_handler.dart';
+    import 'models/token_model.dart';
+    import 'requests/repositories.dart';
+    import 'dart:io';
+
+    List requiredKeys = ['GITHUB_CLIENT_ID', 'GITHUB_CLIENT_SECRET'];
+    late String clientId; // ALTERAR
+    late String clientSecret; // ALTERAR
+    String sentScopes = 'repo';
+    String authorizationUrl =
+        'https://github.com/login/oauth/authorize?scope=$sentScopes&amp;client_id='; // ALTERAR
+
+    void main() async {
+        final EnvironmentHandler env = await EnvironmentHandler.loadEnv('.env', requiredKeys); // ADICIONAR
+        clientId = env.getVar('GITHUB_CLIENT_ID'); // ADICIONAR
+        clientSecret = env.getVar('GITHUB_CLIENT_SECRET'); // ADICIONAR
+        final ServerHandler serverHandler = ServerHandler(clientId, clientSecret);
+        final HttpServer server = await serverHandler.createServer();
+        print('Servidor iniciado: ${server.address} port ${server.port}');
+        BrowserHandler.launchBrowser('$authorizationUrl$clientId'); // ALTERAR
+        await serverHandler.handleRequests(server);
+        final TokenModel token = UniqueToken.instance.tokenModel();
+        getUserRepositories(token);
+    }
+</code></pre>
+
+<p>Experimente rodar o programa sem um arquivo <code>.env</code> existente. O terminal irá guiá-lo no preenchimento dos valores necessários!</p>
+
+<h2>Melhorando a listagem de repositórios</h2>
+
+<p>Para conseguirmos expandir nossa funcionalidades, esse é um bom momento para modelar os valores que recebemos da API.</p>
+
+<p>São três objetos principais com os quais vamos lidar:</p>
+
+<ol>
+<li><a href="https://docs.github.com/en/rest/reference/users#get-the-authenticated-user">Users</a></li>
+<li><a href="https://docs.github.com/en/rest/reference/repos#list-repositories-for-the-authenticated-user">Repositories</a></li>
+<li><a href="https://docs.github.com/en/rest/reference/issues#list-repository-issues">Issues</a></li>
+</ol>
+
+<p>Vamos utilizar o <code>built_value</code> para transformá-los em classes dart rapidamente. Você pode conseguir mais informações sobre esse plugin em <a href="https://pub.dev/packages/built_value">https://pub.dev/packages/built_value</a>.</p>
+
+<p>Você pode consultar os campos de cada objeto nos seus endpoints equivalente na API do GitHub (clique nos nomes na listagem acima).</p>
+
+<p>Não vamos criar o model para <code>Issues</code> agora. Vamos primeiro implementar <code>Users</code> e <code>Repositories</code>, e verificar seu funcionamento.</p>
+
+<h3>Instalando o <code>built_value</code>.</h3>
+
+<p>Você pode instalar o plugin adicionando as seguintes linhas no seu <code>pubspec.yaml</code>:</p>
+
+<pre><code>name: oauth_server
+environment:
+  sdk: '&gt;=2.12.0 &lt;3.0.0'
+dependencies:
+  built_value: ^8.1.4 # ADICIONAR
+  http: ^0.13.4
+  build_runner: ^2.1.7 # ADICIONAR
+  built_value_generator: ^8.1.4 # ADICIONAR
+</code></pre>
+
+<p>Depois, na raíz do projeto, rode um <code>dart pub get</code>.</p>
+
+<h3>Criando o Model User</h3>
+
+<p>Vamos adicionar em <code>models/user_modal.dart</code>:</p>
+
+<pre><code>    import 'dart:convert';
+
+    import 'package:built_value/built_value.dart';
+    import 'package:built_value/serializer.dart';
+    import 'serializers.dart';
+
+    part 'user_model.g.dart';
+
+    abstract class User implements Built&lt;User, UserBuilder&gt; {
+        String get login;
+        int get id;
+        String get node_id;
+        String get avatar_url;
+        String get gravatar_id;
+        String get url;
+        String get html_url;
+        String get followers_url;
+        String get following_url;
+        String get gists_url;
+        String get starred_url;
+        String get subscriptions_url;
+        String get organizations_url;
+        String get repos_url;
+        String get events_url;
+        String get received_events_url;
+        String get type;
+        bool get site_admin;
+
+        User._();
+        factory User([void Function(UserBuilder)? updates]) = _$User;
+
+        static User? fromJson(String jsonString) {
+            return serializers.deserializeWith(
+                User.serializer, json.decode(jsonString));
+        }
+
+        static Serializer&lt;User&gt; get serializer =&gt; _$userSerializer;
+    }
+</code></pre>
+
+<h3>Criando o model Repository</h3>
+
+<p>Vamos adicionar em <code>models/repository_model.dart</code>:</p>
+
+<pre><code>    import 'package:built_value/built_value.dart';
+    import 'package:built_collection/built_collection.dart';
+    import 'package:built_value/serializer.dart';
+    import 'serializers.dart';
+
+    import 'user_model.dart';
+
+    part 'repository_model.g.dart';
+
+    abstract class Repository implements Built&lt;Repository, RepositoryBuilder&gt; {
+        int get id;
+        String get node_id;
+        String get name;
+        String get full_name;
+        User get owner; // instace of User model (1)
+        bool get private;
+        String get html_url;
+        String? get description;
+        bool get fork;
+        String get url;
+        String get archive_url;
+        String get assignees_url;
+        String get blobs_url;
+        String get branches_url;
+        String get collaborators_url;
+        String get comments_url;
+        String get commits_url;
+        String get compare_url;
+        String get contents_url;
+        String get contributors_url;
+        String get deployments_url;
+        String get downloads_url;
+        String get events_url;
+        String get forks_url;
+        String get git_commits_url;
+        String get git_refs_url;
+        String get git_tags_url;
+        String get git_url;
+        String get issue_comment_url;
+        String get issue_events_url;
+        String get issues_url;
+        String get keys_url;
+        String get labels_url;
+        String get languages_url;
+        String get merges_url;
+        String get milestones_url;
+        String get notifications_url;
+        String get pulls_url;
+        String get releases_url;
+        String get ssh_url;
+        String get stargazers_url;
+        String get statuses_url;
+        String get subscribers_url;
+        String get subscription_url;
+        String get tags_url;
+        String get teams_url;
+        String get trees_url;
+        String get clone_url;
+        String? get mirror_url;
+        String get hooks_url;
+        String get svn_url;
+        String? get homepage;
+        String? get language;
+        int get forks_count;
+        int get stargazers_count;
+        int get watchers_count;
+        int get size;
+        String get default_branch;
+        int get open_issues_count;
+        bool get is_template;
+        BuiltList&lt;String&gt; get topics;
+        bool get has_issues;
+        bool get has_projects;
+        bool get has_wiki;
+        bool get has_pages;
+        bool get has_downloads;
+        bool get archived;
+        bool get disabled;
+        String get visibility;
+        String get pushed_at;
+        String get created_at;
+        String get updated_at;
+        BuiltMap&lt;String, bool&gt; get permissions;
+        bool? get allow_rebase_merge;
+        String? get template_repository;
+        String? get temp_clone_token;
+        bool? get allow_squash_merge;
+        bool? get allow_auto_merge;
+        bool? get delete_branch_on_merge;
+        bool? get allow_merge_commit;
+        int? get subscribers_count;
+        int? get network_count;
+        BuiltMap&lt;String, String&gt; get license;
+        int get forks;
+        int get open_issues;
+        int get watchers;
+
+        Repository._();
+        factory Repository([void Function(RepositoryBuilder)? updates]) =
+            _$Repository;
+
+        static Repository fromJson(Map&lt;String, dynamic&gt; jsonObj) {
+            return serializers.deserializeWith(Repository.serializer, jsonObj)!;
+        }
+
+        static Serializer&lt;Repository&gt; get serializer =&gt; _$repositorySerializer;
+    }
+</code></pre>
+
+<p>Optei por carregar todas as propriedades listadas no endpoint, mas você pode separa apenas as que deseja utilizar.</p>
+
+<p>Repare que em (1), o tipo da propriedade é a classe <code>User</code> que criamos anteriormente.</p>
+
+<h3>Criando o Serializer</h3>
+
+<p>Repare que todas as classes criadas possuem um método estático, <code>fromJson</code>. Esse método nos permite instanciar a classe passando como valor de entrada uma string, que é deserializada usando <code>serializers.deserializeWith</code>. Para que possamos utilizar este método, precisamos primeiro criar uma classe, <code>Serializer</code>.</p>
+
+<p>Adicione, em <code>models/serializers.dart</code>:</p>
+
+<pre><code>import 'package:built_collection/built_collection.dart';
+import 'package:built_value/standard_json_plugin.dart';
+import 'package:built_value/serializer.dart';
+
+import 'repository_model.dart';
+import 'user_model.dart';
+
+part 'serializers.g.dart';
+
+@SerializersFor([Repository, User])
+final Serializers serializers =
+    (_$serializers.toBuilder()..addPlugin(StandardJsonPlugin())).build();
+</code></pre>
+
+<p>Repare que em <code>SerializersFor</code>, passamos, no array, <code>Repository</code> e <code>User</code>.</p>
+
+<h3>Criando os arquivos gerados automaticamente</h3>
+
+<p>Antes de rodarmos o <code>build</code> para a geração dos arquivos automáticos, precisamos ajustar a organização dos nossos diretórios e arquivos.</p>
+
+<p>Isso é necessário pois o <code>built_values</code> espera uma certa configuração específica para conseguir encontrar os arquivos necessários e salvar os dados gerados.</p>
+
+<p>Vamos criar, na raíz do projeto, um diretório <code>bin</code>.</p>
+
+<p>Depois, vamos passar todos nossos arquivos <code>.dart</code> pra dentro dele.</p>
+
+<p>Nossa estrutura final vai ficar da seguinte forma:</p>
+
+<pre><code>  - pubspec.yaml
+  - pubspec.lock
+  - README.md
+  - .env
+  - bin/
+    - oauth_server.dart
+    - helpers/
+      - browser_handler.dart
+      - environment_handler.dart
+      - server_handler.dart
+    - models
+      - repository_model.dart
+      - serializers.dart
+      - token_model.dart
+      - user_model.dart
+    - requests/
+      - repositories.dart
+</code></pre>
+
+<p>Com os models criados, podemos agora rodar</p>
+
+<pre><code>dart run build_runner build
+</code></pre>
+
+<p>Agora, podemos instaciar nossas classes.</p>
+
+<p>Para isso, vamos alterar o método utilizado para realizar a requisição na API do GitHub.</p>
+
+<h2>Alterando a requisição na API</h2>
+
+<p>Vamos alterar nosso arquivo <code>requests/repositories.dart</code>.</p>
+
+<p>A primeira alteração é no retorno. Nossa função agora vai retornar uma listagem de repositórios.</p>
+
+<p>Cada item da lista vai ser uma instância da classe <code>Repository</code>. Isso, junto ao fato de ser uma requisição assíncrona, vai nos dar a seguinte tipagem:</p>
+
+<p>Precisamos também importar a classe <code>Repository</code>.</p>
+
+<pre><code>import 'dart:convert';
+
+import '../models/repository_model.dart'; // ADICIONAR
+import '../models/token_model.dart';
+
+import 'package:http/http.dart' as http;
+
+Future&lt;List&lt;Repository&gt;&gt; getUserRepositories(TokenModel tokenModel) async { // ALTERAR
+  final http.Client client = http.Client();
+  final String requestUrl = 'https://api.github.com/user/repos';
+  final http.Response response = await client.get(
+    Uri.parse(requestUrl),
+    headers: {
+      "Accept": "application/vnd.github.v3+json",
+      "Authorization": "token ${tokenModel.accessToken}",
+    },
+  );
+
+  if (response.statusCode != 200) {
+    throw Exception('Ocorreu um erro na conexão com a API do GitHub!');
+  }
+  final List&lt;dynamic&gt; payload = json.decode(response.body);
+  List&lt;Repository&gt; repositories =                                    // ALTERAR
+      payload.map((data) =&gt; Repository.fromJson(data)).toList();
+
+  return repositories;
+}
+</code></pre>
+
+<p>Agora temos acesso à essa listagem no nosso <code>oauth_server.dart</code>. Com isso, podemos focar em deixar nosso app um pouco mais interativo.</p>
+
+<h2>Permitindo que o usuário escolha um repositório</h2>
+
+<p>Com os novos dados que estamos salvando em memória, podemos adicionar três novas funcionalidades:</p>
+
+<ol>
+<li>Mostrar dados do usuário autenticado</li>
+<li>Ao mostrar a listagem dos repositórios, permitir que o usuário escolha um deles.</li>
+<li>Ao selecionar um repositório, mostrar os detalhes recebidos da API de forma ordenada.</li>
+</ol>
+
+<h3>Mostrando dados do usuário autenticado</h3>
+
+<p>Vamos criar uma nova requisição, criando o arquivo <code>requests/authenticated_user.dart</code>.</p>
+
+<p>Vamos utilizar essa função para, usando o <code>access_token</code> recebido, puxar as informações do usuário autenticado.</p>
+
+<pre><code>import '../models/user_model.dart';
+import '../models/token_model.dart';
+
+import 'package:http/http.dart' as http;
+
+Future&lt;User&gt; getAuthenticatedUser(TokenModel tokenModel) async {
+  final http.Client client = http.Client();
+  final String requestUrl = 'https://api.github.com/user';
+  final http.Response response = await client.get(
+    Uri.parse(requestUrl),
+    headers: {
+      "Accept": "application/vnd.github.v3+json",
+      "Authorization": "token ${tokenModel.accessToken}",
+    },
+  );
+
+  if (response.statusCode != 200) {
+    throw Exception('Ocorreu um erro na conexão com a API do GitHub!');
+  }
+
+  User authenticatedUser = User.fromJson(response.body);
+
+  return authenticatedUser;
+}
+</code></pre>
+
+<p>Para mostrarmos os dados no terminal, vamos criar um arquivo que vai ter todas as funções responsáveis por mostrar dados da classe <code>User</code>.</p>
+
+<p>Leve em consideração que os dados que recebemos do usuário autenticado, após instanciar a classe <code>User</code>, ficam no seguinte formato:</p>
+
+<pre><code>User {
+  login=usuario,
+  id=124971234,
+  node_id=MASJF898ASF8,
+  avatar_url=https://avatars.githubusercontent.com/u/124971234?v=4,
+  gravatar_id=,
+  url=https://api.github.com/users/usuario,
+  html_url=https://github.com/usuario,
+  followers_url=https://api.github.com/users/usuario/followers,
+  following_url=https://api.github.com/users/usuario/following{/other_user},
+  gists_url=https://api.github.com/users/usuario/gists{/gist_id},
+  starred_url=https://api.github.com/users/usuario/starred{/owner}{/repo},
+  subscriptions_url=https://api.github.com/users/usuario/subscriptions,
+  organizations_url=https://api.github.com/users/usuario/orgs,
+  repos_url=https://api.github.com/users/usuario/repos,
+  events_url=https://api.github.com/users/usuario/events{/privacy},
+  received_events_url=https://api.github.com/users/usuario/received_events,
+  type=User,
+  site_admin=false,
+}
+</code></pre>
+
+<p>Crie um diretório <code>bin/output</code>, e, dentro dele, <code>user.dart</code>.</p>
+
+<p>Vamos criar um método que printa um cabeçalho simples no terminal.</p>
+
+<pre><code>import 'dart:io';
+import '../models/user_model.dart';
+
+void showAuthUser(User user) {
+  stdout.writeln('------------${ '-' * user.login.length }---${'-' * user.html_url.length}');
+  stdout.writeln('Logado como ${user.login} - ${user.html_url}');
+  stdout.writeln('------------${ '-' * user.login.length }---${'-' * user.html_url.length}');
+}
+</code></pre>
+
+<p>Apenas um cabeçalho simples, calculando o tamanho da string <code>login</code> para criar uma faixa com traços.</p>
+
+<h3>Mostrando a listagem de repositórios</h3>
+
+<p>Vamos reformular nosso loop para listagem dos repositórios disponíveis.</p>
+
+<p>Em <code>output</code>, crie o arquivo <code>repository.dart</code>.</p>
+
+<pre><code>import 'dart:io';
+import '../models/repository_model.dart';
+
+void showUserRepositories(List&lt;Repository&gt; repos) {
+  stdout.writeln('Os seguintes repositórios foram encontrados:\n');
+  for (var i = 0; i &lt; repos.length; i++) {
+    stdout.writeln('[${i + 1}]: ${repos[i].full_name}');
+  }
+}
+</code></pre>
+
+<p>A mesma listagem, mas agora recebemos uma <code>List</code> de <code>Repository</code>s como entrada.</p>
+
+<p>Outra alteração é a adição do índice entre colchetes <code>[1]</code>. Vamos usar essa numeração para buscar mais informações de cada repositório.</p>
+
+<p>Nosso método <code>main()</code> no arquivo <code>oauth_server.dart</code> vai ficar no seguinte formato:</p>
+
+<pre><code>void main() async {
+  final EnvironmentHandler env =
+      await EnvironmentHandler.loadEnv('.env', requiredKeys);
+  clientId = env.getVar('GITHUB_CLIENT_ID');
+  clientSecret = env.getVar('GITHUB_CLIENT_SECRET');
+  final ServerHandler serverHandler = ServerHandler(clientId, clientSecret);
+  final HttpServer server = await serverHandler.createServer();
+  BrowserHandler.launchBrowser('$authorizationUrl$clientId');
+  await serverHandler.handleRequests(server);
+  final TokenModel token = UniqueToken.instance.tokenModel();
+  final User user = await getAuthenticatedUser(token);
+  showAuthUser(user);
+  List&lt;Repository&gt; repos = await getUserRepositories(token);
+  showUserRepositories(repos);
+}
+</code></pre>
+
+<p>Porém, ainda não temos nenhuma interatividade. Vamos agora implementar a lógica para a seleção dos repositórios.</p>
+
+<h3>Mostrando detalhes de um repositório selecionado</h3>
+
+<p>Uma forma fácil de implementar, que impede o programa de terminar a execução, é uma combinação de um <code>while(true)</code> com <code>stdin.readLineSync()</code>.</p>
+
+<p>O <code>while</code> mantém o programa rodando, enquanto o <code>readLineSync</code> trava a execução e aguarde indefinidamente por uma ação do usuário.</p>
+
+<p>Como temos um índice associado a cada repositório da listagem, podemos aceitar como input o índice, e então listar os dados do repositório.</p>
+
+<p>No nosso arquivo <code>output/repository.dart</code>, vamos adicionar o seguinte método:</p>
+
+<pre><code>  void showRepositoryInfo(List&lt;Repository&gt; repos) {
+    stdout.write('Digite o número do repositório para receber mais informações:');
+    final input = stdin.readLineSync();
+  }
+</code></pre>
+
+<p>Antes de acessarmos a lista <code>repos</code> passando o índice recebido, precisamos fazer uma série de verificações:</p>
+
+<ol>
+<li>O usuário digitou algum valor, ou apenas apertou <kbd>ENTER</kbd> ?</li>
+<li>O valor digitado é um número?</li>
+<li>O número recebido é um índice válido na nossa listagem?</li>
+</ol>
+
+<p>Se a resposta a todas essas questões for <em>sim</em>, podemos ter uma boa confiança de que o valor recebido est
+á num formato aceitável.</p>
+
+<p>Para isso, vamos utilizar um estratégia de <code>try catch</code>, jogando exceções diferentes para cada provavel erro.</p>
+
+<pre><code>  void showRepositoryInfo(List&lt;Repository&gt; repos) {
+    stdout.write('Digite o número do repositório para receber mais informações:');
+    final input = stdin.readLineSync();
+    try {
+      if (input == null || input.trim().isEmpty) { // (1)
+        throw Exception('Digite o número à esquerda do repositório que você deseja analisar!');
+      }
+      String filteredInput = input.trim().replaceAll(RegExp(r'\[|\]'), ''); // (2)
+      int index = int.parse(filteredInput); // (3)
+      final Repository repo = repos[index - 1]; // (4)
+      // caso chegarmos até aqui, podemos disponibilizar a informação para o usuário!
+    } catch (e) {
+      // precisamos lidar aqui com cada caso de erro possível!
+    }
+  }
+</code></pre>
+
+<p>Vamos analisar uma por uma as verificações realizadas.
+Em (1) caso o usuário não passar nenhum valor, ou apenas espeços, jogamos uma Exceção manualmente.</p>
+
+<p>Em (2) removemos todos os espaços em branco, e também os colchetes, caso a pessoa tente digitar <code>[1]</code> ao invés de <code>1</code>.</p>
+
+<p>Em (3) utilizamos o método <code>int.parse</code> para verificarmos se o valor recebido se trata de um número inteiro. Caso não seja, por ex. <code>teste</code>, este método joga uma <code>FormatException</code>, com a qual lidaremos depois.</p>
+
+<p>Em (4) utilizamos o índice recebido, e diminuimos 1, para acessar a nossa lista. Caso o valor do índice seja maior do que a quantiade de itens, o dart nos fornece um <code>RangeError</code> automaticamente. Caso o usuário digite 0, recebemos o mesmo <code>RangeError</code>. Com isso, poupamos uma verificação do tipo</p>
+
+<pre><code>if (repos.length &gt;= index)
+</code></pre>
+
+<p>Agora, vamos preencher o bloco <code>catch</code> e mostrar mensagens amigáveis para o usuário</p>
+
+<pre><code>  void showRepositoryInfo(List&lt;Repository&gt; repos) {
+    stdout.write('Digite o número do repositório para receber mais informações:');
+    final input = stdin.readLineSync();
+    try {
+      if (input == null || input.trim().isEmpty) { // (1)
+        throw Exception('Digite o número à esquerda do repositório que você deseja analisar!');
+      }
+      String filteredInput = input.trim().replaceAll(RegExp(r'\[|\]'), ''); // (2)
+      int index = int.parse(filteredInput); // (3)
+      final Repository repo = repos[index]; // (4)
+      // caso chegarmos até aqui, podemos disponibilizar a informação para o usuário!
+    }  on FormatException {
+      stderr.writeln('Por favor, digite um número de 1 a ${repos.length}!');
+    } on RangeError {
+      stderr.writeln(
+          'Repositório não encontrado! Por favor, digite um número de 1 a ${repos.length}!');
+    } catch (e) {
+      stderr.writeln(e);
+    }
+  }
+</code></pre>
+
+<p>Este formato deixa claro o poder do <code>try catch</code> para controle de fluxo.</p>
+
+<p>Com nossas verificações prontas, vamos agora disponibilizar as informações do repositório selecionado.</p>
+
+<p>Nosso método completo vai ficar desta forma:</p>
+
+<pre><code>void showRepositoryInfo(List&lt;Repository&gt; repos) {
+  stdout.write('Digite o número do repositório para receber mais informações:');
+  final input = stdin.readLineSync();
+  try {
+    if (input == null || input.trim().isEmpty) {
+      throw Exception(
+          'Digite o número à esquerda do repositório que você deseja analisar!');
+    }
+    String filteredInput = input.trim().replaceAll(RegExp(r'\[|\]'), '');
+    int index = int.parse(filteredInput);
+    final Repository repo = repos[index];
+    // send formatted output
+    stdout.writeln('-' * (repo.full_name.length + 12));
+    stdout.writeln('\nRepositório ${repo.full_name}\n');
+    stdout.writeln('Página no GitHub: ${repo.html_url}\n');
+    stdout.writeln(
+        'Criado em ${repo.created_at} - Última atualização em ${repo.updated_at}\n');
+    stdout.writeln('Visibilidade: ${repo.private ? 'PRIVADO' : 'PÚBLICO'}\n');
+    stdout.writeln('URL para clonar (ssh): ${repo.ssh_url}\n');
+    stdout.writeln(
+        'Issues em aberto (quantidade): ${repo.open_issues} - ${repo.html_url}/issues \n');
+    if (repo.description != null &amp;&amp; repo.description!.length &gt; 0) {
+      stdout.writeln('Descrição:\n${repo.description}\n');
+    }
+    if (repo.language != null) {
+      stdout.writeln('Linguagem: ${repo.language}\n');
+    }
+  } on FormatException {
+    stderr.writeln('Por favor, digite um número de 1 a ${repos.length}!');
+  } on RangeError {
+    stderr.writeln(
+        'Repositório não encontrado! Por favor, digite um número de 1 a ${repos.length}!');
+  } catch (e) {
+    stderr.writeln(e);
+  }
+}
+</code></pre>
+
+<h3>Utilizando um bloco while para manter o programa rodando</h3>
+
+<p>Para permitir que o usuário possa testar vários repositórios, vamos realizar uma simples adição em nosso <code>main()</code> dentro de <code>oauth_server.dart</code>.</p>
+
+<pre><code>void main() async {
+  final EnvironmentHandler env =
+      await EnvironmentHandler.loadEnv('.env', requiredKeys);
+  clientId = env.getVar('GITHUB_CLIENT_ID');
+  clientSecret = env.getVar('GITHUB_CLIENT_SECRET');
+  final ServerHandler serverHandler = ServerHandler(clientId, clientSecret);
+  final HttpServer server = await serverHandler.createServer();
+  BrowserHandler.launchBrowser('$authorizationUrl$clientId');
+  await serverHandler.handleRequests(server);
+  final TokenModel token = UniqueToken.instance.tokenModel();
+  final User user = await getAuthenticatedUser(token);
+  showAuthUser(user);
+  List&lt;Repository&gt; repos = await getUserRepositories(token);
+  showUserRepositories(repos);
+  while (true) { // ADICIONAR
+    showRepositoryInfo(repos);
+  }
+}
+</code></pre>
+
+<p>Pronto! O fluxo inicial do nosso app está completo.</p>
+
+<p>Você pode testar o funcionamento com <code>dart run</code> na raíz do projeto.</p>
+
+<p>Repare que náo precisamos mais passar o arquivo <code>oauth_server.dart</code> como parâmetro, devido à estrutura de colocar os arquivos <code>.dart</code> dentro do diretório <code>bin</code>.</p>
+
+<p><a title="Clique para ver em formato de vídeo" href="./imgs/apps-de-linha-de-comando-em-dart/working_comp.mp4"><img src="./imgs/apps-de-linha-de-comando-em-dart/working_comp.jpg" alt="Funcionamento do app com escolha de repositório" title="" /></a></p>
+
+<h2>Listandos os issues abertos de cada repositório</h2>
+
+<p>Para listarmos os <em>issues</em>, vamos precisar de dois novos models: <code>Issue</code> e  <code>Label</code>.</p>
+
+<p>Enquanto os <em>labels</em> não são realmente necessários, vão servir como uma informação adicional, sem muita dificuldade de ser implementada.</p>
+
+<p>Os dois models serão gerados utilizando o <code>built_value</code>.</p>
+
+<p>Comece criando, em <code>models</code>, o arquivo <code>issue_model</code>.</p>
+
+<p>Neste caso, optei por selecionar apenas as chaves que eu considero importantes para a nossa aplicação. Você pode ver todas as chaves disponíveis <a href="https://docs.github.com/en/rest/reference/issues#list-repository-issues">neste link</a>, na aba <code>Response</code>.</p>
+
+<pre><code>import 'user_model.dart';
+import 'label_model.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
+import 'package:built_collection/built_collection.dart';
+import 'serializers.dart';
+
+part 'issue_model.g.dart';
+
+abstract class Issue implements Built&lt;Issue, IssueBuilder&gt; {
+  int get id;
+  String get node_id;
+  String get url;
+  String get repository_url;
+  String get labels_url;
+  String get comments_url;
+  String get events_url;
+  String get html_url;
+  int get number;
+  String get state;
+  String get title;
+  String get body;
+  User get user;
+  BuiltList&lt;Label&gt; get labels;
+  User get assignee;
+  BuiltList&lt;User&gt; get assignees;
+  bool get locked;
+  String? get active_lock_reason;
+  String? get closed_at;
+  String get created_at;
+  String get updated_at;
+  User? get closed_by;
+  String? get author_association;
+
+  Issue._();
+  factory Issue([void Function(IssueBuilder)? updates]) = _$Issue;
+
+  static Issue fromJson(Map&lt;String, dynamic&gt; jsonObj) {
+    return serializers.deserializeWith(Issue.serializer, jsonObj)!;
+  }
+
+  static Serializer&lt;Issue&gt; get serializer =&gt; _$issueSerializer;
+}
+</code></pre>
+
+<p>Repare que estamos importando uma classe (e um arquivo) que ainda não existem.</p>
+
+<p>Vamos criar também <code>models/labels</code>:</p>
+
+<pre><code>import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
+
+part 'label_model.g.dart';
+
+abstract class Label implements Built&lt;Label, LabelBuilder&gt; {
+  int get id;
+  String get node_id;
+  String get url;
+  String get name;
+  String get description;
+  String get color;
+
+  Label._();
+  factory Label([void Function(LabelBuilder)? updates]) = _$Label;
+
+  static Serializer&lt;Label&gt; get serializer =&gt; _$labelSerializer;
+}
+</code></pre>
+
+<p>Você pode conferir todas as chaves disponíveis para os <em>labels</em> em <a href="https://docs.github.com/en/rest/reference/issues#get-a-label">https://docs.github.com/en/rest/reference/issues#get-a-label</a>.</p>
+
+<p>Por último, vamos adicionar a classe <code>Issue</code> na listagem do nosso <code>Serializers</code>, para que possamos utilizar o método <code>fromJson</code>.</p>
+
+<p>Em <code>models/serializers.dart</code>:</p>
+
+<pre><code>import 'package:built_collection/built_collection.dart';
+import 'package:built_value/standard_json_plugin.dart';
+import 'package:built_value/serializer.dart';
+
+import 'repository_model.dart';
+import 'user_model.dart';
+import 'issue_model.dart'; // ADICIONAR
+import 'label_model.dart'; // ADICIONAR
+
+
+part 'serializers.g.dart';
+
+@SerializersFor([Repository, User, Issue]) // ALTERAR
+final Serializers serializers =
+    (_$serializers.toBuilder()..addPlugin(StandardJsonPlugin())).build();
+</code></pre>
+
+<p>Repare que, mesmo não utilizando a classe <code>Label</code> diretamente no <code>Serializers</code>, precisamos importar o arquivo.</p>
+
+<p>Isso é pois vamos utilizá-la na serialização dos <code>Issue</code>s.</p>
+
+<p>Agora, podemos rodar no terminal, na raíz do projeto:</p>
+
+<pre><code>dart run build_runner build
+</code></pre>
+
+<p>Isso vai gerar os arquivos necessários.</p>
+
+<h3>Realizando a requisição dos issues na API</h3>
+
+<p>Vamos criar a função responsável pela requisição em <code>requests/issues.dart</code>.</p>
+
+<pre><code>import '../models/issue_model.dart';
+import '../models/repository_model.dart';
+import '../models/token_model.dart';
+
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+Future&lt;List&lt;Issue&gt;&gt; getIssuesFromRepo(
+    TokenModel tokenModel, Repository repo) async {
+  final http.Client client = http.Client();
+  final String requestUrl =
+      'https://api.github.com/repos/${repo.full_name}/issues';
+  final http.Response response = await client.get(
+    Uri.parse(requestUrl),
+    headers: {
+      "Accept": "application/vnd.github.v3+json",
+      "Authorization": "token ${tokenModel.accessToken}",
+    },
+  );
+
+  if (response.statusCode != 200) {
+    throw Exception('Ocorreu um erro na conexão com a API do GitHub!');
+  }
+  final List&lt;dynamic&gt; payload = json.decode(response.body);
+    List&lt;Issue&gt; issues =
+      payload.map((data) =&gt; Issue.fromJson(data)).toList();
+
+  return issues;
+}
+</code></pre>
+
+<p>Para realizar a requisição, vamos precisar tanto do <em>token</em> com as chaves de acesso, quanto do repositório.</p>
+
+<p>Para isso, precisamos alterar o método <code>showRepositoryInfo</code>, que recebe o repositório escolhido para o usuário.</p>
+
+<p>A ideia é que ele retorne o repositório, para ser usado na requisição dos <em>issues</em>.</p>
+
+<p>Dentro do arquivo <code>output/repository.dart</code>:</p>
+
+<pre><code>Repository? showRepositoryInfo(List&lt;Repository&gt; repos) { // ALTERAR
+</code></pre>
+
+<p>E depois</p>
+
+<pre><code>  if (repo.language != null) {
+    stdout.writeln('Linguagem: ${repo.language}\n');
+  }
+    return repo; // ADICIONAR
+  } on FormatException {
+    stderr.writeln('Por favor, digite um número de 1 a ${repos.length}!');
+    return null;    // ADICIONAR
+  } on RangeError {
+    stderr.writeln(
+        'Repositório não encontrado! Por favor, digite um número de 1 a ${repos.length}!');
+    return null;  // ADICIONAR
+  } catch (e) {
+    stderr.writeln(e);
+    return null;  // ADICIONAR
+  }
+</code></pre>
+
+<p>Vamos retornar o repositório selecionado pelo usuário, ou <code>null</code> caso ocorra algum erro.</p>
+
+<p>Podemos agora chamar a função no nosso <code>main()</code>:</p>
+
+<pre><code>  while (true) {
+    final Repository? repo = showRepositoryInfo(repos);
+    if (repo != null) {
+      List&lt;Issue&gt; issues = await getIssuesFromRepo(token, repo);
+    }
+  }
+</code></pre>
+
+<h3>Mostrando uma listagem dos issues em aberto</h3>
+
+<p>Tendo carregado os valores na variável <code>issues</code>, vamos criar uma função para renderizá-los no terminal:</p>
+
+<p>Crie em <code>output</code> o arquivo <code>issues.dart</code>, com o conteúdo abaixo:</p>
+
+<pre><code>import 'dart:io';
+import '../models/issue_model.dart';
+
+void showRepositoryIssues(List&lt;Issue&gt; issues) {
+  stdout.writeln('Issues em aberto:');
+  for (var i = 0; i &lt; issues.length; i++) {
+    if (issues[i].closed_at == null) {
+      stdout.writeln('    ${i + 1}. ${issues[i].title.toUpperCase()}');
+      stdout.writeln('        Aberto em: ${issues[i].created_at}');
+      if (issues[i].labels.isNotEmpty) {
+        final String issueNames =
+            issues[i].labels.map((el) =&gt; el.name).join(',');
+        stdout.writeln('        Labels: $issueNames');
+      }
+      if (issues[i].body != null) {
+        final List&lt;String&gt; splitDescr = issues[i].body!.split('\n');
+        splitDescr.forEach((element) {
+          stdout.writeln('        $element');
+        });
+      }
+    }
+    stdout.writeln();
+    stdout.writeln();
+  }
+}
+</code></pre>
+
+<p>Agora você pode chamar esta função no <code>main()</code>:</p>
+
+<pre><code>void main() async {
+  final EnvironmentHandler env =
+      await EnvironmentHandler.loadEnv('.env', requiredKeys);
+  clientId = env.getVar('GITHUB_CLIENT_ID');
+  clientSecret = env.getVar('GITHUB_CLIENT_SECRET');
+  final ServerHandler serverHandler = ServerHandler(clientId, clientSecret);
+  final HttpServer server = await serverHandler.createServer();
+  BrowserHandler.launchBrowser('$authorizationUrl$clientId');
+  await serverHandler.handleRequests(server);
+  final TokenModel token = UniqueToken.instance.tokenModel();
+  final User user = await getAuthenticatedUser(token);
+  showAuthUser(user);
+  List&lt;Repository&gt; repos = await getUserRepositories(token);
+  showUserRepositories(repos);
+  while (true) {
+    final Repository? repo = showRepositoryInfo(repos);
+    if (repo != null) {
+      List&lt;Issue&gt; issues = await getIssuesFromRepo(token, repo);
+      showRepositoryIssues(issues);
+    }
+  }
+}
+</code></pre>
+
+<p>Pronto! Agora temos uma listagem das informações de cada repositório, com seus issues em aberto.</p>
+
+<h2>Considerações finais</h2>
+
+<p>Neste post, nós vimos como criar as ferramentas básicas necessárias para configuração de um aplicativo de terminal escrito em Dart.</p>
+
+<p>Criamos uma classe dedicada para lidar com a leitura e escrita de informações num arquivo <em>.env</em>.</p>
+
+<p>Criamos, utilizando a biblioteca <code>built_values</code>, modelos dos dados recebidos do GitHub (usuários, repositórios e issues).</p>
+
+<p>Criamos um fluxo básico para uso do aplicativo, onde o usuário pode escolher o repositório desejado, e receber mais informações.</p>
+
+<p>Existem alguns pontos que precisam ser melhorados, caso você queira ampliar este aplicativo: Atualmente, nossa função <code>showUserRepositories</code> recebe diretamente os dados digitados pelo usuário.</p>
+
+<p>Para possibilitar mais ações do que a simples seleção de um repositório ( como por ex. aperta <code>q</code> para finalizar o programa, ou apertar alguma tecla para abrir um novo issue ), precisariamos criar uma interface responsável por receber todo input do usuário e direcioná-lo para a função ou método correto.</p>
+
+<p>Também precisamos de uma forma de persistir os dados recebidos da API do GitHub, diminuindo a quantidade de consultas e evitando que o usuário tenha que abrir a página de autenticação toda vez que rodar o programa.</p>
+
+<p>No mais, espero que tenha entendido como podemos iniciar a estruturação de um aplicativo interativo no terminal, usando a linguagem Dart.</p>
+
+<p>Abraço!</p>
+
+<p>Fontes:</p>
+
+<ul>
+<li><a href="https://dart.dev/tutorials/server/cmdline">https://dart.dev/tutorials/server/cmdline</a></li>
+<li><a href="https://api.dart.dev/stable/2.16.1/dart-io/File-class.html">https://api.dart.dev/stable/2.16.1/dart-io/File-class.html</a></li>
+<li><a href="https://www.youtube.com/watch?v=hNbOSSgpneI">https://www.youtube.com/watch?v=hNbOSSgpneI</a></li>
+<li><a href="https://charafau.github.io/json2builtvalue/">https://charafau.github.io/json2builtvalue/</a></li>
+<li><a href="https://pub.dev/packages/built_value">https://pub.dev/packages/built_value</a></li>
+<li><a href="https://www.youtube.com/watch?v=XoZ01mY-cUg&amp;list=PLNnAcB93JKV9YAl4QDygDEMfplrt5uUUx&amp;index=6">https://www.youtube.com/watch?v=XoZ01mY-cUg&amp;list=PLNnAcB93JKV9YAl4QDygDEMfplrt5uUUx&amp;index=6</a></li>
+</ul>
+
+<p>Tags: <a href='tag_dart.html'>dart</a>, <a href='tag_cli.html'>cli</a>, <a href='tag_api.html'>api</a>, <a href='tag_github.html'>github</a></p>
+<!-- text end -->
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/apps-de-linha-de-comando-em-dart.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/apps-de-linha-de-comando-em-dart.html'><span id='count-26991'></span></a>&nbsp;</p>
+<!-- entry end -->
+</div>
+<div id="footer">CC by-nc-nd <a href="https://twitter.com/gui_garcia67">Guilherme Garcia</a> &mdash; <a href="mailto:gui&#46;garcia67&#64;gmail&#46;com">gui&#46;garcia67&#64;gmail&#46;com</a><br/>
+Generated with <a href="https://github.com/cfenollosa/bashblog">bashblog</a>, a single bash script to easily create blogs like this one</div>
+</div></div>
+</body></html>
