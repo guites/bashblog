@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="main.css" type="text/css" />
+<link rel="stylesheet" href="blog.css" type="text/css" />
+<link rel="stylesheet" href="code.css" type="text/css" />
+<link rel="alternate" type="application/rss+xml" title="Inscrever-se nesta página..." href="feed.rss" />
+<title>Blog do guilherme &mdash; Posts marcados com "streaming"</title>
+<meta name='twitter:card' content='summary' />
+<meta name='twitter:site' content='@gui_garcia67' />
+<meta name='twitter:title' content='Blog do guilherme &mdash; Posts marcados com "streaming"' />
+<meta name='twitter:description' content=" PoC: Stream de videos com javascript no navegador   Março 26, 2022 &mdash;  Guilherme Garcia    mg;nl: vamos desenvolver um reprodutor de vídeos utilizando a API MediaSource do navegador e o conceito de fragmentação de vídeos, no modelo utiliza" />
+</head><body>
+<div id="divbodyholder">
+<div class="headerholder"><div class="header">
+<div id="title">
+<h1 class="nomargin"><a class="ablack" href="https://guilhermegarcia.dev/blog/index.html">Blog do guilherme</a></h1>
+<div id="description">programação e outras coisas menos úteis</div>
+</div></div></div>
+<div id="divbody"><div class="content">
+<h3><a class="ablack" href="poc-stream-de-videos-com-javascript-no-navegador.html">
+PoC: Stream de videos com javascript no navegador
+</a></h3>
+<!-- bashblog_timestamp: #202203261940.00# -->
+<div class="subtitle">Março 26, 2022 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p><abbr title="muito grande; nemli">mg;nl</abbr>: vamos desenvolver um reprodutor de vídeos utilizando a API MediaSource do navegador e o conceito de fragmentação de vídeos, no modelo utilizado por sites como twitter, facebook e netflix.</p>
+
+<p>Ao acessar sites com stream de vídeo, como twitter, facebook ou netflix, e visualizar um vídeo, você pode se deparar com duas situações: Na primeira, o vídeo está encapsulado em uma tag <code>&lt;video&gt;</code>, com um <code>src</code> ou algumas tags <code>&lt;source&gt;</code>, indicando a URL do vídeo.</p>
+
+<p>Neste caso, você pode facilmente, inspecionando a tela, copiar a URL do vídeo e abrí-la em outra aba, ou salvar no seu computador.</p>
+
+<p>Por exemplo: <a href="https://twitter.com/TheOtaking/status/1507809616993742848">https://twitter.com/TheOtaking/status/1507809616993742848</a></p>
+
+<p>O GIF mostrado na página é, na verdade, um mp4, e, inspecionando a estrutura do html, descobrimos que ele está no seguinte formato:</p>
+
+<pre><code>&lt;video preload="auto" playsinline="" aria-label="Embedded video" disablepictureinpicture="" style="width: 100%; height: 100%; position: absolute; background-color: black; top: 0%; left: 0%; transform: rotate(0deg) scale(1.005);" poster="https://pbs.twimg.com/tweet_video_thumb/FOzEMPDXEAEE_e5.jpg" src="https://video.twimg.com/tweet_video/FOzEMPDXEAEE_e5.mp4" type="video/mp4"&gt;&lt;/video&gt;
+</code></pre>
+
+<p>Você pode facilmente salvar a URL <a href="https://video.twimg.com/tweet_video/FOzEMPDXEAEE_e5.mp4">https://video.twimg.com/tweet_video/FOzEMPDXEAEE_e5.mp4</a>, reproduzí-la em outros ambientes, ou fazer o download do arquivo.</p>
+
+<p>Na segunda situação, você também encontra uma tag <code>video</code>, mas seu atributo <code>src</code> não é uma URL comum: se trata de um blob.</p>
+
+<p>Exemplo: <a href="https://twitter.com/TheOtaking/status/1507278342176882730">https://twitter.com/TheOtaking/status/1507278342176882730</a></p>
+
+<p>O vídeo possui os controles habilitados, e, inspecionando a página, sua estrutura é a seguinte:</p>
+
+<pre><code>&lt;video preload="none" playsinline="" aria-label="Embedded video" disablepictureinpicture="" style="width: 100%; height: 100%; position: absolute; background-color: black; top: 0%; left: 0%; transform: rotate(0deg) scale(1.005);" poster="https://pbs.twimg.com/ext_tw_video_thumb/1507278264003440640/pu/img/1OLNuDRaCHoKzs1e.jpg" src="blob:https://twitter.com/dfc0270a-52b1-4ea8-a49d-bc9939732deb"&gt;&lt;/video&gt;
+</code></pre>
+
+<p>Se você tentar acessar a URL <blob:https://twitter.com/dfc0270a-52b1-4ea8-a49d-bc9939732deb>, ou mesmo <a href="https://twitter.com/dfc0270a-52b1-4ea8-a49d-bc9939732deb">https://twitter.com/dfc0270a-52b1-4ea8-a49d-bc9939732deb</a>, vai receber um erro de página não encontrada.</p>
+
+<p>Neste post, vamos entender o funcionamento das URLs blob, qual os benefícios do seu uso, e desenvolver uma prova de conceito mostrando como implementar uma funcionalidade de stream em javascript.</p>
+
+<p class="readmore"><a href="poc-stream-de-videos-com-javascript-no-navegador.html">Ler mais...</a></p>
+<p>Tags: <a href='tag_streaming.html'>streaming</a>, <a href='tag_javascript.html'>javascript</a>, <a href='tag_node.html'>node</a>, <a href='tag_poc.html'>poc</a></p>
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/poc-stream-de-videos-com-javascript-no-navegador.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/poc-stream-de-videos-com-javascript-no-navegador.html'><span id='count-12726'></span></a>&nbsp;</p>
+</div>
+<div id="footer">CC by-nc-nd <a href="https://twitter.com/gui_garcia67">Guilherme Garcia</a> &mdash; <a href="mailto:gui&#46;garcia67&#64;gmail&#46;com">gui&#46;garcia67&#64;gmail&#46;com</a><br/>
+Generated with <a href="https://github.com/cfenollosa/bashblog">bashblog</a>, a single bash script to easily create blogs like this one</div>
+</div></div>
+</body></html>

@@ -1,0 +1,456 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="main.css" type="text/css" />
+<link rel="stylesheet" href="blog.css" type="text/css" />
+<link rel="stylesheet" href="code.css" type="text/css" />
+<link rel="alternate" type="application/rss+xml" title="Inscrever-se nesta página..." href="feed.rss" />
+<title>PoC: Stream de videos com javascript no navegador</title>
+<meta name='twitter:card' content='summary' />
+<meta name='twitter:site' content='@gui_garcia67' />
+<meta name='twitter:title' content='PoC: Stream de videos com javascript no navegador' />
+<meta name='twitter:description' content=" mg;nl: vamos desenvolver um reprodutor de vídeos utilizando a API MediaSource do navegador e o conceito de fragmentação de vídeos, no modelo utilizado por sites como twitter, facebook e netflix.  Ao acessar sites com stream de vídeo, como twitt" />
+</head><body>
+<div id="divbodyholder">
+<div class="headerholder"><div class="header">
+<div id="title">
+<h1 class="nomargin"><a class="ablack" href="https://guilhermegarcia.dev/blog/index.html">Blog do guilherme</a></h1>
+<div id="description">programação e outras coisas menos úteis</div>
+</div></div></div>
+<div id="divbody"><div class="content">
+<!-- entry begin -->
+<h3><a class="ablack" href="poc-stream-de-videos-com-javascript-no-navegador.html">
+PoC: Stream de videos com javascript no navegador
+</a></h3>
+<!-- bashblog_timestamp: #202203261940.00# -->
+<div class="subtitle">Março 26, 2022 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p><abbr title="muito grande; nemli">mg;nl</abbr>: vamos desenvolver um reprodutor de vídeos utilizando a API MediaSource do navegador e o conceito de fragmentação de vídeos, no modelo utilizado por sites como twitter, facebook e netflix.</p>
+
+<p>Ao acessar sites com stream de vídeo, como twitter, facebook ou netflix, e visualizar um vídeo, você pode se deparar com duas situações: Na primeira, o vídeo está encapsulado em uma tag <code>&lt;video&gt;</code>, com um <code>src</code> ou algumas tags <code>&lt;source&gt;</code>, indicando a URL do vídeo.</p>
+
+<p>Neste caso, você pode facilmente, inspecionando a tela, copiar a URL do vídeo e abrí-la em outra aba, ou salvar no seu computador.</p>
+
+<p>Por exemplo: <a href="https://twitter.com/TheOtaking/status/1507809616993742848">https://twitter.com/TheOtaking/status/1507809616993742848</a></p>
+
+<p>O GIF mostrado na página é, na verdade, um mp4, e, inspecionando a estrutura do html, descobrimos que ele está no seguinte formato:</p>
+
+<pre><code>&lt;video preload="auto" playsinline="" aria-label="Embedded video" disablepictureinpicture="" style="width: 100%; height: 100%; position: absolute; background-color: black; top: 0%; left: 0%; transform: rotate(0deg) scale(1.005);" poster="https://pbs.twimg.com/tweet_video_thumb/FOzEMPDXEAEE_e5.jpg" src="https://video.twimg.com/tweet_video/FOzEMPDXEAEE_e5.mp4" type="video/mp4"&gt;&lt;/video&gt;
+</code></pre>
+
+<p>Você pode facilmente salvar a URL <a href="https://video.twimg.com/tweet_video/FOzEMPDXEAEE_e5.mp4">https://video.twimg.com/tweet_video/FOzEMPDXEAEE_e5.mp4</a>, reproduzí-la em outros ambientes, ou fazer o download do arquivo.</p>
+
+<p>Na segunda situação, você também encontra uma tag <code>video</code>, mas seu atributo <code>src</code> não é uma URL comum: se trata de um blob.</p>
+
+<p>Exemplo: <a href="https://twitter.com/TheOtaking/status/1507278342176882730">https://twitter.com/TheOtaking/status/1507278342176882730</a></p>
+
+<p>O vídeo possui os controles habilitados, e, inspecionando a página, sua estrutura é a seguinte:</p>
+
+<pre><code>&lt;video preload="none" playsinline="" aria-label="Embedded video" disablepictureinpicture="" style="width: 100%; height: 100%; position: absolute; background-color: black; top: 0%; left: 0%; transform: rotate(0deg) scale(1.005);" poster="https://pbs.twimg.com/ext_tw_video_thumb/1507278264003440640/pu/img/1OLNuDRaCHoKzs1e.jpg" src="blob:https://twitter.com/dfc0270a-52b1-4ea8-a49d-bc9939732deb"&gt;&lt;/video&gt;
+</code></pre>
+
+<p>Se você tentar acessar a URL <blob:https://twitter.com/dfc0270a-52b1-4ea8-a49d-bc9939732deb>, ou mesmo <a href="https://twitter.com/dfc0270a-52b1-4ea8-a49d-bc9939732deb">https://twitter.com/dfc0270a-52b1-4ea8-a49d-bc9939732deb</a>, vai receber um erro de página não encontrada.</p>
+
+<p>Neste post, vamos entender o funcionamento das URLs blob, qual os benefícios do seu uso, e desenvolver uma prova de conceito mostrando como implementar uma funcionalidade de stream em javascript.</p>
+
+<hr/>
+
+<h2>O que são Blobs</h2>
+
+<p>O significado direto de Blob é <em>Binary Large Object</em>. Se trata de um arquivo binário. Em javascript, e mais especificamente nos navegadores, ele é utilizado para alocar dados arbitrários a um endereço de memória temporário.</p>
+
+<p>Quando você acessou o tweet no exemplo anterior, pode ter reparado que a URL do blob que encontrou no <code>src</code> do vídeo não era o mesmo que eu coloquei. Isso é porque a URL de um blob é gerada em função de onde ele foi armazenado, e, se você atualizar a página repetidas vezes, vai reparar que a URL segue mudando.</p>
+
+<p>A principal vantagem de utilizar blobs, no contexto de reprodução de vídeos, é que um blob não precisa ser transmitido integralmente em uma só requisição. </p>
+
+<p>Uma forma mais eficiente é fragmentá-lo, e direcionar os diversos fragmentos para a mesma blob URL, reduzindo significativamente a quantidade de banda utilizada quando um usuário, por exemplo, acessa um vídeo e desiste de assistí-lo logo nos primeiros segundos.</p>
+
+<h2>Transmitindo um Blob de forma fragmentada</h2>
+
+<p>Se você abrir qualquer tweet que contenha um vídeo (grande o bastante para ter os controles habilitados), você pode analisar a forma como os dados são transmitidos através da barra <em>Network</em> das ferramentas de desenvolvedor.</p>
+
+<p>No FireFox, você pode apertar <kbd>F12</kbd> e selecionar <em>Network</em> na aba que abrir.</p>
+
+<p>Se você manter esta aba aberta enquanto visualiza um vídeo, vai perceber que várias novas requisições são realizadas.</p>
+
+<p><img src="./imgs/poc-stream-de-videos-com-javascript-no-navegador/network-tab-requests.jpg" alt="Requisições na aba network" title="" /></p>
+
+<p>Repare que vários arquivos .m4s (como 9dE9d2NFxlCbhY0K.m4s) estão sendo baixados pelo navegador. Mesmo com a extensão .m4s, o navegador os reconhece como .mp4.</p>
+
+<p>Estes arquivos são os diferentes fragmentos do vídeo que estão sendo adicionados ao Blob através do qual a tag <code>&lt;video&gt;</code> reproduz o conteúdo.</p>
+
+<h2>Gerando um vídeo fragmentado a partir de um mp4</h2>
+
+<p>Mas como estes fragmentos são gerados?</p>
+
+<p>Existem diversas especificações, formatos e ferramentas utilizadas para fragmentar vídeos de forma eficiente.</p>
+
+<p>Neste post, vamos explorar o uso do formato .m4s, devido à facilidade de sua geração de forma automatizada.</p>
+
+<p>Utilizei o vídeo disponível <a href="https://www.videezy.com/random-objects/11425-multiple-choice-test">aqui</a> pois o tamanho maior facilita a demonstração.</p>
+
+<p>Para gerar a fragmentação, vamos utilizar a ferramenta <a href="https://github.com/gpac/gpac/wiki/MP4Box">MP4Box</a>. Sua instalação pode ser feita, no mac, com o homebrew, rodando:</p>
+
+<pre><code>brew install mp4box
+</code></pre>
+
+<p>Veja, no link acima, mais informações sobre como instalar em outros sistemas.</p>
+
+<p>Acesse o diretório onde você salvou o arquivo, e rode o seguinte comando:</p>
+
+<pre><code>MP4Box -dash 1000 -segment-name chunk -dash-profile live video.mp4
+</code></pre>
+
+<p>Verifique uma estrutura no seguinte formato, dentro do seu diretório, após rodar o comando:</p>
+
+<pre><code>ls -l
+Mar 26 18:15 chunk1.m4s
+...
+..
+.
+Mar 26 18:15 chunk37.m4s
+Mar 26 18:15 chunkinit.mp4
+Mar 26 18:15 video.mp4
+Mar 26 18:15 video_dash.mpd
+</code></pre>
+
+<p>Repare que foram criados vários <em>chunks</em>, do chunk1.m4s ao chunk37.m4s, no formato <em>.m4s</em>, um arquivo <em>chunkinit.mp4</em> e um outro <em>video_dash.mpd</em>.</p>
+
+<p>Cada <em>chunk</em> possui informação referente à um fragmento do vídeo. </p>
+
+<p>Você não vai conseguir reproduzir estes arquivos soltos em um reprodutor de vídeo.</p>
+
+<p>O arquivo <em>chunkinit.mp4</em> também não pode ser reproduzido sozinho, mas ele possui os metadados necessários para a criação do blocos <em>mp4</em> reproduzíveis pelos programas, ou pelo seu navegador.</p>
+
+<p>Experimente o seguinte teste:</p>
+
+<pre><code>cat chunkinit.mp4 chunk1.m4s &gt; teste_video.mp4
+</code></pre>
+
+<p>Agora, abra o <em>teste_video.mp4</em> com o seu navegador ou reprodutor de vídeo. Você criou um vídeo com cerca de 1s de duração!</p>
+
+<p>Quanto mais <em>chunks</em> forem unidos, maior será a duração do vídeo resultante.</p>
+
+<p>O arquivo <em>video_dash.mpd</em> guarda as informações gerais do vídeo fragmentado, em formato xml.</p>
+
+<pre><code>&lt;Period duration="PT0H0M40.085S"&gt;
+  &lt;AdaptationSet segmentAlignment="true" maxWidth="1920" maxHeight="1080" maxFrameRate="29970/1000" par="16:9" lang="eng" startWithSAP="1"&gt;
+   &lt;ContentComponent id="1" contentType="video"/&gt;
+   &lt;ContentComponent id="2" contentType="audio"/&gt;
+   &lt;Representation id="1" mimeType="video/mp4" codecs="avc1.4D002A,mp4a.40.2" width="1920" height="1080" frameRate="29970/1000" sar="1:1" bandwidth="31972015"&gt;
+    &lt;AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2"/&gt;
+    &lt;SegmentTemplate media="chunk$Number$.m4s" initialization="chunkinit.mp4" timescale="29970" presentationTimeOffset="1000" startNumber="1" duration="29970"/&gt;
+   &lt;/Representation&gt;
+  &lt;/AdaptationSet&gt;
+ &lt;/Period&gt;
+</code></pre>
+
+<p>Repare nas chaves <code>maxWidth</code>, <code>maxHeight</code>, <code>maxFrameRate</code>, <code>codecs</code>, <code>SegmentTemplate</code>. Esses dados podem ser utilizados para guiar a reprodução de vídeos nas web, mas no nosso exemplo, podem ser descartados. Vamos utilizar uma metodologia mais "manual".</p>
+
+<h2>Disponibilizando o vídeo fragmentado com um servidor web</h2>
+
+<p>Vamos simular um sistema de streaming criando um servidor em node.js. Você pode utilizar qualquer linguagem com a qual estiver mais familiarizado.</p>
+
+<p>A lógica do servidor, no nosso exemplo, vai ser extremamente simples.</p>
+
+<p>Crie um projeto e instale o pacote <em>express</em>.</p>
+
+<pre><code>mkdir poc-streaming &amp;&amp; cd poc-streaming &amp;&amp; npm init -y &amp;&amp; npm i express --save
+</code></pre>
+
+<p>Vamos criar um arquivo <code>index.js</code> responsável pelo roteamento e envio dos arquivos para o front end.</p>
+
+<pre><code>const express = require('express');
+const app = express();
+const port = 3000;
+const fs    = require('fs')
+const path = require('path');
+
+// disponibiliza nosso front end (public/index.html)
+const staticPath = path.join(__dirname, '/public');
+app.use('/', express.static(staticPath));
+
+// serve o arquivo equivalente dependendo do parâmetro recebido na requisição
+const stream = async function (req, res, next) {
+    const dir = path.join(__dirname, 'videos/example/');
+    const files = fs.readdirSync(dir);
+    const chunks = files.filter(file =&gt; {
+        return file.includes('chunk');
+    });
+    const part = req.params.part;
+    if (chunks[part]) {
+        const file = `chunk${part}.mp4`;
+        res.sendFile(`${dir}${file}`);
+    } else {
+        res.status(204);
+        res.send();
+    }
+}
+
+// lógica modificada para envio de .m4s
+app.get('/stream/:part?', stream);
+
+app.listen(port, () =&gt; {
+  console.log(`Example app listening on port ${port}`);
+});
+</code></pre>
+
+<p>E vamos editar nosso <code>package.json</code> para incluir o script que inicia o servidor.</p>
+
+<pre><code>"scripts": {
+  "start": "node index.js"
+},
+</code></pre>
+
+<p>Atente para os seguintes pontos:</p>
+
+<p>Utilizaremos o diretório <code>public</code> para servir os arquivos do front end. Vamos desenvolvê-los a seguir.</p>
+
+<p>A função <code>stream</code> recebe um parâmetro, <code>part</code>, na URL da requisição. Esse parâmetro define qual pedaço (chunk) do vídeo deve ser enviado para o front end.</p>
+
+<p>Os arquivos do vídeo devem estar num diretório <code>videos/example</code>.</p>
+
+<p>Apliquei uma verificação básica, usando <code>readdirSync</code>, onde tiramos uma listagem dos arquivos presentes no diretório com <code>chunk</code> no nome, e verificamos se o <em>chunk</em> solicitado existe.</p>
+
+<p>Mas temos um problema: os arquivos enviados para o front end são no formato <em>.mp4</em>.</p>
+
+<p>Vamos resolver isto com um pequeno script em bash. (Este script também pode ser adaptado para node, mas mantive assim pela simplicidade).</p>
+
+<p>Rode os seguintes comandos no diretório com o video.mp4, baixado do link na seção anterior.</p>
+
+<pre><code>MP4Box -dash 1000 -segment-name chunk -dash-profile live video.mp4 # essa parte nós já fizemos
+cat chunkinit.mp4 chunk1.m4s &gt; chunk1.mp4 # vamos criar o arquivo inicial, com os meta dados presentes em chunkinit.mp4
+rm chunkinit.mp4 # não vai mais ser utilizado, podemos remover
+rm chunk1.m4s # mesma coisa
+for f in *.m4s;
+  do mv -- "$f" "${f%.m4s}.mp4";
+done
+rm video_dash.mpd # não vamos utilizar no nosso exemplo!
+</code></pre>
+
+<p>A mágica acontece no <code>for</code>. Após enviarmos o primeiro arquivo, que se trata de um mp4 concatenado com o primeiro .m4s, podemos enviar os outros chunks em m4s sem nenhuma alteração. Apenas "enganamos" o navegador, alterando a nomenclatura para .mp4.</p>
+
+<p>Após os comandos acima, a estrutura de <code>videos/example</code> deve ser a seguinte:</p>
+
+<pre><code>ls -l
+chunk1.mp4
+...
+..
+.
+chunk37.mp4
+video.mp4
+</code></pre>
+
+<p>Temos todos os <em>chunks</em>, onde o primeiro é a combinação de <em>chunkinit.mp4</em> com <em>chunk1.m4s</em>, e os outros foram apenas renomeados para <em>.mp4</em>, e também, o vídeo original.</p>
+
+<p>Você pode testar nosso endpoit utilizando:</p>
+
+<pre><code>npm start # inicia o servidor nodejs
+curl http://localhost:3000/stream/1 &gt; parte1.mp4
+file part1.mp4
+# output esperado: "parte1.mp4: ISO Media, MP4 Base Media v6"
+</code></pre>
+
+<p>Sucesso! Vamos preparar nosso front end.</p>
+
+<h2>Realizando o streaming no front end</h2>
+
+<p>Vamos desenvolver a lógica de streaming utilizando a API <a href="https://developer.mozilla.org/en-US/docs/Web/API/Media_Source_Extensions_API">MediaSource</a> e, para as requisições, a API <a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API">Fetch</a>.</p>
+
+<p>Crie os dois arquivos <code>public/index.html</code> e <code>public/app.js</code> (Certifique-se de que você está na raíz do projeto.)</p>
+
+<pre><code>mkdir public
+touch public/index.html
+</code></pre>
+
+<p>E coloque o seguinte conteúdo:</p>
+
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta http-equiv="X-UA-Compatible" content="IE=edge"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;PoC Streaming com Javascript&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;video id="video" controls="true"&gt;&lt;/video&gt;
+    &lt;script src="app.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<p>Agora, crie o arquivo responsável pela lógica, e vamos desenvolvê-la juntos.</p>
+
+<pre><code>touch public/app.js
+</code></pre>
+
+<p>Vamos definir algumas globais para controlar o estado da nossa aplicação:</p>
+
+<pre><code>const video = document.getElementById('video');
+let assetURL = 'http://localhost:3000/stream/';
+let isFetchingData = false;
+let currentChunk = 1;
+</code></pre>
+
+<p>A variável <code>isFetchingData</code> é uma flag, que vai ser útil para impedir que o mesmo recurso seja baixado mais de uma vez.</p>
+
+<p><code>currentChunk</code> vai manter a informação de qual <em>chunk</em> deve ser baixado na sequência.</p>
+
+<pre><code>/**
+ * Starts streaming fragmented mp4 data into video tag
+ */
+function streamIntoVideo() {
+    const mimeCodec = 'video/mp4; codecs=avc1.4D002A,mp4a.40.2';
+    const isAbleToPlay = 'MediaSource' in window &amp;&amp; MediaSource.isTypeSupported(mimeCodec);
+    // TODO: should throw error stating that html element was not found
+    if (!video) return;
+    // TODO: should fallback to playing regular video with src="...mp4"
+    if (!isAbleToPlay) return;
+    const mediaSource = new MediaSource;
+
+    video.src = URL.createObjectURL(mediaSource);
+    // prototype style argument passing! source https://stackoverflow.com/a/11986895
+    mediaSource.addEventListener('sourceopen', sourceOpen);
+    mediaSource.mimeCodec = mimeCodec;
+}
+</code></pre>
+
+<p>Essa é a função principal, através da qual chamaremos os outros métodos necessários.</p>
+
+<p>Repare que a variável <code>mimeCodec</code> está hardcoded. Esse é um valor que, em uma aplicação real, deve ser extraída de cada vídeo, e enviada para o cliente.</p>
+
+<p>Caso você esteja testando com algum exemplo diferente do que foi fornecido, pode descobrir os codecs necessários utilizando o MP4Box, com o comando:</p>
+
+<pre><code>raw_codec=$(MP4Box -info video.mp4 2&gt;&amp;1 | grep RFC6381 | awk '{print $4}' | paste -sd , -);
+echo "video/mp4; codecs="$raw_codec
+</code></pre>
+
+<p>O output, no nosso caso, é: </p>
+
+<pre><code>video/mp4; codecs=avc1.4D002A,mp4a.40.2
+</code></pre>
+
+<p>Em <code>isAbleToPlay</code>, verificamos se o navegador comporta o uso da API necessária, e os codecs do vídeo. Em caso negativo, o ideal é fornecer algum método alternativo para visualização (como um link para download, por exemplo).</p>
+
+<p>Com nosso <code>mediaSource</code> instanciado, vamos adicionar um <code>eventListener</code> para o evento <code>sourceopen</code>. </p>
+
+<p>Precisamos aguardar esse evento, pois a criação do <code>MediaSource</code> ocorre de forma assíncrona, e, enquanto este evento não disparar, não podemos atrelar a ele um <code>sourceBuffer</code>, que é o elemento que recebe os dados do nosso <em>blob</em>.</p>
+
+<p>Vamos verificar os passos do método <code>sourceOpen</code>.</p>
+
+<pre><code>/**
+ * Handles fetching new chunks of video and appending into current buffer
+ */
+function sourceOpen () {
+    const mediaSource = this;
+    const mimeCodec = this.mimeCodec;
+    const sourceBuffer = mediaSource.addSourceBuffer(mimeCodec)
+    if (isNaN(video.duration)) { // (1)
+        fetchSegment(`${assetURL}${currentChunk}`).then(function(buffer) {
+            sourceBuffer.addEventListener('updateend', function (_) {
+                mediaSource.endOfStream();
+            });
+            sourceBuffer.appendBuffer(buffer);
+            currentChunk++;
+        });
+        video.addEventListener('timeupdate', async function() { // (2)
+            // `this` holds the video html element
+            const shouldFetch = this.currentTime &gt; (0.75 * this.duration);
+            // fetches new data at 75% of video actual duration
+            if (shouldFetch &amp;&amp; !isFetchingData) {
+                isFetchingData = true;
+                video.pause();
+                const newStream = await fetchSegment(`${assetURL}${currentChunk}`);
+                if (newStream) {
+                    sourceBuffer.appendBuffer(newStream);
+                    isFetchingData = false;
+                    currentChunk++;
+                }
+                video.play();
+            }
+        })
+    }
+};
+</code></pre>
+
+<p>Dentro dele, começamos adicionando um <code>SourceBuffer</code> criado com as informações dos codecs do nosso vídeo.</p>
+
+<p>Em (1), verificamos se a propriedade <code>duration</code> do nosso vídeo ( que definimos como uma global ) é do tipo <code>NaN</code>.</p>
+
+<p>Este <code>if</code> tem o objetivo de rodar apenas na inicialização do vídeo: enquanto o elemento <code>src</code> do vídeo não for definido, sua duração tem como padrão <code>NaN</code>. Então, essa verificação só passa quando não tivermos adicionado nenhum dado ao nosso <code>sourceBuffer</code>.</p>
+
+<p>Na primera iteração, portanto, vamos recuperar um segmento de vídeo do nosso backend (nesse momento, <code>currentChunk</code> vai ter o valor <code>1</code>), e acrescentá-lo ao nosso <code>sourceBuffer</code>. Neste momento, a duração do vídeo se torna definida, e ele já pode ser iniciado pelo usuário. Isso vai ocorrer no início do carregamento da página.</p>
+
+<p>Também adicionamos um <code>eventListener</code> no evento <code>updateend</code> do <code>sourceBuffer</code>. Isso faz com que o vídeo pare de tocar ao chegar no final do buffer. Em casos em que a internet do usuário cai, e ele só conseguiu baixar parte do vídeo, isso evita que ocorram erros.</p>
+
+<p>Em (2), adicionamos a lógica que vai buscar, no servidor, novos <em>chunks</em> sempre que necessário.</p>
+
+<p>Sempre que o contador de tempo do vídeo for atualizado, verificamos se o tempo atual está acima de 75% do total baixado até o momento.</p>
+
+<p>Em caso positivo realizamos nova requisição, e adicionamos o valor recebido ( que é o conteúdo dos nossos arquivos .m4s renomeados ) ao buffer atual.</p>
+
+<p>Isso automaticamente atualiza a duração do vídeo, e assim sucessivamente.</p>
+
+<p>Por ultimo, precisamos da nossa helper function <code>fetchSegment</code>. Ela se trata de uma requisição, que verifica se o status code é igual a <code>204</code>. Neste caso, entendemos que o vídeo foi baixado integralmente.</p>
+
+<pre><code>/**
+ * Fetch a video or an audio segment, and returns it as an ArrayBuffer, in a
+ * Promise.
+ * @param {string} url
+ * @returns {Promise.&lt;ArrayBuffer&gt;}
+ */
+function fetchSegment(url) {
+  return fetch(url).then(function(response) {
+    if (response.status == 204) {
+        return null;
+    }
+    return response.arrayBuffer();
+  });
+}
+</code></pre>
+
+<p>Agora você já pode testar o funcionamento da nossa prova de conceito, reiniciando o servidor e acessando <a href="http://localhost:3000">http://localhost:3000</a>. </p>
+
+<p>Abra a aba de network para verificar as requisições realizadas incrementalmente.</p>
+
+<p><img src="./imgs/poc-stream-de-videos-com-javascript-no-navegador/network-tab-poc.jpg" alt="Requisições na aba network - POC" title="" /></p>
+
+<h2>Conclusões finais</h2>
+
+<p>Utilizando algumas ferramentas, como a API MediaSource e Fetch e o programa MP4Box, conseguimos simular um processo de streaming em javascript.</p>
+
+<p>Com este exemplo, fica fácil de entender como é feito o processo de controle nos players de vídeo moderno.</p>
+
+<p>Muitas coisas ficaram em aberto, entretanto. Como lidar com diferentes resoluções de vídeo? Como controlar um usuário que entra no vídeo, pula para o final, e depois volta para o início?</p>
+
+<p>Estas funcionalidades podem ser extendidas a partir do modelo apresentado, refinando a lógica de programação utilizada, com um melhor controle das requisições no lado do servidor, e explorando mais a fundo as funcionalidades do player de vídeo do HTML5.</p>
+
+<p>Vou deixar as referências utilizadas, fique a vontade para explorá-las.</p>
+
+<p>Abraço!</p>
+
+<p>Referências:</p>
+
+<ol>
+<li><a href="https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Client-side_web_APIs/Video_and_audio_APIs">https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Client-side_web_APIs/Video_and_audio_APIs</a></li>
+<li><a href="https://nickdesaulniers.github.io/netfix/demo/bufferAll.html">https://nickdesaulniers.github.io/netfix/demo/bufferAll.html</a></li>
+<li><a href="https://medium.com/canal-tech/how-video-streaming-works-on-the-web-an-introduction-7919739f7e1">https://medium.com/canal-tech/how-video-streaming-works-on-the-web-an-introduction-7919739f7e1</a></li>
+<li><a href="https://medium.com/swlh/building-a-video-streaming-service-in-javascript-7f751fe76564">https://medium.com/swlh/building-a-video-streaming-service-in-javascript-7f751fe76564</a></li>
+<li><a href="https://stackoverflow.com/questions/16363167/html5-video-tag-codecs-attribute/48991053#48991053">https://stackoverflow.com/questions/16363167/html5-video-tag-codecs-attribute/48991053#48991053</a></li>
+</ol>
+
+<p>Tags: <a href='tag_streaming.html'>streaming</a>, <a href='tag_javascript.html'>javascript</a>, <a href='tag_node.html'>node</a>, <a href='tag_poc.html'>poc</a></p>
+<!-- text end -->
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/poc-stream-de-videos-com-javascript-no-navegador.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/poc-stream-de-videos-com-javascript-no-navegador.html'><span id='count-12726'></span></a>&nbsp;</p>
+<!-- entry end -->
+</div>
+<div id="footer">CC by-nc-nd <a href="https://twitter.com/gui_garcia67">Guilherme Garcia</a> &mdash; <a href="mailto:gui&#46;garcia67&#64;gmail&#46;com">gui&#46;garcia67&#64;gmail&#46;com</a><br/>
+Generated with <a href="https://github.com/cfenollosa/bashblog">bashblog</a>, a single bash script to easily create blogs like this one</div>
+</div></div>
+</body></html>
