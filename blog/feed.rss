@@ -2,9 +2,39 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
 <channel><title>Blog do guilherme</title><link>https://guilhermegarcia.dev/blog/index.html</link>
 <description>programação e outras coisas menos úteis</description><language>en</language>
-<lastBuildDate>Sat, 26 Mar 2022 19:48:49 -0300</lastBuildDate>
-<pubDate>Sat, 26 Mar 2022 19:48:49 -0300</pubDate>
+<lastBuildDate>Mon, 10 Oct 2022 10:51:38 -0300</lastBuildDate>
+<pubDate>Mon, 10 Oct 2022 10:51:38 -0300</pubDate>
 <atom:link href="https://guilhermegarcia.dev/blog/feed.rss" rel="self" type="application/rss+xml" />
+<item><title>
+Interceptando tokens com puppeteer
+</title><description><![CDATA[
+
+<p><abbr title="muito grande; nem li">mg;nl</abbr>: vamos ver como automatizar o login em um app e interceptar as requisições realizadas, com o objetivo de acessar os tokens gerados pelo front end de uma aplicação.</p>
+
+<p>Digamos que você esteja trabalhando com uma API que exige autenticação.</p>
+
+<p>Você consegue autenticar pelo frontend, mas gostaria de uma forma automatizada de acessar o token, para trabalhar
+com as requisições pelo terminal, ou via postman/insomnia:</p>
+
+<pre><code>    curl -X POST -H 'Bearer tokensecretogeradonofrontend' https://api-autenticada.net/resources
+</code></pre>
+
+<p>Dependendo da solução de identidade e autenticação utilizada na API, você pode tentar reproduzir as requisições e gerar o token no seu formato final.</p>
+
+<p>Mas alguns provedores, como o <a href="https://www.okta.com/">Okta</a> ou o <a href="https://www.keycloak.org/">Keycloak</a> dificultam essa tática, pois envolvem o uso de <a href="https://pt.wikipedia.org/wiki/Nonce">nonces</a> ou processamento adicional dos valores trocados entre cliente e servidor.</p>
+
+<p>Essas etapas são de difícil reprodução, e podem tomar muito tempo.</p>
+
+<p>Uma alternativa é a automatização do acesso realizado no front end com um navegador <code>headless</code>, como o puppeteer.</p>
+
+<hr/>
+<p>Tags: <a href='tag_node.html'>node</a>, <a href='tag_puppeteer.html'>puppeteer</a>, <a href='tag_oauth2.html'>oauth2</a></p>
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/interceptando-tokens-com-puppeteer.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/interceptando-tokens-com-puppeteer.html'><span id='count-9818'></span></a>&nbsp;</p>
+]]></description><link>https://guilhermegarcia.dev/blog/interceptando-tokens-com-puppeteer.html</link>
+<guid>https://guilhermegarcia.dev/blog/./interceptando-tokens-com-puppeteer.html</guid>
+<dc:creator>Guilherme Garcia</dc:creator>
+<pubDate>Mon, 10 Oct 2022 10:48:57 -0300</pubDate></item>
 <item><title>
 PoC: Stream de videos com javascript no navegador
 </title><description><![CDATA[
@@ -229,29 +259,4 @@ muito boa: ele ensina a criar uma barra de busca, de uma fonte remota, usando as
 <guid>https://guilhermegarcia.dev/blog/./barra-de-buscas-e-consulta-a-api-com-flutter.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
 <pubDate>Wed, 02 Feb 2022 22:10:37 -0300</pubDate></item>
-<item><title>
-Coisas que eu não sabia sobre bash
-</title><description><![CDATA[
-
-<p><abbr title="muito grande; nem li">mg;nl</abbr>: Compilei o aqui o resultado de uma noite analisando o código fonte do <a href="https://github.com/cfenollosa/bashblog">bashblog</a>.</p>
-
-<p>O bash tem muitas particularidades, principalmente pra quem tem um background em linguagens web. Neste post eu falo sobre:</p>
-
-<ol>
-<li>Uso de exit status como condicional</li>
-<li>Redirecionamento de streams</li>
-<li>Parenteses duplos para comparação numérica</li>
-<li>Expansão de parametros e criação de substrings</li>
-</ol>
-
-<p>ps. com o quarto item eu consegui gerar um <a href="https://github.com/cfenollosa/bashblog/pull/168">pull request</a></p>
-
-<hr/>
-<p>Tags: <a href='tag_bash.html'>bash</a></p>
-<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/coisas-que-eu-nao-sabia-sobre-bash.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/coisas-que-eu-nao-sabia-sobre-bash.html'><span id='count-9601'></span></a>&nbsp;</p>
-]]></description><link>https://guilhermegarcia.dev/blog/coisas-que-eu-nao-sabia-sobre-bash.html</link>
-<guid>https://guilhermegarcia.dev/blog/./coisas-que-eu-nao-sabia-sobre-bash.html</guid>
-<dc:creator>Guilherme Garcia</dc:creator>
-<pubDate>Sun, 30 Jan 2022 01:48:49 -0300</pubDate></item>
 </channel></rss>

@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="main.css" type="text/css" />
+<link rel="stylesheet" href="blog.css" type="text/css" />
+<link rel="stylesheet" href="code.css" type="text/css" />
+<link rel="alternate" type="application/rss+xml" title="Inscrever-se nesta página..." href="feed.rss" />
+<title>Interceptando tokens com puppeteer</title>
+<meta name='twitter:card' content='summary' />
+<meta name='twitter:site' content='@gui_garcia67' />
+<meta name='twitter:title' content='Interceptando tokens com puppeteer' />
+<meta name='twitter:description' content=" mg;nl: vamos ver como automatizar o login em um app e interceptar as requisições realizadas, com o objetivo de acessar os tokens gerados pelo front end de uma aplicação.  Digamos que você esteja trabalhando com uma API que exige autenticação." />
+</head><body>
+<div id="divbodyholder">
+<div class="headerholder"><div class="header">
+<div id="title">
+<h1 class="nomargin"><a class="ablack" href="https://guilhermegarcia.dev/blog/index.html">Blog do guilherme</a></h1>
+<div id="description">programação e outras coisas menos úteis</div>
+</div></div></div>
+<div id="divbody"><div class="content">
+<!-- entry begin -->
+<h3><a class="ablack" href="interceptando-tokens-com-puppeteer.html">
+Interceptando tokens com puppeteer
+</a></h3>
+<!-- bashblog_timestamp: #202210101048.57# -->
+<div class="subtitle">outubro 10, 2022 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p><abbr title="muito grande; nem li">mg;nl</abbr>: vamos ver como automatizar o login em um app e interceptar as requisições realizadas, com o objetivo de acessar os tokens gerados pelo front end de uma aplicação.</p>
+
+<p>Digamos que você esteja trabalhando com uma API que exige autenticação.</p>
+
+<p>Você consegue autenticar pelo frontend, mas gostaria de uma forma automatizada de acessar o token, para trabalhar
+com as requisições pelo terminal, ou via postman/insomnia:</p>
+
+<pre><code>    curl -X POST -H 'Bearer tokensecretogeradonofrontend' https://api-autenticada.net/resources
+</code></pre>
+
+<p>Dependendo da solução de identidade e autenticação utilizada na API, você pode tentar reproduzir as requisições e gerar o token no seu formato final.</p>
+
+<p>Mas alguns provedores, como o <a href="https://www.okta.com/">Okta</a> ou o <a href="https://www.keycloak.org/">Keycloak</a> dificultam essa tática, pois envolvem o uso de <a href="https://pt.wikipedia.org/wiki/Nonce">nonces</a> ou processamento adicional dos valores trocados entre cliente e servidor.</p>
+
+<p>Essas etapas são de difícil reprodução, e podem tomar muito tempo.</p>
+
+<p>Uma alternativa é a automatização do acesso realizado no front end com um navegador <code>headless</code>, como o puppeteer.</p>
+
+<hr/>
+
+<h2>Identificando as requisições chave</h2>
+
+<p>Pra entender o funcionamento da API, e qual token você precisa acessar, recomendo utilizar a aplicação com o monitor de rede aberto.</p>
+
+<p>Geralmente, existe um (ou vários) endpoints que envolvem a troca de um par de login/senha por um valor intermediário, que depois é utilizado para produzir um token.</p>
+
+<p>Esse token vai ser utilizado como cabeçalho para as futuras requisições.</p>
+
+<h2>Automatizando a extração do token com puppeteer</h2>
+
+<p>No exemplo abaixo, tenho uma aplicação com o frontend rodando em <a href="http://localhost:3000">http://localhost:3000</a>, que por sua vez acessa uma API em <a href="http://localhost:8080">http://localhost:8080</a>, autenticada através do Okta.</p>
+
+<p>A requisição que retorna o token pro frontend foi identificada como sendo um <code>POST</code> para <a href="http://localhost:8080/api/token">http://localhost:8080/api/token</a></p>
+
+<p>O puppeteer é configurado para acessar o frontend, inserir valores num formulário de login e apertar o botão de enviar o formulário.</p>
+
+<p>Dali em diante, adicionamos um <code>listener</code> em todas as requisições finalizadas (<code>requestfinished</code>), e filtramos a requisição que trás como resposta o token, com a função <code>onRequestFinished</code>.</p>
+
+<p>Coloquei uma verificação adicional (<code>request.method()</code> precisa ser <code>POST</code>), pois é comum o envio de uma requisição <code>OPTIONS</code> pelo frontend antes da requisição verdadeira.</p>
+
+<pre><code>    // get_token.js
+    const puppeteer = require("puppeteer");
+
+    const onRequestFinished = async (request) =&gt; {
+      if (request.url() !== 'http://localhost:8080/api/token') {
+        return;
+      }
+      if (request.method() !== 'POST') {
+        return;
+      }
+      const response = request.response();
+      try {
+        const responseContent = await response.json();
+        console.log(JSON.stringify(responseContent));
+      } catch (e) {
+        console.log(`Could not parse JSON response, details: ${e}`);
+      }
+      return;
+    }
+
+    (async () =&gt; {
+      const browser = await puppeteer.launch({ headless: true });
+      const page = await browser.newPage();
+      await page.goto("http://localhost:3000", { waitUntil: "load" });
+
+      await page.waitForSelector("input[type=email]", {
+        visible: true,
+      });
+      await page.focus("input[type=email]");
+      await page.type("input[type=email]", "john@doe.com");
+
+      await page.focus("input[type=password]");
+      await page.type("input[type=password]", "mystrongpassword");
+
+      await page.click("button.btn-primary");
+
+      page.on("requestfinished", onRequestFinished);
+      await page.waitForNavigation({ waitUntil: "networkidle0" });
+      await browser.close();
+    })();
+</code></pre>
+
+<p>No exemplo, assumi que o retorno da requisição é no formato json.</p>
+
+<p>Rodando o script com</p>
+
+<pre><code>    node get_token.js | jq -r .
+</code></pre>
+
+<p>Temos um output no formato:</p>
+
+<pre><code>    {
+      "token": "eyJhbGciOiJlUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwiZW1haWwiOiJqb2FvQGV4YW1wbGUuY29tIiwicm9sZSI6W10sImlhdCI6MTY2NTQwODg4OCwiZXhwIjoxNjY1NDM3Njg4LCJhdWQiOiJlcHNvbiIsImlzcyI6ImVwc29uIiwic3ViIjoiam9hb0BleGFtcGxlLmNvbSJ9.Q6PBDCWjvguo123Scb1TZ3SuhQ8Mw_CAx4R5Q-KciY",
+      "name": "JOHN DOE",
+      "registration": null,
+      "rfidCode": null,
+      "birthDate": null,
+      "admissionDate": null,
+      "demissionDate": null,
+      "status": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2022-10-05T13:30:07.000Z",
+      "updatedAt": "2022-10-05T13:30:07.000Z",
+      "deletedAt": null,
+      "teamId": null,
+      "roleId": null,
+      "team": null
+    }
+</code></pre>
+
+<p>E a requisição final fica no formato:</p>
+
+<pre><code>    curl -X POST \
+    -H 'Bearer eyJhbGciOiJlUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwiZW1haWwiOiJqb2FvQGV4YW1wbGUuY29tIiwicm9sZSI6W10sImlhdCI6MTY2NTQwODg4OCwiZXhwIjoxNjY1NDM3Njg4LCJhdWQiOiJlcHNvbiIsImlzcyI6ImVwc29uIiwic3ViIjoiam9hb0BleGFtcGxlLmNvbSJ9.Q6PBDCWjvguo123Scb1TZ3SuhQ8Mw_CAx4R5Q-KciY' \
+    http://localhost:8000/resources
+</code></pre>
+
+<p>Tags: <a href='tag_node.html'>node</a>, <a href='tag_puppeteer.html'>puppeteer</a>, <a href='tag_oauth2.html'>oauth2</a></p>
+<!-- text end -->
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/interceptando-tokens-com-puppeteer.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/interceptando-tokens-com-puppeteer.html'><span id='count-9818'></span></a>&nbsp;</p>
+<!-- entry end -->
+</div>
+<div id="footer">CC by-nc-nd <a href="https://twitter.com/gui_garcia67">Guilherme Garcia</a> &mdash; <a href="mailto:gui&#46;garcia67&#64;gmail&#46;com">gui&#46;garcia67&#64;gmail&#46;com</a><br/>
+Generated with <a href="https://github.com/cfenollosa/bashblog">bashblog</a>, a single bash script to easily create blogs like this one</div>
+</div></div>
+</body></html>
