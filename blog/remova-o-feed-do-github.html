@@ -1,0 +1,201 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="main.css" type="text/css" />
+<link rel="stylesheet" href="blog.css" type="text/css" />
+<link rel="stylesheet" href="code.css" type="text/css" />
+<link rel="alternate" type="application/rss+xml" title="Inscrever-se nesta página..." href="feed.rss" />
+<title>Remova o feed do github</title>
+<meta name='twitter:card' content='summary' />
+<meta name='twitter:site' content='@gui_garcia67' />
+<meta name='twitter:title' content='Remova o feed do github' />
+<meta name='twitter:description' content=" mg;nl: vamos criar um bookmarklet pra remover o feed da página inicial do github.  Se você é como eu, provavelmente já entrou no seguinte loop:   Você fica com dúvida sobre um projeto hospedado no github Você acessa https://github.com. Você " />
+</head><body>
+<div id="divbodyholder">
+<div class="headerholder"><div class="header">
+<div id="title">
+<h1 class="nomargin"><a class="ablack" href="https://guilhermegarcia.dev/blog/index.html">Blog do guilherme</a></h1>
+<div id="description">programação e outras coisas menos úteis</div>
+</div></div></div>
+<div id="divbody"><div class="content">
+<!-- entry begin -->
+<h3><a class="ablack" href="remova-o-feed-do-github.html">
+Remova o feed do github
+</a></h3>
+<!-- bashblog_timestamp: #202210102053.57# -->
+<div class="subtitle">outubro 10, 2022 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p><abbr title="muito grande;nem li">mg;nl</abbr>: vamos criar um bookmarklet pra remover o feed da página inicial do github.</p>
+
+<p>Se você é como eu, provavelmente já entrou no seguinte loop:</p>
+
+<ol>
+<li>Você fica com dúvida sobre um projeto hospedado no github</li>
+<li>Você acessa <a href="https://github.com">https://github.com</a>.</li>
+<li>Você fica interessado no que as pessoas andaram fazendo, e acaba clicando em alguma coisa.</li>
+<li>Você mata a curiosidade e sai do github.</li>
+<li>????</li>
+<li>Você lembra da dúvida sobre o projeto</li>
+<li>repeat</li>
+</ol>
+
+<p>Vamos remover a distração da homepage do github usando um pouco de javascript.</p>
+
+<hr/>
+
+<h2>Bookmarklets</h2>
+
+<p>Bookmarklets são como favoritos, mas ao invés de direcionar para uma nova página, rodam um <em>snippet</em> de javascript na página atual.</p>
+
+<p>Eles precisam seguir as seguintes regras:</p>
+
+<ol>
+<li>Ter <code>javascript:</code> no início</li>
+<li>Estar encapsulado numa <a href="https://en.wikipedia.org/wiki/Immediately_invoked_function_expression">IIFE</a></li>
+</ol>
+
+<p>Ou seja, deve seguir o seguinte formato:</p>
+
+<pre><code>    javascript:(function(){
+      alert("Bookmarklet!");
+    })();
+</code></pre>
+
+<h2>Feed: página inicial do github</h2>
+
+<p>Se você está logado, a página inicial do github tem esse formato:</p>
+
+<p><img src="./imgs/remova-o-feed-do-github/github-home.jpg" alt="Captura de tela da home do Github" title="Captura de tela da home do Github" /></p>
+
+<p>Inspecionando o HTML da página, vemos que a seção principal é dividida em dois containers.</p>
+
+<p>O primeiro contém o menu da esquerda (menu com os repositórios):</p>
+
+<p><img src="./imgs/remova-o-feed-do-github/menu-repositorios-github-home.jpg" alt="Menu com os repositórios na home do Github" title="Menu com os repositórios na home do Github" /></p>
+
+<p>O segundo é dividido em dois. Primeiro, o feed central:</p>
+
+<p><img src="./imgs/remova-o-feed-do-github/menu-central-feed-github-home.jpg" alt="Feed central da home do Github" title="Feed central da home do Github" /></p>
+
+<p>Depois, o feed com as últimas atualizações e recomendações de repositório:</p>
+
+<p><img src="./imgs/remova-o-feed-do-github/feed-atualizacoes-github-home.jpg" alt="Feed com atualizações da home do Github" title="Feed com atualização da home do Github" /></p>
+
+<h2>Removendo os feeds</h2>
+
+<p>Sabendo o markup, podemos utilizar javascript para removê-los.</p>
+
+<p>O feed principal pode ser selecionado pelo seu id:</p>
+
+<pre><code>    document.querySelector("#dashboard-feed-frame")
+</code></pre>
+
+<p>O feed de atualizações pode ser selecionado pelo seu <code>aria-role</code>:</p>
+
+<pre><code>    document.querySelector("aside[aria-label=Explore]")
+</code></pre>
+
+<p>Podemos utilizar uma iteração para selecionar e removê-los:</p>
+
+<pre><code>    [
+        "#dashboard-feed-frame",
+        "aside[aria-label=Explore]"
+    ].forEach((selector) =&gt; document.querySelector(selector).remove())
+</code></pre>
+
+<p>Você pode ver o resultado na imagem abaixo:</p>
+
+<p><img src="./imgs/remova-o-feed-do-github/empty-github-home.png" alt="Home do github sem os feeds" title="Home do github sem os feeds" /></p>
+
+<h2>Ocupando a tela com informações (úteis)</h2>
+
+<p>A tela fica meio vazia, e o espaço mau aproveitado, sem os feeds.</p>
+
+<p>Vamos expandir o conteúdo útil. O que sobrou na tela principal pode ser acessado pela classe <code>.application-main</code>.</p>
+
+<pre><code>    const appMain = document.querySelector(".application-main");
+</code></pre>
+
+<p>A estrutura dentro desse elemento é no seguinte formato:</p>
+
+<pre><code>&lt;div class="application-main " ...&gt;
+    &lt;div class="d-md-flex color-bg-inset" style="min-height: 100vh;"&gt;
+        &lt;aside data-turbo="false" class="team-left-column ..." aria-label="Account"&gt;
+            &lt;!-- LISTA DE REPOSITÓRIOS --&gt;
+        &lt;/aside&gt;
+        &lt;div class="flex-auto col-md-8 col-lg-8 px-3 px-lg-5"&gt;
+            &lt;!-- RODAPÉ --&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+
+<p>A <code>&lt;div&gt;</code> logo abaixo do nosso <code>appMain</code> serve como um <em>wrapper</em> flexbox. Vamos adicionar um <code>flex-direction: column</code> e centralizar o conteúdo:</p>
+
+<pre><code>appMain.querySelector("div").style.flexDirection = "column";
+appMain.querySelector("div").style.alignItems = "center";
+</code></pre>
+
+<p>Vamos também expandir a lista de repositórios para ocupar toda a largura disponível:</p>
+
+<pre><code>    ["aside", "aside div"].forEach((sel) =&gt; appMain.querySelector(sel).style.minWidth = "100vw");
+</code></pre>
+
+<p>Sem distrações!</p>
+
+<p><img src="./imgs/remova-o-feed-do-github/sem-distracoes.png" alt="Home do github sem distrações" title="Home do github sem distrações" /></p>
+
+<h2>O bookmarklet final</h2>
+
+<p>O seguinte código vai ajustar sua home em um clique:</p>
+
+<pre><code>    [
+        "#dashboard-feed-frame",
+        "aside[aria-label=Explore]"
+    ].forEach((selector) =&gt; document.querySelector(selector).remove());
+
+    const appMain = document.querySelector(".application-main");
+
+    appMain.querySelector("div").style.flexDirection = "column";
+    appMain.querySelector("div").style.alignItems = "center";
+
+    ["aside", "aside div"].forEach((sel) =&gt; appMain.querySelector(sel).style.minWidth = "100vw");
+</code></pre>
+
+<p>E, formatado para bookmarklet, fica da seguinte forma:</p>
+
+<pre><code>    javascript:(function(){
+        [
+            "#dashboard-feed-frame",
+            "aside[aria-label=Explore]"
+        ].forEach((selector) =&gt; document.querySelector(selector).remove());
+
+        const appMain = document.querySelector(".application-main");
+
+        appMain.querySelector("div").style.flexDirection = "column";
+        appMain.querySelector("div").style.alignItems = "center";
+
+        ["aside", "aside div"].forEach((sel) =&gt; appMain.querySelector(sel).style.minWidth = "100vw");
+    })();
+</code></pre>
+
+<h2>Referências</h2>
+
+<ol>
+<li><a href="https://gist.github.com/caseywatts/c0cec1f89ccdb8b469b1">https://gist.github.com/caseywatts/c0cec1f89ccdb8b469b1</a></li>
+</ol>
+
+<p>Tags: <a href='tag_bookmarklet.html'>bookmarklet</a>, <a href='tag_javascript.html'>javascript</a></p>
+<!-- text end -->
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/remova-o-feed-do-github.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/remova-o-feed-do-github.html'><span id='count-22818'></span></a>&nbsp;</p>
+<!-- entry end -->
+</div>
+<div id="footer">CC by-nc-nd <a href="https://twitter.com/gui_garcia67">Guilherme Garcia</a> &mdash; <a href="mailto:gui&#46;garcia67&#64;gmail&#46;com">gui&#46;garcia67&#64;gmail&#46;com</a><br/>
+Generated with <a href="https://github.com/cfenollosa/bashblog">bashblog</a>, a single bash script to easily create blogs like this one</div>
+</div></div>
+</body></html>
