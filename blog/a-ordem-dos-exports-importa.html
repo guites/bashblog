@@ -1,0 +1,135 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="main.css" type="text/css" />
+<link rel="stylesheet" href="blog.css" type="text/css" />
+<link rel="stylesheet" href="code.css" type="text/css" />
+<link rel="alternate" type="application/rss+xml" title="Inscrever-se nesta página..." href="feed.rss" />
+<title>A ordem dos exports importa</title>
+<meta name='twitter:card' content='summary' />
+<meta name='twitter:site' content='@gui_garcia67' />
+<meta name='twitter:title' content='A ordem dos exports importa' />
+<meta name='twitter:description' content=" mg;nl: quando você utiliza um arquivo index.js para exportar módulos no react, a ordem dos exports pode quebrar seu app se dois módulos importam um ao outro, causando um Uncaught TypeError: _MyModule__WEBPACK_IMPORTED_MODULE_1__ is undefined.  O " />
+</head><body>
+<div id="divbodyholder">
+<div class="headerholder"><div class="header">
+<div id="title">
+<h1 class="nomargin"><a class="ablack" href="https://guilhermegarcia.dev/blog/index.html">Blog do guilherme</a></h1>
+<div id="description">programação e outras coisas menos úteis</div>
+</div></div></div>
+<div id="divbody"><div class="content">
+<!-- entry begin -->
+<h3><a class="ablack" href="a-ordem-dos-exports-importa.html">
+A ordem dos exports importa
+</a></h3>
+<!-- bashblog_timestamp: #202210120157.25# -->
+<div class="subtitle">outubro 12, 2022 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p><abbr title="muito grande;nem li">mg;nl</abbr>: quando você utiliza um arquivo index.js para exportar módulos no react, a ordem dos exports pode quebrar seu app se dois módulos importam um ao outro, causando um <code>Uncaught TypeError: _MyModule__WEBPACK_IMPORTED_MODULE_1__ is undefined</code>.</p>
+
+<p>O react tem uma funcionalidade muito boa, o <a href="https://create-react-app.dev/docs/importing-a-component/#absolute-imports">absolute imports</a>, que ajuda você a não precisar ficar lidando com o caminho relativo entre os arquivos.</p>
+
+<p>Se seu app tem uma estrutura do tipo</p>
+
+<pre><code>    - src/
+        - components/
+        - pages/
+</code></pre>
+
+<p>Você pode, num arquivo em <code>src/pages/Home.jsx</code>, importar módulos de duas formas</p>
+
+<pre><code>    // bad! &gt;:(
+    import { ButtonGroup } from '../components/ButtonGroup';
+    import { MyButton } from '../components/RadioGroup';
+
+    // good! &gt;:)
+    import { ButtonGroup, MyButton } from 'components';
+</code></pre>
+
+<p>Basta você largar um arquivo <code>jsconfig.json</code> na raíz do seu projeto, passando o diretório <code>src/</code> como <code>baseUrl</code>:</p>
+
+<pre><code>    {
+      "compilerOptions": {
+        "baseUrl": "src"
+      },
+      "include": ["src"]
+    }
+</code></pre>
+
+<p>Porém existem algum gotchas quando você começa a agrupar seus exports.</p>
+
+<hr/>
+
+<h2>Agrupando exports</h2>
+
+<p>Pra que você possa agrupar todos os módulos em um mesmo import, você precisa utilizar um <code>index.js</code> no escopo de cada diretório.</p>
+
+<pre><code>- src/
+    - components/
+        - index.js
+        - ButtonGroup/
+            - ButtonGroup.jsx
+            - index.js
+        - MyButton/
+            - MyButton.jsx
+            - index.js
+    - pages/
+        - ...
+</code></pre>
+
+<p>Para cada módulo, você precisa exportar no index.js o conteúdo do seu arquivo .jsx adjacente:</p>
+
+<pre><code>// arquivo src/components/ButtonGroup/index.js
+
+export * from './ButtonGroup';
+</code></pre>
+
+<p>E no index do diretório em sí (components/, pages/, ..) você precisa exportar também cada módulo:</p>
+
+<pre><code>// arquivo src/components/index.js
+
+// this is bad &gt;:(
+
+export * from './ButtonGroup';
+export * from './MyButton';
+</code></pre>
+
+<p>Agora você pode acessá-los de fora.</p>
+
+<h2>Gotcha nos exports</h2>
+
+<p>O que vai acontecer caso o ButtonGroup.jsx precise importar o componente MyButton?</p>
+
+<p>Isso mesmo, um bug sinistro.</p>
+
+<p>Abrindo o terminal você pode ver um <code>TypeError</code> não tratado:</p>
+
+<pre><code>    Uncaught TypeError: _MyButton__WEBPACK_IMPORTED_MODULE_1__ is undefined
+</code></pre>
+
+<p>A solução está na ordem dos exports: como o MyButton é acessado dentro do ButtonGroup, ele precisa ser exportado primeiro:</p>
+
+<pre><code>// arquivo src/components/index.js
+
+// this is good &gt;:)
+
+export * from './MyButton';
+export * from './ButtonGroup';
+</code></pre>
+
+<p>Bom desenvolvimento!</p>
+
+<p>Tags: <a href='tag_react.html'>react</a>, <a href='tag_javascript.html'>javascript</a></p>
+<!-- text end -->
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/a-ordem-dos-exports-importa.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/a-ordem-dos-exports-importa.html'><span id='count-17220'></span></a>&nbsp;</p>
+<!-- entry end -->
+</div>
+<div id="footer">CC by-nc-nd <a href="https://twitter.com/gui_garcia67">Guilherme Garcia</a> &mdash; <a href="mailto:gui&#46;garcia67&#64;gmail&#46;com">gui&#46;garcia67&#64;gmail&#46;com</a><br/>
+Generated with <a href="https://github.com/cfenollosa/bashblog">bashblog</a>, a single bash script to easily create blogs like this one</div>
+</div></div>
+</body></html>

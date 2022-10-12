@@ -10,7 +10,7 @@
 <meta name='twitter:card' content='summary' />
 <meta name='twitter:site' content='@gui_garcia67' />
 <meta name='twitter:title' content='Blog do guilherme &mdash; Posts marcados com "javascript"' />
-<meta name='twitter:description' content=" Remova o feed do github   outubro 10, 2022 &mdash;  Guilherme Garcia    mg;nl: vamos criar um bookmarklet pra remover o feed da página inicial do github.  Se você é como eu, provavelmente já entrou no seguinte loop:   Você fica com dúvida sobr" />
+<meta name='twitter:description' content=" A ordem dos exports importa   outubro 12, 2022 &mdash;  Guilherme Garcia    mg;nl: quando você utiliza um arquivo index.js para exportar módulos no react, a ordem dos exports pode quebrar seu app se dois módulos importam um ao outro, causando um " />
 </head><body>
 <div id="divbodyholder">
 <div class="headerholder"><div class="header">
@@ -19,6 +19,52 @@
 <div id="description">programação e outras coisas menos úteis</div>
 </div></div></div>
 <div id="divbody"><div class="content">
+<h3><a class="ablack" href="a-ordem-dos-exports-importa.html">
+A ordem dos exports importa
+</a></h3>
+<!-- bashblog_timestamp: #202210120157.25# -->
+<div class="subtitle">outubro 12, 2022 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p><abbr title="muito grande;nem li">mg;nl</abbr>: quando você utiliza um arquivo index.js para exportar módulos no react, a ordem dos exports pode quebrar seu app se dois módulos importam um ao outro, causando um <code>Uncaught TypeError: _MyModule__WEBPACK_IMPORTED_MODULE_1__ is undefined</code>.</p>
+
+<p>O react tem uma funcionalidade muito boa, o <a href="https://create-react-app.dev/docs/importing-a-component/#absolute-imports">absolute imports</a>, que ajuda você a não precisar ficar lidando com o caminho relativo entre os arquivos.</p>
+
+<p>Se seu app tem uma estrutura do tipo</p>
+
+<pre><code>    - src/
+        - components/
+        - pages/
+</code></pre>
+
+<p>Você pode, num arquivo em <code>src/pages/Home.jsx</code>, importar módulos de duas formas</p>
+
+<pre><code>    // bad! &gt;:(
+    import { ButtonGroup } from '../components/ButtonGroup';
+    import { MyButton } from '../components/RadioGroup';
+
+    // good! &gt;:)
+    import { ButtonGroup, MyButton } from 'components';
+</code></pre>
+
+<p>Basta você largar um arquivo <code>jsconfig.json</code> na raíz do seu projeto, passando o diretório <code>src/</code> como <code>baseUrl</code>:</p>
+
+<pre><code>    {
+      "compilerOptions": {
+        "baseUrl": "src"
+      },
+      "include": ["src"]
+    }
+</code></pre>
+
+<p>Porém existem algum gotchas quando você começa a agrupar seus exports.</p>
+
+<p class="readmore"><a href="a-ordem-dos-exports-importa.html">Ler mais...</a></p>
+<p>Tags: <a href='tag_react.html'>react</a>, <a href='tag_javascript.html'>javascript</a></p>
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/a-ordem-dos-exports-importa.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/a-ordem-dos-exports-importa.html'><span id='count-17220'></span></a>&nbsp;</p>
 <h3><a class="ablack" href="remova-o-feed-do-github.html">
 Remova o feed do github
 </a></h3>
