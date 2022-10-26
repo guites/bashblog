@@ -10,7 +10,7 @@
 <meta name='twitter:card' content='summary' />
 <meta name='twitter:site' content='@gui_garcia67' />
 <meta name='twitter:title' content='Blog do guilherme &mdash; Posts marcados com "bash"' />
-<meta name='twitter:description' content=" Mantendo data de criação de arquivos no git   Fevereiro 06, 2022 &mdash;  Guilherme Garcia    mg;nl: Vamos desenvolver dois scripts, um pra adicionar a data da ultima alteração de um arquivo em forma de uma timestamp, evitando que ela seja perdi" />
+<meta name='twitter:description' content=" Comparando json na linha de comando   outubro 25, 2022 &mdash;  Guilherme Garcia    mg;nl: vamos usar o vimdiff e o jq para comparar arquivos json independente da formatação.  Comparar arquivos json parecidos pode ser complicado. Muitas vezes os a" />
 </head><body>
 <div id="divbodyholder">
 <div class="headerholder"><div class="header">
@@ -19,6 +19,29 @@
 <div id="description">programação e outras coisas menos úteis</div>
 </div></div></div>
 <div id="divbody"><div class="content">
+<h3><a class="ablack" href="comparando-json-na-linha-de-comando.html">
+Comparando json na linha de comando
+</a></h3>
+<!-- bashblog_timestamp: #202210252245.36# -->
+<div class="subtitle">outubro 25, 2022 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p><abbr title="muito grande;nem li">mg;nl</abbr>: vamos usar o <a href="https://vimdoc.sourceforge.net/htmldoc/diff.html">vimdiff</a> e o <a href="https://stedolan.github.io/jq/">jq</a> para comparar arquivos json independente da formatação.</p>
+
+<p>Comparar arquivos json parecidos pode ser complicado. Muitas vezes os arquivos foram formatados com espaçamentos diferentes, ou a diferença não ocorre no mesmo nível hierarquico.</p>
+
+<p>Vamos criar um script simples pra comparar arquivos json diretamente pelo terminal, usando o programa <code>jq</code> e o <code>vimdiff</code>.</p>
+
+<p>Vamos ver também como preparar um script bash pra lidar com erros conhecidos, como arquivos com json inválido ou de outro formato.</p>
+
+<p><aside>Os exemplos usados foram gerados usando <a href="https://json-generator.com">https://json-generator.com</a></aside></p>
+
+<p class="readmore"><a href="comparando-json-na-linha-de-comando.html">Ler mais...</a></p>
+<p>Tags: <a href='tag_json.html'>json</a>, <a href='tag_vimdiff.html'>vimdiff</a>, <a href='tag_cli.html'>cli</a>, <a href='tag_bash.html'>bash</a></p>
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/comparando-json-na-linha-de-comando.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/comparando-json-na-linha-de-comando.html'><span id='count-25112'></span></a>&nbsp;</p>
 <h3><a class="ablack" href="mantendo-data-de-criacao-de-arquivos-no-git.html">
 Mantendo data de criação de arquivos no git
 </a></h3>
@@ -35,7 +58,7 @@ já deve ter reparado que, cada vez que você clona o repositório, a data de cr
 
 <p>Vou apresentar nesse post os métodos que eu utilizo para persistir essa informação.</p>
 
-<p class="readmore"><a href="./mantendo-data-de-criacao-de-arquivos-no-git.html">Ler mais...</a></p>
+<p class="readmore"><a href="mantendo-data-de-criacao-de-arquivos-no-git.html">Ler mais...</a></p>
 <p>Tags: <a href='tag_git.html'>git</a>, <a href='tag_bash.html'>bash</a></p>
 <p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/mantendo-data-de-criacao-de-arquivos-no-git.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
 <a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/mantendo-data-de-criacao-de-arquivos-no-git.html'><span id='count-28974'></span></a>&nbsp;</p>
@@ -54,7 +77,7 @@ Guilherme Garcia
 
 <p>Faço um panorama dos formatos de sitemap existente, suas diferenças, e depois proponho uma função, escrita em bash, para gerar um sitemap baseado numa listagem de arquivos html presentes num diretório. </p>
 
-<p class="readmore"><a href="./automatizando-a-geracao-de-site-map.html">Ler mais...</a></p>
+<p class="readmore"><a href="automatizando-a-geracao-de-site-map.html">Ler mais...</a></p>
 <p>Tags: <a href='tag_seo.html'>seo</a>, <a href='tag_bash.html'>bash</a>, <a href='tag_bashblog.html'>bashblog</a></p>
 <p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/automatizando-a-geracao-de-site-map.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
 <a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/automatizando-a-geracao-de-site-map.html'><span id='count-28856'></span></a>&nbsp;</p>
@@ -80,7 +103,7 @@ Guilherme Garcia
 
 <p>ps. com o quarto item eu consegui gerar um <a href="https://github.com/cfenollosa/bashblog/pull/168">pull request</a></p>
 
-<p class="readmore"><a href="./coisas-que-eu-nao-sabia-sobre-bash.html">Ler mais...</a></p>
+<p class="readmore"><a href="coisas-que-eu-nao-sabia-sobre-bash.html">Ler mais...</a></p>
 <p>Tags: <a href='tag_bash.html'>bash</a></p>
 <p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/coisas-que-eu-nao-sabia-sobre-bash.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
 <a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/coisas-que-eu-nao-sabia-sobre-bash.html'><span id='count-9601'></span></a>&nbsp;</p>

@@ -2,9 +2,31 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
 <channel><title>Blog do guilherme</title><link>https://guilhermegarcia.dev/blog/index.html</link>
 <description>programação e outras coisas menos úteis</description><language>en</language>
-<lastBuildDate>Wed, 12 Oct 2022 01:59:03 -0300</lastBuildDate>
-<pubDate>Wed, 12 Oct 2022 01:59:03 -0300</pubDate>
+<lastBuildDate>Tue, 25 Oct 2022 22:47:29 -0300</lastBuildDate>
+<pubDate>Tue, 25 Oct 2022 22:47:29 -0300</pubDate>
 <atom:link href="https://guilhermegarcia.dev/blog/feed.rss" rel="self" type="application/rss+xml" />
+<item><title>
+Comparando json na linha de comando
+</title><description><![CDATA[
+
+<p><abbr title="muito grande;nem li">mg;nl</abbr>: vamos usar o <a href="https://vimdoc.sourceforge.net/htmldoc/diff.html">vimdiff</a> e o <a href="https://stedolan.github.io/jq/">jq</a> para comparar arquivos json independente da formatação.</p>
+
+<p>Comparar arquivos json parecidos pode ser complicado. Muitas vezes os arquivos foram formatados com espaçamentos diferentes, ou a diferença não ocorre no mesmo nível hierarquico.</p>
+
+<p>Vamos criar um script simples pra comparar arquivos json diretamente pelo terminal, usando o programa <code>jq</code> e o <code>vimdiff</code>.</p>
+
+<p>Vamos ver também como preparar um script bash pra lidar com erros conhecidos, como arquivos com json inválido ou de outro formato.</p>
+
+<p><aside>Os exemplos usados foram gerados usando <a href="https://json-generator.com">https://json-generator.com</a></aside></p>
+
+<hr/>
+<p>Tags: <a href='tag_json.html'>json</a>, <a href='tag_vimdiff.html'>vimdiff</a>, <a href='tag_cli.html'>cli</a>, <a href='tag_bash.html'>bash</a></p>
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/comparando-json-na-linha-de-comando.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/comparando-json-na-linha-de-comando.html'><span id='count-25112'></span></a>&nbsp;</p>
+]]></description><link>https://guilhermegarcia.dev/blog/comparando-json-na-linha-de-comando.html</link>
+<guid>https://guilhermegarcia.dev/blog/./comparando-json-na-linha-de-comando.html</guid>
+<dc:creator>Guilherme Garcia</dc:creator>
+<pubDate>Tue, 25 Oct 2022 22:45:36 -0300</pubDate></item>
 <item><title>
 A ordem dos exports importa
 </title><description><![CDATA[
@@ -269,23 +291,4 @@ Depurando PHP com XDEBUG no VS Code
 <guid>https://guilhermegarcia.dev/blog/./depurando-php-com-xdebug-no-vs-code.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
 <pubDate>Sat, 12 Feb 2022 21:06:07 -0300</pubDate></item>
-<item><title>
-Mantendo data de criação de arquivos no git
-</title><description><![CDATA[
-
-<p><abbr title="muito grande; nem li">mg;nl</abbr>: Vamos desenvolver dois scripts, um pra adicionar a data da ultima alteração de um arquivo em forma de uma timestamp, evitando que ela seja perdida quando o arquivo é copiado ou movido, e outro para ordená-los através da data presente na timestamp. </p>
-
-<p>Se você está versionando seus arquivos com git, usando um remote como o <a href="https://about.gitlab.com/">gitlab</a>, <a href="https://github.com/">github</a> ou <a href="https://www.heroku.com/home">heroku</a>, 
-já deve ter reparado que, cada vez que você clona o repositório, a data de criação e modificação dos arquivos passa pro momento que você clonou.</p>
-
-<p>Vou apresentar nesse post os métodos que eu utilizo para persistir essa informação.</p>
-
-<hr/>
-<p>Tags: <a href='tag_git.html'>git</a>, <a href='tag_bash.html'>bash</a></p>
-<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/mantendo-data-de-criacao-de-arquivos-no-git.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/mantendo-data-de-criacao-de-arquivos-no-git.html'><span id='count-28974'></span></a>&nbsp;</p>
-]]></description><link>https://guilhermegarcia.dev/blog/mantendo-data-de-criacao-de-arquivos-no-git.html</link>
-<guid>https://guilhermegarcia.dev/blog/./mantendo-data-de-criacao-de-arquivos-no-git.html</guid>
-<dc:creator>Guilherme Garcia</dc:creator>
-<pubDate>Sun, 06 Feb 2022 03:07:55 -0300</pubDate></item>
 </channel></rss>

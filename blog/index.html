@@ -10,7 +10,7 @@
 <meta name='twitter:card' content='summary' />
 <meta name='twitter:site' content='@gui_garcia67' />
 <meta name='twitter:title' content='Blog do guilherme' />
-<meta name='twitter:description' content=" A ordem dos exports importa   outubro 12, 2022 &mdash;  Guilherme Garcia    mg;nl: quando você utiliza um arquivo index.js para exportar módulos no react, a ordem dos exports pode quebrar seu app se dois módulos importam um ao outro, causando um " />
+<meta name='twitter:description' content=" Comparando json na linha de comando   outubro 25, 2022 &mdash;  Guilherme Garcia    mg;nl: vamos usar o vimdiff e o jq para comparar arquivos json independente da formatação.  Comparar arquivos json parecidos pode ser complicado. Muitas vezes os a" />
 </head><body>
 <div id="divbodyholder">
 <div class="headerholder"><div class="header">
@@ -19,6 +19,29 @@
 <div id="description">programação e outras coisas menos úteis</div>
 </div></div></div>
 <div id="divbody"><div class="content">
+<h3><a class="ablack" href="comparando-json-na-linha-de-comando.html">
+Comparando json na linha de comando
+</a></h3>
+<!-- bashblog_timestamp: #202210252245.36# -->
+<div class="subtitle">outubro 25, 2022 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p><abbr title="muito grande;nem li">mg;nl</abbr>: vamos usar o <a href="https://vimdoc.sourceforge.net/htmldoc/diff.html">vimdiff</a> e o <a href="https://stedolan.github.io/jq/">jq</a> para comparar arquivos json independente da formatação.</p>
+
+<p>Comparar arquivos json parecidos pode ser complicado. Muitas vezes os arquivos foram formatados com espaçamentos diferentes, ou a diferença não ocorre no mesmo nível hierarquico.</p>
+
+<p>Vamos criar um script simples pra comparar arquivos json diretamente pelo terminal, usando o programa <code>jq</code> e o <code>vimdiff</code>.</p>
+
+<p>Vamos ver também como preparar um script bash pra lidar com erros conhecidos, como arquivos com json inválido ou de outro formato.</p>
+
+<p><aside>Os exemplos usados foram gerados usando <a href="https://json-generator.com">https://json-generator.com</a></aside></p>
+
+<p class="readmore"><a href="./comparando-json-na-linha-de-comando.html">Ler mais...</a></p>
+<p>Tags: <a href='tag_json.html'>json</a>, <a href='tag_vimdiff.html'>vimdiff</a>, <a href='tag_cli.html'>cli</a>, <a href='tag_bash.html'>bash</a></p>
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/comparando-json-na-linha-de-comando.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/comparando-json-na-linha-de-comando.html'><span id='count-25112'></span></a>&nbsp;</p>
 <h3><a class="ablack" href="a-ordem-dos-exports-importa.html">
 A ordem dos exports importa
 </a></h3>
@@ -240,39 +263,6 @@ Guilherme Garcia
 <p>Tags: <a href='tag_flutter.html'>flutter</a></p>
 <p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/gerenciando-estado-num-app-flutter-com-provider.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
 <a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/gerenciando-estado-num-app-flutter-com-provider.html'><span id='count-13735'></span></a>&nbsp;</p>
-<h3><a class="ablack" href="criando-um-app-com-flutter-e-sqlite.html">
-Criando um app com Flutter e sqlite
-</a></h3>
-<!-- bashblog_timestamp: #202202210840.47# -->
-<div class="subtitle">Fevereiro 21, 2022 &mdash; 
-Guilherme Garcia
-</div>
-<!-- text begin -->
-
-<p><abbr title="muito grande; nem li">mg;nl</abbr>: neste post vamos configurar um projeto em flutter utilizando sqlite3 e models criados utilizando geração de código. Vamos verificar também como exibir esses valores utilizando o Widget FutureBuilder.</p>
-
-<p>Iniciei o desenvolvimento de um app de registro de exercícios.</p>
-
-<p>Já existem muitos aplicativos ótimos nesse ambito, e muito mais completos, mas nenhum, na minha opinião, atingiu os 3 objetivos principais que eu buscava:</p>
-
-<ol>
-<li><p>interface simples e leve: um clique tem que me levar direto pra parte principal, sem login, sem configurações. Apenas um clique, escolher o exercício, e começar a registrar.</p></li>
-<li><p>Registrar a quantidade de sets e o tempo de descanso: eu começo um exercício, faço um set e, enquanto descanso, penso na vida. Já se passaram 30 segundos, 1 minuto ou 3 minutos? Quantos sets eu já fiz, 2 ou 3?</p></li>
-<li><p>Funcionar sem internet. Eu costumo revisar meu treino enquanto caminho pra academia, e não gosto de ficar à merce da qualidade de recepção da 4g.</p></li>
-</ol>
-
-<p>Optei por desenvolver em flutter, assim consigo gerar um apk instalável no meu celular, e também hospedar a versão web pra mostrar pras pessoas.</p>
-
-<p>Neste post vou falar um pouco sobre integrar o uso de bancos de dado, em sqlite3, para aplicativos Flutter.</p>
-
-<p>O banco de dados de exercícios foi adaptado do projeto <a href="https://github.com/wger-project/wger">wger</a>.</p>
-
-<p>O código deste post pode ser encontrado no <a href="https://github.com/guites/flutter-gym-app/tree/main">branch main deste repositório</a>.</p>
-
-<p class="readmore"><a href="./criando-um-app-com-flutter-e-sqlite.html">Ler mais...</a></p>
-<p>Tags: <a href='tag_flutter.html'>flutter</a>, <a href='tag_api.html'>api</a></p>
-<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/criando-um-app-com-flutter-e-sqlite.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/criando-um-app-com-flutter-e-sqlite.html'><span id='count-11456'></span></a>&nbsp;</p>
 <div id="all_posts"><a href="todos_posts.html">Ver mais posts</a> &mdash; <a href="todas_tags.html">Todas as tags</a> &mdash; <a href="feed.rss">RSS feed</a></div>
 </div>
 <div id="footer">CC by-nc-nd <a href="https://twitter.com/gui_garcia67">Guilherme Garcia</a> &mdash; <a href="mailto:gui&#46;garcia67&#64;gmail&#46;com">gui&#46;garcia67&#64;gmail&#46;com</a><br/>

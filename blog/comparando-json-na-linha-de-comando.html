@@ -1,0 +1,284 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="main.css" type="text/css" />
+<link rel="stylesheet" href="blog.css" type="text/css" />
+<link rel="stylesheet" href="code.css" type="text/css" />
+<link rel="alternate" type="application/rss+xml" title="Inscrever-se nesta página..." href="feed.rss" />
+<title>Comparando json na linha de comando</title>
+<meta name='twitter:card' content='summary' />
+<meta name='twitter:site' content='@gui_garcia67' />
+<meta name='twitter:title' content='Comparando json na linha de comando' />
+<meta name='twitter:description' content=" mg;nl: vamos usar o vimdiff e o jq para comparar arquivos json independente da formatação.  Comparar arquivos json parecidos pode ser complicado. Muitas vezes os arquivos foram formatados com espaçamentos diferentes, ou a diferença não ocorre n" />
+</head><body>
+<div id="divbodyholder">
+<div class="headerholder"><div class="header">
+<div id="title">
+<h1 class="nomargin"><a class="ablack" href="https://guilhermegarcia.dev/blog/index.html">Blog do guilherme</a></h1>
+<div id="description">programação e outras coisas menos úteis</div>
+</div></div></div>
+<div id="divbody"><div class="content">
+<!-- entry begin -->
+<h3><a class="ablack" href="comparando-json-na-linha-de-comando.html">
+Comparando json na linha de comando
+</a></h3>
+<!-- bashblog_timestamp: #202210252245.36# -->
+<div class="subtitle">outubro 25, 2022 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p><abbr title="muito grande;nem li">mg;nl</abbr>: vamos usar o <a href="https://vimdoc.sourceforge.net/htmldoc/diff.html">vimdiff</a> e o <a href="https://stedolan.github.io/jq/">jq</a> para comparar arquivos json independente da formatação.</p>
+
+<p>Comparar arquivos json parecidos pode ser complicado. Muitas vezes os arquivos foram formatados com espaçamentos diferentes, ou a diferença não ocorre no mesmo nível hierarquico.</p>
+
+<p>Vamos criar um script simples pra comparar arquivos json diretamente pelo terminal, usando o programa <code>jq</code> e o <code>vimdiff</code>.</p>
+
+<p>Vamos ver também como preparar um script bash pra lidar com erros conhecidos, como arquivos com json inválido ou de outro formato.</p>
+
+<p><aside>Os exemplos usados foram gerados usando <a href="https://json-generator.com">https://json-generator.com</a></aside></p>
+
+<hr/>
+
+<h2>Payloads de exemplo</h2>
+
+<p>Vamos testar a comparação de dois arquivos json, <a href="./imgs/comparando-json-na-linha-de-comando/payload1.json">payload1.json</a> e <a href="./imgs/comparando-json-na-linha-de-comando/payload2.json">payload2.json</a>.</p>
+
+<p><aside>Clique no nome dos arquivos pra fazer download.</aside></p>
+
+<h2>Comparando no olho</h2>
+
+<p>Você pode fazer do jeito manual, abrindo seus arquivos e comparando no olho:</p>
+
+<pre><code>    # substitua firefox pelo seu visualizador/editor favorito
+
+    firefox payload1.json payload2.json
+</code></pre>
+
+<p><img src="./imgs/comparando-json-na-linha-de-comando/firefox-compare.png" alt="Usando um visualizador para encontrar diferenças" title="Usando um visualizadoer para encontrar diferenças" /></p>
+
+<p>Logo de cara, algumas dúvidas surgem: quais chaves o primeiro arquivo tem, que o segundo não? Em quais índices do array?</p>
+
+<p>Vamos utilizar um programa mais propício.</p>
+
+<h2>Programas de comparação de texto</h2>
+
+<p>Que tal usar o <code>diff</code>?</p>
+
+<pre><code>    diff payload1.json payload2.json
+</code></pre>
+
+<p><img src="./imgs/comparando-json-na-linha-de-comando/diff-compare.png" alt="Comparando com diff" title="Comparando com diff" /></p>
+
+<p>Opa, parece que todas as linhas são diferentes?</p>
+
+<p>Vamos investigar com <code>vimdiff</code></p>
+
+<pre><code>    vimdiff payload1.json payload2.json
+</code></pre>
+
+<p><img src="./imgs/comparando-json-na-linha-de-comando/vimdiff-compare.png" alt="Investigando com vimdiff" title="Investigando com vimdiff" /></p>
+
+<p>Ah é, o espaçamento é diferente nos dois arquivos...</p>
+
+<p><aside>Você precisa escrever <code>:qa</code> pra fechar o vimdiff!</aside></p>
+
+<h2>Ajustando a formatação</h2>
+
+<p>Vamos utilizar o <a href="https://stedolan.github.io/jq/">jq</a>, um utilitário que permite manipular arquivos json pela linha de comandos.</p>
+
+<pre><code>    sudo apt-get install jq
+</code></pre>
+
+<p>Ele tem uma opção que resolve o problema das chaves faltantes, <code>-S</code> ou <code>--sort-keys</code>, que ordena as propriedades de todos os objetos.</p>
+
+<pre><code>    jq -S . payload1.json
+</code></pre>
+
+<p><img src="./imgs/comparando-json-na-linha-de-comando/jq-output.png" alt="json formatado usando jq" title="json formatado usando jq" /></p>
+
+<p>Repare que ele também ajusta os espaçamentos.</p>
+
+<h2>Juntando tudo em <code>jsondiff</code></h2>
+
+<p>Vamos criar uma função que une a formatação de <code>jq</code> com a comparação de <code>vimdiff</code>, usando a <a href="https://www.gnu.org/software/bash/manual/html_node/Command-Substitution.html">substituição de comandos</a> do bash.</p>
+
+<pre><code>    vimdiff &lt;(jq -S . payload1.json) &lt;(jq -S . payload2.json)
+</code></pre>
+
+<p><img src="./imgs/comparando-json-na-linha-de-comando/vimdiff-jq.png" alt="Diferença com a formatação correta" title="Diferença com a formatação correta" /></p>
+
+<p>Bem melhor!</p>
+
+<p>Podemos generalizar o comando em uma função. Você pode adicioná-la diretamente no seu arquivo <code>~/.bash_aliases</code>.</p>
+
+<pre><code>    function jsondiff() {
+        vimdiff &lt;(jq -S . $1) &lt;(jq -S . $2)
+    }
+    alias ,jsondiff=jsondiff
+</code></pre>
+
+<p>Onde <code>$1</code> e <code>$2</code> fazem referência ao primeiro e segundo argumentos passados na função, respectivamente.</p>
+
+<p>Depois de editar o <code>~/.bash_aliases</code>, lembre de rodar</p>
+
+<pre><code>    source ~/.bash_aliases
+</code></pre>
+
+<p>Pra alteração surtir efeito na sessão atual.</p>
+
+<p>Você pode chamar a nova função com</p>
+
+<pre><code>    ,jsondiff payload1.json payload2.json
+</code></pre>
+
+<p><aside>A vírgula antes do nome da função é opcional, mas é uma forma fácil de lembrar o nome das suas funções customizadas. Basta digitar "," no terminal e apertar tab duas vezes :-) . </aside></p>
+
+<h2>Evitando erros em jsondiff</h2>
+
+<p>No formato atual, caso você passe como argumento um arquivo com json inválido (ou arquivo de outro formato), erros estranhos podem ocorrer.</p>
+
+<p>Salve o json abaixo num arquivo chamado <a href="./imgs/comparando-json-na-linha-de-comando/invalid.json">invalid.json</a>:</p>
+
+<pre><code>    [
+      {
+        "_id": "63587aa3e14b988f7c6c2aff",
+        "index": 0,
+        "guid": "884e6062-cfc2-4f57-a82c-081d6d5eac83",
+        "isActive": false,
+      }
+    ]
+</code></pre>
+
+<p><aside>O formato json não permite a vírgula à direita na última propriedade de um objeto.</aside></p>
+
+<p>E tente utilizá-lo como parâmetro no <code>jsondiff</code></p>
+
+<pre><code>    ,jsondiff payload1.json invalid.json
+</code></pre>
+
+<p><img src="./imgs/comparando-json-na-linha-de-comando/error-case.png" alt="jsondiff em estado de erro" title="jsondiff em estado de erro" /></p>
+
+<p>Repare que a tela da direita está vazia.</p>
+
+<p>Se você tentar utilizar o <code>jq</code> diretamente no invalid.json,</p>
+
+<pre><code>    jq -S . invalid.json
+</code></pre>
+
+<p>Vai ver o seguinte output:</p>
+
+<pre><code>    parse error: Expected another key-value pair at line 7, column 3
+</code></pre>
+
+<p>Por sorte, o <code>jq</code> respeita a tradição unix de reservar o código de saída 0 para programas que rodarem com sucesso.</p>
+
+<p>Um código de saída diferente de 0, portanto, indica que ocorreu um erro. No nosso caso, qualquer tipo de erro deve impedir que o programa prossiga.</p>
+
+<p>Vamos criar um teste, que vai ser rodado antes da lógica do <code>jsondiff</code>.</p>
+
+<p>Primeiro, rodamos o <code>jq</code>:</p>
+
+<pre><code>    jq . invalid.json &gt;/dev/null 2&gt;&amp;1
+</code></pre>
+
+<p><aside>A parte <code>&gt;/dev/null 2&gt;&amp;1</code> tem duas funções: <code>2&gt;&amp;1</code> redireciona as saídas de erro pro canal normal (stderr into stdout), e <code>&gt;dev/null</code> descarta toda a saída do canal normal. Basicamente, jogamos fora qualquer output da função.</aside></p>
+
+<p>Depois, verificamos o código de saída, utilizando a variável reservada <code>$?</code>. Experimenta printá-la:</p>
+
+<pre><code>    jq . invalid.json &gt;/dev/null 2&gt;&amp;1
+    echo $?
+</code></pre>
+
+<p>Verifique um output no formato abaixo:</p>
+
+<pre><code>    guites@local:/tmp$ jq -S . invalid.json
+    parse error: Expected another key-value pair at line 7, column 3
+    guites@local:/tmp$ echo $?
+    4 # &lt;!-- código de erro diferente de 0 !
+</code></pre>
+
+<p>Vamos colocar esse teste num bloco <code>if else</code>:</p>
+
+<pre><code>if ! jq . $1 &gt;/dev/null 2&gt;&amp;1; then
+    echo "$1 contains invalid json data."
+fi
+</code></pre>
+
+<p><aside>No mundo unix, um output 0 é considerado <code>true</code>, enquanto qualquer outro número é visto como <code>false</code>.</aside></p>
+
+<p>Podemos encapsular esse teste em uma função separada</p>
+
+<pre><code>    function validatejson() {
+        if ! jq . $1 &gt;/dev/null 2&gt;&amp;1; then
+            echo "$1 contains invalid json data."
+            return 1
+        fi
+        return 0
+    }
+</code></pre>
+
+<h2><code>jsondiff</code> à prova de erros</h2>
+
+<p>Utilizando a verificação, vamos adaptar nosso método principal, o <code>jsondiff</code>, diretamente no arquivo <code>~/.bash_aliases</code></p>
+
+<pre><code>    function validatejson() {
+        if ! jq . $1 &gt;/dev/null 2&gt;&amp;1; then
+            echo "$1 contains invalid json data."
+            return 1
+        fi
+        return 0
+    }
+
+    function jsondiff() {
+        validatejson $1 || return 1
+        validatejson $2 || return 1
+        vimdiff &lt;(jq -S . $1) &lt;(jq -S . $2)
+    }
+
+    alias ,jsondiff=jsondiff
+</code></pre>
+
+<p><aside>O uso do <code>if ! &lt;comando&gt;</code> é uma forma enxuta de verificar se o código de saída de um comando é diferente de zero.</aside></p>
+
+<p>Caso o arquivo json passado de argumento seja inválido, o método <code>validatejson()</code> vai retornar 1, que é considerado um valor falso, e caímos no lado direito dos operadores OR (<code>||</code>) utilizados nas duas primeiras linhas da função <code>jsondiff</code>.</p>
+
+<p><aside>Lembre de rodar <code>source ~/.bash_aliases</code> sempre que modificar o arquivo.</aside></p>
+
+<p>O <code>return 1</code> cumpre dois objetivos: finaliza a função antes de entrarmos na parte principal, e define o código de saída, para mantermos o padrão unix.</p>
+
+<p>Vamos testar:</p>
+
+<pre><code>    ,jsondiff payload1.json invalid.json
+    echo $?
+</code></pre>
+
+<p>Verifique o output no formato:</p>
+
+<pre><code>    guites@local:/tmp$ ,jsondiff payload1.json invalid.json
+    invalid.json contains invalid json data.
+    guites@local:/tmp$ echo $?
+    1
+</code></pre>
+
+<p>Abraço!</p>
+
+<h2>Referências</h2>
+
+<ol>
+<li><a href="https://stackoverflow.com/a/46955018/14427854">https://stackoverflow.com/a/46955018/14427854</a></li>
+<li><a href="https://stackoverflow.com/a/37175540/14427854">https://stackoverflow.com/a/37175540/14427854</a></li>
+<li><a href="https://www.jsondiff.com/">https://www.jsondiff.com/</a></li>
+</ol>
+
+<p>Tags: <a href='tag_json.html'>json</a>, <a href='tag_vimdiff.html'>vimdiff</a>, <a href='tag_cli.html'>cli</a>, <a href='tag_bash.html'>bash</a></p>
+<!-- text end -->
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/comparando-json-na-linha-de-comando.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/comparando-json-na-linha-de-comando.html'><span id='count-25112'></span></a>&nbsp;</p>
+<!-- entry end -->
+</div>
+<div id="footer">CC by-nc-nd <a href="https://twitter.com/gui_garcia67">Guilherme Garcia</a> &mdash; <a href="mailto:gui&#46;garcia67&#64;gmail&#46;com">gui&#46;garcia67&#64;gmail&#46;com</a><br/>
+Generated with <a href="https://github.com/cfenollosa/bashblog">bashblog</a>, a single bash script to easily create blogs like this one</div>
+</div></div>
+</body></html>
