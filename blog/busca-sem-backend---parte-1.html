@@ -334,16 +334,16 @@ muito boa: ele ensina a criar uma barra de busca, de uma fonte remota, usando as
 <li>n (max ngram size): Tamanho máximo dos ngrams coletados no resultado. Um ngram é um conjunto de palavras considerado como um único resultado. Por exemplo, "programação" seria um 1-gram, enquanto "acesso livre" seria um 2-gram, etc.</li>
 <li>dedupLim (deduplication limiar): Valor de corte utilizado na remoção de keywords consideradas duplicadas. Age em conjunto com o parâmetro <code>dedupFunc</code> na hora de decidir o que é duplicado e o que não é.</li>
 <li>dedupFunc (deduplication function): Função utilizada na remoção de keywords consideradas duplicadas. Pode ter um dos três valores: <code>leve|jaro|seqm</code>.</li>
-<li><p>top: número de palavras chaves que a extração deve retornar.</p>
-
-<pre><code>from bs4 import BeautifulSoup
-import yake
-</code></pre>
-
-<ul>
-<li>custom<em>kw</em>extractor = yake.KeywordExtractor(lan='pt', n=3, dedupLim=0.3, dedupFunc='seqm', top=35)</li>
-</ul></li>
+<li>top: número de palavras chaves que a extração deve retornar.</li>
 </ul>
+
+<p>A adição no script fica assim:</p>
+
+<pre><code>    from bs4 import BeautifulSoup
+    import yake
+
+  + custom_kw_extractor = yake.KeywordExtractor(lan='pt', n=3, dedupLim=0.3, dedupFunc='seqm', top=35)
+</code></pre>
 
 <p><aside>Deixei os parâmetros nesse formato pra facilitar a visualização. Achei que o resultado fica mais fiél ao conteúdo das postagens usando <code>n=2</code> e <code>top=20</code></aside></p>
 
@@ -562,7 +562,7 @@ import yake
 
 <!-- text end -->
 <p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/busca-sem-backend---parte-1.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/busca-sem-backend---parte-1.html'><span id='count-20744'></span></a>&nbsp;</p>
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/busca-sem-backend---parte-1.html'><span id='count-16648'></span></a>&nbsp;</p>
 <!-- entry end -->
 </div>
 <div id="footer">CC by-nc-nd <a href="https://twitter.com/gui_garcia67">Guilherme Garcia</a> &mdash; <a href="mailto:gui&#46;garcia67&#64;gmail&#46;com">gui&#46;garcia67&#64;gmail&#46;com</a><br/>

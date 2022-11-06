@@ -287,6 +287,8 @@ E vamos também inicializar o extrator, passando alguns parâmetros necessários
 - dedupFunc \(deduplication function\): Função utilizada na remoção de keywords consideradas duplicadas. Pode ter um dos três valores: `leve|jaro|seqm`.
 - top: número de palavras chaves que a extração deve retornar.
 
+A adição no script fica assim:
+
         from bs4 import BeautifulSoup
         import yake
 

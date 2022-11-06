@@ -2,8 +2,8 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
 <channel><title>Blog do guilherme</title><link>https://guilhermegarcia.dev/blog/index.html</link>
 <description>programação e outras coisas menos úteis</description><language>en</language>
-<lastBuildDate>Sun, 06 Nov 2022 15:36:39 -0300</lastBuildDate>
-<pubDate>Sun, 06 Nov 2022 15:36:39 -0300</pubDate>
+<lastBuildDate>Sun, 06 Nov 2022 15:48:23 -0300</lastBuildDate>
+<pubDate>Sun, 06 Nov 2022 15:48:23 -0300</pubDate>
 <atom:link href="https://guilhermegarcia.dev/blog/feed.rss" rel="self" type="application/rss+xml" />
 <item><title>
 Busca sem backend - parte 1
@@ -26,7 +26,7 @@ Busca sem backend - parte 1
 <hr/>
 <p>Tags: <a href='tag_python.html'>python</a>, <a href='tag_json.html'>json</a>, <a href='tag_busca.html'>busca</a>, <a href='tag_nlp.html'>nlp</a></p>
 <p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/busca-sem-backend---parte-1.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/busca-sem-backend---parte-1.html'><span id='count-20744'></span></a>&nbsp;</p>
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/busca-sem-backend---parte-1.html'><span id='count-16648'></span></a>&nbsp;</p>
 ]]></description><link>https://guilhermegarcia.dev/blog/busca-sem-backend---parte-1.html</link>
 <guid>https://guilhermegarcia.dev/blog/./busca-sem-backend---parte-1.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
