@@ -2,9 +2,35 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
 <channel><title>Blog do guilherme</title><link>https://guilhermegarcia.dev/blog/index.html</link>
 <description>programação e outras coisas menos úteis</description><language>en</language>
-<lastBuildDate>Tue, 25 Oct 2022 22:47:29 -0300</lastBuildDate>
-<pubDate>Tue, 25 Oct 2022 22:47:29 -0300</pubDate>
+<lastBuildDate>Sun, 06 Nov 2022 15:36:39 -0300</lastBuildDate>
+<pubDate>Sun, 06 Nov 2022 15:36:39 -0300</pubDate>
 <atom:link href="https://guilhermegarcia.dev/blog/feed.rss" rel="self" type="application/rss+xml" />
+<item><title>
+Busca sem backend - parte 1
+</title><description><![CDATA[
+
+<p><abbr title="muito grande;nem li">mg;nl</abbr>: Vamos ver como adicionar um mecanismo de busca em um site estático. Neste post vamos criar um script que gera um arquivo json contendo os conteúdos do site, juntando o título, sumário, tags e palavras chave geradas utilizando a ferramenta <a href="https://github.com/LIAAD/yake">yake</a>.</p>
+
+<p>A barra de busca: essencial, mas de dificil implementação se você não tiver acesso a um banco de dados. </p>
+
+<p>Em sites dinâmicos, no qual o conteúdo é resgatado de um banco de dados a cada acesso, você pode utilizar um formulário, que envia os valores digitados pelo usuário (termos de busca) a um endpoint que as utiliza para realizar uma consulta no banco de dados, e retorna os resultados para o usuário.</p>
+
+<p>Em sites estáticos (como esse, que é hospedado no <a href="https://pages.github.com/">github pages</a>), todo o conteúdo disponível para o usuário precisa ser previamente criado e hospedado. Ou seja, não temos como responder de forma dinâmica às combinações (praticamente infinitas) de palavras chave que um usuário pode buscar.</p>
+
+<p>Para um site pequeno, porém, podemos estruturar o conteúdo em um formato de fácil consulta, como o <a href="https://www.json.org/json-en.html">json</a>, e deixá-lo salvo no servidor. </p>
+
+<p>Daí podemos receber os termos de busca digitados pelo usuário e usar algumas linhas de javascript para carregar o arquivo, aplicar o filtro, e retornar os resultados.</p>
+
+<p>Neste primeiro post, vamos desenvolver um script em python que percorre as publicações do site e formata as informações essenciais em um formato facilmente consultável.</p>
+
+<hr/>
+<p>Tags: <a href='tag_python.html'>python</a>, <a href='tag_json.html'>json</a>, <a href='tag_busca.html'>busca</a>, <a href='tag_nlp.html'>nlp</a></p>
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/busca-sem-backend---parte-1.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/busca-sem-backend---parte-1.html'><span id='count-20744'></span></a>&nbsp;</p>
+]]></description><link>https://guilhermegarcia.dev/blog/busca-sem-backend---parte-1.html</link>
+<guid>https://guilhermegarcia.dev/blog/./busca-sem-backend---parte-1.html</guid>
+<dc:creator>Guilherme Garcia</dc:creator>
+<pubDate>Sun, 06 Nov 2022 15:36:37 -0300</pubDate></item>
 <item><title>
 Comparando json na linha de comando
 </title><description><![CDATA[
@@ -273,22 +299,4 @@ Criando um app com Flutter e sqlite
 <guid>https://guilhermegarcia.dev/blog/./criando-um-app-com-flutter-e-sqlite.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
 <pubDate>Mon, 21 Feb 2022 08:40:47 -0300</pubDate></item>
-<item><title>
-Depurando PHP com XDEBUG no VS Code
-</title><description><![CDATA[
-
-<p><abbr title="muito grande; nem li">mg;nl</abbr>: Neste post vamos configurar o XDEBUG e utilizar o VScode para depurar um script simples em PHP.</p>
-
-<p>Muitas vezes a preguiça nos mantém presos ao <code>var_dump</code> e F5 como forma de depurar no PHP. Esse post serve como uma cola, misturei as informações de alguns artigos e tutoriais que encontrei pela net, e adaptei pra incluir alguns detalhes que me confundiram quando fui configurar a minha máquina. As fontes estão no final do post.</p>
-
-<p>Este tutorial foi feito utilizando a versão 7.1 do PHP no macOS. Para outras versões, os passos são os mesmos mas as informações adicionadas diferem um pouco.</p>
-
-<hr/>
-<p>Tags: <a href='tag_vscode.html'>vscode</a>, <a href='tag_php.html'>php</a>, <a href='tag_debug.html'>debug</a></p>
-<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/depurando-php-com-xdebug-no-vs-code.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/depurando-php-com-xdebug-no-vs-code.html'><span id='count-10690'></span></a>&nbsp;</p>
-]]></description><link>https://guilhermegarcia.dev/blog/depurando-php-com-xdebug-no-vs-code.html</link>
-<guid>https://guilhermegarcia.dev/blog/./depurando-php-com-xdebug-no-vs-code.html</guid>
-<dc:creator>Guilherme Garcia</dc:creator>
-<pubDate>Sat, 12 Feb 2022 21:06:07 -0300</pubDate></item>
 </channel></rss>

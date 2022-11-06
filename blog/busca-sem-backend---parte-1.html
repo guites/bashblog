@@ -1,0 +1,571 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="main.css" type="text/css" />
+<link rel="stylesheet" href="blog.css" type="text/css" />
+<link rel="stylesheet" href="code.css" type="text/css" />
+<link rel="alternate" type="application/rss+xml" title="Inscrever-se nesta página..." href="feed.rss" />
+<title>Busca sem backend - parte 1</title>
+<meta name='twitter:card' content='summary' />
+<meta name='twitter:site' content='@gui_garcia67' />
+<meta name='twitter:title' content='Busca sem backend - parte 1' />
+<meta name='twitter:description' content=" mg;nl: Vamos ver como adicionar um mecanismo de busca em um site estático. Neste post vamos criar um script que gera um arquivo json contendo os conteúdos do site, juntando o título, sumário, tags e palavras chave geradas utilizando a ferramenta" />
+</head><body>
+<div id="divbodyholder">
+<div class="headerholder"><div class="header">
+<div id="title">
+<h1 class="nomargin"><a class="ablack" href="https://guilhermegarcia.dev/blog/index.html">Blog do guilherme</a></h1>
+<div id="description">programação e outras coisas menos úteis</div>
+</div></div></div>
+<div id="divbody"><div class="content">
+<!-- entry begin -->
+<h3><a class="ablack" href="busca-sem-backend---parte-1.html">
+Busca sem backend - parte 1
+</a></h3>
+<!-- bashblog_timestamp: #202211061536.37# -->
+<div class="subtitle">Novembro 06, 2022 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p><abbr title="muito grande;nem li">mg;nl</abbr>: Vamos ver como adicionar um mecanismo de busca em um site estático. Neste post vamos criar um script que gera um arquivo json contendo os conteúdos do site, juntando o título, sumário, tags e palavras chave geradas utilizando a ferramenta <a href="https://github.com/LIAAD/yake">yake</a>.</p>
+
+<p>A barra de busca: essencial, mas de dificil implementação se você não tiver acesso a um banco de dados. </p>
+
+<p>Em sites dinâmicos, no qual o conteúdo é resgatado de um banco de dados a cada acesso, você pode utilizar um formulário, que envia os valores digitados pelo usuário (termos de busca) a um endpoint que as utiliza para realizar uma consulta no banco de dados, e retorna os resultados para o usuário.</p>
+
+<p>Em sites estáticos (como esse, que é hospedado no <a href="https://pages.github.com/">github pages</a>), todo o conteúdo disponível para o usuário precisa ser previamente criado e hospedado. Ou seja, não temos como responder de forma dinâmica às combinações (praticamente infinitas) de palavras chave que um usuário pode buscar.</p>
+
+<p>Para um site pequeno, porém, podemos estruturar o conteúdo em um formato de fácil consulta, como o <a href="https://www.json.org/json-en.html">json</a>, e deixá-lo salvo no servidor. </p>
+
+<p>Daí podemos receber os termos de busca digitados pelo usuário e usar algumas linhas de javascript para carregar o arquivo, aplicar o filtro, e retornar os resultados.</p>
+
+<p>Neste primeiro post, vamos desenvolver um script em python que percorre as publicações do site e formata as informações essenciais em um formato facilmente consultável.</p>
+
+<hr/>
+
+<h2>Visão geral do projeto</h2>
+
+<p>Nosso objetivo é criar um script que acesse os arquivos <code>html</code> do blog e gere um arquivo no formato:</p>
+
+<pre><code>[
+  {
+    "title":"Título do post",
+    "permalink":"link-do-post.html",
+    "summary":"mg;nl: Este post é sobre ...",
+    "keywords":"palavras chave geradas automaticamente usando yake",
+    "tags":"tags do post original"
+  },
+  {
+    ...
+  }
+]
+</code></pre>
+
+<p>Para que depois possamos consultar via javascript.</p>
+
+<p>Repare no campo "keywords": as tags aqui do site são definidas manualmente (eu invento tags conforme acho relevante), e disso acontece que elas nem sempre refletem com precisão o assunto coberto pelo post.</p>
+
+<p>Resolvi utilizar um processo chamado <em>Automatic Keyword Extraction</em>, que analisa o conteúdo de um texto arbritário e extrai palavras chaves.</p>
+
+<p>Eu não vou me aprofundar muito no funcionamento desse processo, mas você pode ler mais sobre no <a href="https://github.com/LIAAD/yake">github do projeto</a>.</p>
+
+<h2>Iterando sobre uma listagem de arquivos</h2>
+
+<p>Vamos criar um script, <code>generate_json.py</code>.</p>
+
+<p>Vamos supor uma estrutura onde cada post é um arquivo html dentro de um mesmo diretório:</p>
+
+<pre><code>  - generate_json.py
+  - blog/
+    - automatizando-a-geracao-de-site-map.html
+    - barra-de-buscas-e-consulta-a-api-com-flutter.html
+    - coisas-que-eu-nao-sabia-sobre-bash.html
+    - criando-um-app-com-flutter-e-sqlite.html
+    - depurando-php-com-xdebug-no-vs-code.html
+    - mantendo-data-de-criacao-de-arquivos-no-git.html
+</code></pre>
+
+<p>Vamos começar iterando sobre os arquivos.</p>
+
+<pre><code># import required modules
+from pathlib import Path
+import os
+
+# assign directory
+directory = 'blog'
+
+invalid_prefixes = ['index', 'todos', 'todas', 'tag']
+
+# iterate over files in that directory
+files = Path(directory).glob('*.html')
+for file in files:
+
+    skip = False
+    basename = os.path.basename(file)
+    for prefix in invalid_prefixes:
+        if basename.startswith(prefix):
+            skip = True
+    if skip: continue
+</code></pre>
+
+<p>Adicionei uma pequena lógica usando uma lista de prefixos, <code>invalid_prefixes</code>. Você pode adicionar nela qualquer arquivo presente no seu diretório que você não queira incluir no arquivo json resultante.</p>
+
+<p>Caso chegarmos na ultima linha e o valor da variável <code>skip</code> seja verdadeiro, pulamos o arquivo. Caso contrário, seguimos em frente.</p>
+
+<h2>Carregando arquivos html em memória e acessando o valor das tags</h2>
+
+<p>Precisamos carregar os arquivos em memória e <em>parseá-los</em>, ou seja, acessar os valores dentro das tags (h1, p, div...).</p>
+
+<p>Vamos utilizar a biblioteca Beautiful Soup, que facilita esse processo.</p>
+
+<h3>Instalando o Beautiful Soup</h3>
+
+<p>Você pode instalar o pacote com</p>
+
+<pre><code>pip3 install beautifulsoup4
+</code></pre>
+
+<p>Mas eu recomendo sempre criar um ambiente virtual pra rodar qualquer aplicação python3:</p>
+
+<pre><code>python3 -m virtualenv venv # cria um ambiente virtual
+source venv/bin/activate # ativa o ambiente
+pip3 install beautifulsoup4
+</code></pre>
+
+<p>Você pode utilizar o conteúdo <a href="https://raw.githubusercontent.com/guites/bashblog/blog/blog/barra-de-buscas-e-consulta-a-api-com-flutter.html">deste arquivo</a> para acompanhar os exemplos.</p>
+
+<h3>Acessando o valor das tags html</h3>
+
+<p>Vamos adicionar o import necessário: </p>
+
+<pre><code>    # import required modules
+    from pathlib import Path
+    import os
+  + from bs4 import BeautifulSoup
+  + import bs4
+</code></pre>
+
+<p>Carregar os arquivos, e acessá-los usando o <code>open</code> e <code>BeautifulSoup</code>:</p>
+
+<pre><code>  + print(f"{basename}:")
+  + with open(file, 'r', encoding='UTF-8') as html_file:
+  +     parsed = BeautifulSoup(html_file, 'html.parser')
+  +     if parsed.h3:
+  +         print(f"--- {parsed.h3.text.strip()}")
+</code></pre>
+
+<h2>Criando o arquivo json</h2>
+
+<p>Agora que temos acesso as tags, basta escolher quais iremos utilizar e formatá-las no arquivo json de saída.</p>
+
+<p>O formato que queremos é o seguinte:</p>
+
+<pre><code>[
+  {
+    "title":"Título do post",
+    "permalink":"link-do-post.html",
+    "summary":"mg;nl: Este post é sobre ...",
+    "keywords":"palavras chave geradas automaticamente usando yake",
+    "tags":"tags do post original"
+  },
+  {
+    ...
+  }
+]
+</code></pre>
+
+<p>Vamos iniciar uma lista para guardar os valores.</p>
+
+<pre><code>    invalid_prefixes = ['index', 'todos', 'todas', 'tag']
+
+  + output_list = []
+
+    # iterate over files in that directory
+    files = Path(directory).glob('*.html')
+    for file in files:
+</code></pre>
+
+<p>E iniciar um dicionário vazio para cada arquivo encontrado.</p>
+
+<pre><code>  - print(f"{basename}:")
+    with open(file, 'r', encoding='UTF-8') as html_file:
+    +  post_dictionary = {
+    +       "title": "",
+    +       "permalink": "",
+    +       "summary": "",
+    +       "keywords": "",
+    +       "tags": ""
+    +   }
+</code></pre>
+
+<p>Novamente, cada site vai ter um padrão nas suas postagens, e aqui no blog, tanto o título quanto a URL da página ficam nesse formato,</p>
+
+<pre><code>&lt;h3&gt;&lt;a class="ablack" href="apps-de-linha-de-comando-em-dart.html"&gt;
+Apps de linha de comando em dart
+&lt;/a&gt;&lt;/h3&gt;
+</code></pre>
+
+<p>Que podemos acessar com </p>
+
+<pre><code>   -  if parsed.h3:
+   -    print(f"--- {parsed.h3.text.strip()}")
+   +  if parsed.h3: post_dictionary['title'] = parsed.h3.text.strip()
+   +  if parsed.select('h3 a'): post_dictionary['permalink'] = parsed.select('h3 a')[0]['href'].strip()
+</code></pre>
+
+<p><aside>Repare que o <code>.select('h3 a')</code> é equivalente a um <code>document.querySelector</code> do javascript.</aside></p>
+
+<h3>Acessando o summary</h3>
+
+<p>O <code>summary</code> vai ser um pouco mais complicado, pois envolve lidar com o texto "cru" da postagem (plaintext), que é no seguinte formato: </p>
+
+<pre><code>&lt;div id="divbody"&gt;&lt;div class="content"&gt;
+&lt;!-- entry begin --&gt;
+&lt;h3&gt;&lt;a class="ablack" href="barra-de-buscas-e-consulta-a-api-com-flutter.html"&gt;
+Barra de buscas e consulta a API com Flutter
+&lt;/a&gt;&lt;/h3&gt;
+&lt;!-- bashblog_timestamp: #202202022210.37# --&gt;
+&lt;div class="subtitle"&gt;Fevereiro 02, 2022 &amp;mdash; 
+Guilherme Garcia
+&lt;/div&gt;
+&lt;!-- text begin --&gt;
+
+&lt;p&gt;&lt;abbr title="muito grande; nem li"&gt;mg;nl&lt;/abbr&gt;: Tutorial para criar um app em flutter que realiza requisições http numa API e filtra o resultado usando uma barra de busca.&lt;/p&gt;
+
+&lt;p&gt;Então essa semana eu comecei a aprender desenvolvimento de apps em Flutter.&lt;/p&gt;
+
+&lt;p&gt;Duas questões importantes em qualquer aplicativo, web ou mobile, é a possibilidade de acessar dados remotos, comumente em 
+formato JSON, e disponibilizar ao usuário uma busca, por nome ou palavras-chave.&lt;/p&gt;
+
+&lt;p&gt;Dando uma procurada na net encontrei &lt;a href="https://medium.com/flutter-community/parsing-complex-json-in-flutter-747c46655f51"&gt;este artigo&lt;/a&gt;, com uma proposta
+muito boa: ele ensina a criar uma barra de busca, de uma fonte remota, usando as ferramentas incluídas no pacote básico do Flutter.  &lt;/p&gt;
+
+&lt;p&gt;O artigo é um pouco datado (escrito ali por 2018) e utiliza algumas ferramentas já deprecadas.&lt;/p&gt;
+
+&lt;p&gt;Neste post, vou analisar o processo do autor enquanto migro sua aplicação para a versão atual do Flutter (em janeiro/2022).&lt;/p&gt;
+
+&lt;hr/&gt;
+
+&lt;p&gt;Vou partir do princípio de que você já tem o android studio instalado, com uma VM de um celular ou tablet, como o pixel X3, por exemplo.&lt;/p&gt;
+</code></pre>
+
+<p>A parte que nos interessa começa em <code>&lt;!-- text begin --&gt;</code> e termina na primeira ocorrência da tag <code>&lt;hr/&gt;</code>.</p>
+
+<p>O ideal seria que essa parte estivesse dentro de uma tag, digamos, <code>&lt;div id="summary"&gt;</code>, e então poderiamos resgatá-la com </p>
+
+<pre><code>parsed.find(id='summary')
+</code></pre>
+
+<p>Mas, do jeito que está, o elemento mais próximo que temos acesso é a div com a classe "content".</p>
+
+<p>Vamos utilizar a seguinte lógica: selecionamos a <code>div.content</code>, e iteramos sobre seus filhos (tags que estiverem dentro dela). O BeautifulSoup nos permite identificar o tipo de cada tag, e conseguimos verificar se uma tag é um comentário.</p>
+
+<p>Caso o comentário tiver o texto "text begin", vamos começar a salvar o conteúdo de todas as tags que forem aparecendo, até chegarmos em uma tag do tipo <code>&lt;hr/&gt;</code>.</p>
+
+<pre><code>      if parsed.select('h3 a'): post_dictionary['permalink'] = parsed.select('h3 a')[0]['href'].strip()
+
+    + is_summary = False
+    + summary = ""
+    + content = parsed.select_one('div.content')
+    + for child in content.children:
+    +     if (type(child) == bs4.element.Comment):
+    +         if (child.strip() == 'text begin'):
+    +             is_summary = True
+    +     if child.name == "hr":
+    +         is_summary = False
+    +         break
+    +     if is_summary:
+    +         summary = summary + child.text
+    + post_dictionary['summary'] = summary
+</code></pre>
+
+<p>Para decidirmos quais tags devem ser capturadas, vamos utilizar a flag <code>is_summary</code>.</p>
+
+<p>Agora faltam apenas as tags e as keywords.</p>
+
+<h3>Pegando as tags de cada post</h3>
+
+<p>As tags estão, no html do post, no seguinte formato</p>
+
+<pre><code>&lt;p&gt;Tags: &lt;a href='tag_flutter.html'&gt;flutter&lt;/a&gt;, &lt;a href='tag_dart.html'&gt;dart&lt;/a&gt;&lt;/p&gt;
+</code></pre>
+
+<p>Novamente, um <code>id</code> ou uma <code>class</code> ajudariam, mas podemos resgatá-las usando um pequeno filtro.</p>
+
+<pre><code>       post_dictionary['summary'] = summary
+
+    +  content_p_tags = content.select('p')
+    +  for p_tag in content_p_tags:
+    +      p_tag_text = p_tag.get_text()
+    +      if p_tag_text.startswith('Tags:'):
+    +          post_dictionary['tags'] = p_tag_text.replace('Tags: ','')
+    +          break
+</code></pre>
+
+<p>Iteramos por todas as tags <code>p</code> dentro da variável <code>content</code> (que usamos para encontrar nosso summary), e pegamos o conteúdo daquela que começar com "Tags: ".</p>
+
+<h2>Gerando as keywords com a biblioteca YAKE</h2>
+
+<p>YAKE significa "Yet Another Keyword Extractor" ("Mais um extrator de palavras chave" :P). A ideia é que ele realize esse processo, que costuma ser bem teórico e trabalhoso, de forma rápida, com um pacote leve e simples de utilizar.</p>
+
+<p>O <a href="https://github.com/LIAAD/yake">github do projeto</a> tem uma ótima explicação do funcionamento da ferramenta, e aqui vamos focar em como utilizá-la em conjunto com nosso script.</p>
+
+<p>Primeiro, precisamos instalá-la.</p>
+
+<pre><code>pip3 install git+https://github.com/LIAAD/yake
+</code></pre>
+
+<p>E colocar um <code>import</code> no topo do nosso script</p>
+
+<pre><code>    # import required modules
+    from pathlib import Path
+    import os
+    import bs4
+    from bs4 import BeautifulSoup
+  + import yake
+</code></pre>
+
+<p>E vamos também inicializar o extrator, passando alguns parâmetros necessários:</p>
+
+<ul>
+<li>lan (language): vamos usar <code>pt</code>, pois o padrão é inglês. Eu acho que funciona bem tanto pra português europeu quanto brasileiro. Inclusive o <a href="http://yake.inesctec.pt/demo/sample/sample15">exemplo utilizado no site do yake</a> é sobre a seleção brasileira.</li>
+<li>n (max ngram size): Tamanho máximo dos ngrams coletados no resultado. Um ngram é um conjunto de palavras considerado como um único resultado. Por exemplo, "programação" seria um 1-gram, enquanto "acesso livre" seria um 2-gram, etc.</li>
+<li>dedupLim (deduplication limiar): Valor de corte utilizado na remoção de keywords consideradas duplicadas. Age em conjunto com o parâmetro <code>dedupFunc</code> na hora de decidir o que é duplicado e o que não é.</li>
+<li>dedupFunc (deduplication function): Função utilizada na remoção de keywords consideradas duplicadas. Pode ter um dos três valores: <code>leve|jaro|seqm</code>.</li>
+<li><p>top: número de palavras chaves que a extração deve retornar.</p>
+
+<pre><code>from bs4 import BeautifulSoup
+import yake
+</code></pre>
+
+<ul>
+<li>custom<em>kw</em>extractor = yake.KeywordExtractor(lan='pt', n=3, dedupLim=0.3, dedupFunc='seqm', top=35)</li>
+</ul></li>
+</ul>
+
+<p><aside>Deixei os parâmetros nesse formato pra facilitar a visualização. Achei que o resultado fica mais fiél ao conteúdo das postagens usando <code>n=2</code> e <code>top=20</code></aside></p>
+
+<p>Agora, basta aplica nosso extrator em cada página.</p>
+
+<p>Um detalhe importante é a decisão de qual parte da página vai ser utilizada. No caso do blog, optei por usar apenas o texto visível dentro daquela div <code>.content</code>, que possui o conteúdo da postagem.</p>
+
+<p>Ficou da seguinte forma:</p>
+
+<pre><code>          if p_tag_text.startswith('Tags:'):
+              post_dictionary['tags'] = p_tag_text.replace('Tags: ','')
+              break
+
+  +   keywords = custom_kw_extractor.extract_keywords(content.get_text())
+  +   for kw in keywords:
+  +       print(kw)
+</code></pre>
+
+<p>O resultado do print, pro post usado de exemplo, fica assim:</p>
+
+<pre><code>('Adicionar', 0.0028274157124887687)
+('Guilherme Garcia', 0.005811470715375073)
+('Flutter', 0.013492457875624883)
+('return', 0.016910840426021857)
+('Breed', 0.01912511108143883)
+('Text', 0.019214247534260948)
+('widget', 0.019297320635162443)
+('API', 0.022457665678024995)
+('dados', 0.027917870615386184)
+('lista', 0.030639494714601857)
+('http', 0.03291428909366911)
+('Barra', 0.03321703879633509)
+('método', 0.03818383547178414)
+('SearchPageState', 0.038862643368540825)
+('Key', 0.03974743900536119)
+('formato', 0.04344967620887332)
+('Icons.search', 0.043656612355202365)
+('String', 0.05005954258384762)
+('função', 0.06279564452195556)
+('responseObject', 0.07139370923874819)
+('requisições http', 0.0721761189386072)
+('usuário', 0.073361973736161)
+('listagem de raças', 0.07681885961917626)
+('class', 0.08299965908564721)
+('JSON', 0.08444435407204463)
+('override', 0.08531633811080994)
+('buildListOfBreeds', 0.10062577219435372)
+('appBarTitle', 0.10231932155808073)
+('dynamic', 0.10265887744947501)
+('seja', 0.10738858527930627)
+('variável', 0.10965849337311194)
+('extends', 0.1229440576959018)
+('import', 0.12343809691625732)
+('arquivo', 0.12670392651326004)
+('message', 0.12672339486946965)
+</code></pre>
+
+<p>Quanto mais próximo de zero for o valor, mais relevante é a palavra chave.</p>
+
+<p>Uma coisa que eu não gostei, é que muitos resultados são palavras encontradas dentro de tags <code>&lt;code&gt;</code>, pois coloco muitos exemplos nos posts. Eu acredito que o contexto do uso de YAKE é para texto natural, então vou primeiro filtrar os blocos de código presentes no corpo da postagem.</p>
+
+<h3>Filtrando os blocos de código antes de aplicar o extrator</h3>
+
+<p>Na escrita dos textos do blog, fiz uma escolha arbitrária: código escrito dentro da mesma linha do resto do texto fica dentro de uma tag <code>&lt;code&gt;</code>, e blocos de código grandes o bastante pra ter sua própria linha e identação, ficam dentro de um <code>&lt;pre&gt;&lt;code&gt;</code>, pra manter a formatação quando eu usar <kbd>ctrl + c</kbd> e <kbd>ctrl + v</kbd>.</p>
+
+<p>Então o que precisamos fazer é clonar o <code>content</code> original e ir removendo todas as tags <code>&lt;pre&gt;</code> que existirem dentro dele.</p>
+
+<p>A documentação do BeautifulSoup recomenda a clonagem de objetos com o pacote <code>copy</code>. Vamos importá-lo</p>
+
+<pre><code>    from bs4 import BeautifulSoup
+    import yake
+ +  import copy
+</code></pre>
+
+<p>E para cada arquivo html, vamos remover todas as tags indesejadas, e depois utilizaremos nossa cópia filtrada como argumento no extrator.</p>
+
+<pre><code>     + content_copy = copy.copy(content)
+     + for child in content_copy.children:
+     +     if child.name == 'pre':
+     +        child.extract()
+
+     - keywords = custom_kw_extractor.extract_keywords(content.get_text())
+     + keywords = custom_kw_extractor.extract_keywords(content_copy.get_text())
+       for kw in keywords:
+           print(kw)
+</code></pre>
+
+<p>Podemos ver uma mudança grande nas keywords geradas:</p>
+
+<pre><code>('Guilherme Garcia text', 0.004532153520049423)
+('Garcia text begin', 0.012948359380401397)
+('Flutter', 0.016925800324343994)
+('API', 0.02055282206994107)
+('dados', 0.023249378371687807)
+('lista', 0.025973503165796163)
+('método', 0.03175054696754484)
+('Adicionar', 0.03280023890613875)
+('propriedade', 0.034090023290055324)
+('formato', 0.03606688281671043)
+('raça', 0.04101614672715731)
+('http', 0.04219519416718389)
+('requisição', 0.045245453868184786)
+('widget', 0.05301021972241176)
+('Tutorial', 0.07197539997471863)
+('begin Barra', 0.07887160161743723)
+('JSON', 0.09724311315576666)
+('android', 0.10759621380487877)
+('qualquer', 0.1170957486746625)
+('Breed', 0.12396985431611546)
+('código', 0.13581759727238618)
+('import', 0.14748220665792972)
+('criando', 0.15749912021084772)
+('variáveis', 0.16391981569246364)
+('será', 0.16434553439229052)
+('precisamos realizar', 0.17273564442135858)
+('package', 0.21369426404160313)
+('classes', 0.2220703835489235)
+('dynamic', 0.22544049880440167)
+('erro', 0.23362063816061)
+('listagem de raças', 0.23492778889638644)
+('função fetchBreeds', 0.2467958041484861)
+('consulta a API', 0.2524130851954772)
+('API e filtra', 0.2524130851954772)
+('bashblog', 0.29547454398648465)
+</code></pre>
+
+<p>Algumas keywords ainda estão repetidas, e outras não refletem o conteúdo do post em si ("Guilherme Garcia" e "Garcia", por exemplo), mas isso pode ser resolvido com filtros adicionais, ou mexendo nos parâmetros do extrator.</p>
+
+<p><aside>O meu nome aparece provavelmente devido a posição que ele tem no texto (aparece duas vezes logo no início)</aside></p>
+
+<h3>Adicionando os resultados do extrator ao dicionário</h3>
+
+<p>Quando você estiver satisfeito com as palavras chave encontradas, podemos passar pro último passo, que é adicioná-las ao resultado.</p>
+
+<pre><code>     - keywords = custom_kw_extractor.extract_keywords(content.get_text())
+     + keywords = custom_kw_extractor.extract_keywords(content_copy.get_text())
+       for kw in keywords:
+           print(kw)
+
+     keywords = custom_kw_extractor.extract_keywords(content_copy.get_text())
+  +  keyword_string = ""
+  -  for kw in keywords:
+  +   for keyword, score in keywords:
+  +       keyword_string = keyword_string + keyword + " "
+  +   post_dictionary['keywords'] = keyword_string
+</code></pre>
+
+<p>Como os resultados do extrator são um <code>tuple</code>, a palavra chave em si vai estar sempre na primeira posição.</p>
+
+<p>Precisamos também adicionar o resultado a nossa listagem, <code>output_list</code></p>
+
+<pre><code>      post_dictionary['keywords'] = keyword_string
+   +  output_list.append(post_dictionary)
+</code></pre>
+
+<h2>Salvando o resultado em um arquivo json</h2>
+
+<p>Para escrever o resultado num arquivo, vamos utilizar o pacote <code>json</code>.</p>
+
+<pre><code>    import yake
+    import copy
+  + import json
+</code></pre>
+
+<p>E, após iterar por todos os arquivos válidos, vamos salvar nosso dicionário com o <code>json.dump()</code>.</p>
+
+<pre><code>            post_dictionary['keywords'] = keyword_string
+            output_list.append(post_dictionary)
+
+ +  with open("search_content.json", "w", encoding='UTF-8') as json_file:
+ +      json.dump(output_list, json_file)
+</code></pre>
+
+<h2>Considerações finais</h2>
+
+<p>Nesse post vimos como podemos condensar o conteúdo de diversas páginas em um arquivo de fácil consulta, utilizando um processador de linguagem natural pra extrair algumas palavras-chave do texto.</p>
+
+<p>Você pode analisar os exemplos (<a href="http://yake.inesctec.pt/demo/sample/sample2">1</a>,<a href="http://yake.inesctec.pt/demo/sample/sample12">2</a>,<a href="http://yake.inesctec.pt/demo/sample/sample5">3</a>...) presentes no site do YAKE se quiser entender melhor como a formatação do texto e os parâmetros utilizados influenciam no resultado.</p>
+
+<p>Etapas adicionais de preparação do conteúdo das páginas do blog teriam certamente melhorado a qualidade dos resultados, mas a ideia aqui é mostrar de forma rápida como uma ferramenta desse tipo pode agregar valor a um projeto, mesmo que simples.</p>
+
+<p>Pretendo dar continuidade ao tema da busca em sites estáticos, onde o json gerado nesse post vai fazer o papel de backend para gerar os resultados da busca.</p>
+
+<p>Abraço.</p>
+
+<h2>Fontes:</h2>
+
+<ul>
+<li><a href="https://unix.stackexchange.com/a/264972">https://unix.stackexchange.com/a/264972</a></li>
+<li><a href="https://matix.io/extract-text-from-webpage-using-beautifulsoup-and-python/">https://matix.io/extract-text-from-webpage-using-beautifulsoup-and-python/</a></li>
+<li><a href="https://www.educative.io/answers/what-are-n-grams">https://www.educative.io/answers/what-are-n-grams</a></li>
+<li><a href="https://www.crummy.com/software/BeautifulSoup/bs4/doc/#copying-beautiful-soup-objects">https://www.crummy.com/software/BeautifulSoup/bs4/doc/#copying-beautiful-soup-objects</a></li>
+<li><a href="https://www.crummy.com/software/BeautifulSoup/bs4/doc/#extract">https://www.crummy.com/software/BeautifulSoup/bs4/doc/#extract</a></li>
+</ul>
+
+<p>Tags: <a href='tag_python.html'>python</a>, <a href='tag_json.html'>json</a>, <a href='tag_busca.html'>busca</a>, <a href='tag_nlp.html'>nlp</a></p>
+<pre><code>[
+  {
+    "title":"Automatizando a geração de site map",
+    "permalink":"automatizando-a-geracao-de-site-map.html",
+    "published_date":"Fevereiro 06, 2022 ",
+    "summary":"mg;nl: Vamos falar sobre o porquê ...",
+    "keywords":"sitemap arquivo loc lastmod url tag RSS https Formato post ",
+    "tags":" seo  bash  bashblog"
+  },
+  {
+    "title":"Barra de buscas e consulta a API com Flutter",
+    "permalink":"barra-de-buscas-e-consulta-a-api-com-flutter.html",
+    "published_date":"Fevereiro 02, 2022 ",
+    "summary":"mg;nl: Tutorial para criar um app em flutter que ...",
+    "keywords":"Adicionar breeds listagem return Flutter Text API dados Barra http ",
+    "tags":" flutter  dart"
+  },
+]
+</code></pre>
+
+<!-- text end -->
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/busca-sem-backend---parte-1.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/busca-sem-backend---parte-1.html'><span id='count-20744'></span></a>&nbsp;</p>
+<!-- entry end -->
+</div>
+<div id="footer">CC by-nc-nd <a href="https://twitter.com/gui_garcia67">Guilherme Garcia</a> &mdash; <a href="mailto:gui&#46;garcia67&#64;gmail&#46;com">gui&#46;garcia67&#64;gmail&#46;com</a><br/>
+Generated with <a href="https://github.com/cfenollosa/bashblog">bashblog</a>, a single bash script to easily create blogs like this one</div>
+</div></div>
+</body></html>

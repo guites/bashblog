@@ -10,7 +10,7 @@
 <meta name='twitter:card' content='summary' />
 <meta name='twitter:site' content='@gui_garcia67' />
 <meta name='twitter:title' content='Blog do guilherme' />
-<meta name='twitter:description' content=" Comparando json na linha de comando   outubro 25, 2022 &mdash;  Guilherme Garcia    mg;nl: vamos usar o vimdiff e o jq para comparar arquivos json independente da formatação.  Comparar arquivos json parecidos pode ser complicado. Muitas vezes os a" />
+<meta name='twitter:description' content=" Busca sem backend - parte 1   Novembro 06, 2022 &mdash;  Guilherme Garcia    mg;nl: Vamos ver como adicionar um mecanismo de busca em um site estático. Neste post vamos criar um script que gera um arquivo json contendo os conteúdos do site, juntan" />
 </head><body>
 <div id="divbodyholder">
 <div class="headerholder"><div class="header">
@@ -19,6 +19,33 @@
 <div id="description">programação e outras coisas menos úteis</div>
 </div></div></div>
 <div id="divbody"><div class="content">
+<h3><a class="ablack" href="busca-sem-backend---parte-1.html">
+Busca sem backend - parte 1
+</a></h3>
+<!-- bashblog_timestamp: #202211061536.37# -->
+<div class="subtitle">Novembro 06, 2022 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p><abbr title="muito grande;nem li">mg;nl</abbr>: Vamos ver como adicionar um mecanismo de busca em um site estático. Neste post vamos criar um script que gera um arquivo json contendo os conteúdos do site, juntando o título, sumário, tags e palavras chave geradas utilizando a ferramenta <a href="https://github.com/LIAAD/yake">yake</a>.</p>
+
+<p>A barra de busca: essencial, mas de dificil implementação se você não tiver acesso a um banco de dados. </p>
+
+<p>Em sites dinâmicos, no qual o conteúdo é resgatado de um banco de dados a cada acesso, você pode utilizar um formulário, que envia os valores digitados pelo usuário (termos de busca) a um endpoint que as utiliza para realizar uma consulta no banco de dados, e retorna os resultados para o usuário.</p>
+
+<p>Em sites estáticos (como esse, que é hospedado no <a href="https://pages.github.com/">github pages</a>), todo o conteúdo disponível para o usuário precisa ser previamente criado e hospedado. Ou seja, não temos como responder de forma dinâmica às combinações (praticamente infinitas) de palavras chave que um usuário pode buscar.</p>
+
+<p>Para um site pequeno, porém, podemos estruturar o conteúdo em um formato de fácil consulta, como o <a href="https://www.json.org/json-en.html">json</a>, e deixá-lo salvo no servidor. </p>
+
+<p>Daí podemos receber os termos de busca digitados pelo usuário e usar algumas linhas de javascript para carregar o arquivo, aplicar o filtro, e retornar os resultados.</p>
+
+<p>Neste primeiro post, vamos desenvolver um script em python que percorre as publicações do site e formata as informações essenciais em um formato facilmente consultável.</p>
+
+<p class="readmore"><a href="./busca-sem-backend---parte-1.html">Ler mais...</a></p>
+<p>Tags: <a href='tag_python.html'>python</a>, <a href='tag_json.html'>json</a>, <a href='tag_busca.html'>busca</a>, <a href='tag_nlp.html'>nlp</a></p>
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/busca-sem-backend---parte-1.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/busca-sem-backend---parte-1.html'><span id='count-20744'></span></a>&nbsp;</p>
 <h3><a class="ablack" href="comparando-json-na-linha-de-comando.html">
 Comparando json na linha de comando
 </a></h3>
@@ -240,29 +267,6 @@ Guilherme Garcia
 <p>Tags: <a href='tag_dart.html'>dart</a>, <a href='tag_github.html'>github</a>, <a href='tag_oauth2.html'>oauth2</a>, <a href='tag_api.html'>api</a></p>
 <p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/oauth2-pela-linha-de-comando-em-dart.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
 <a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/oauth2-pela-linha-de-comando-em-dart.html'><span id='count-7667'></span></a>&nbsp;</p>
-<h3><a class="ablack" href="gerenciando-estado-num-app-flutter-com-provider.html">
-Gerenciando estado num app Flutter com Provider
-</a></h3>
-<!-- bashblog_timestamp: #202202281527.22# -->
-<div class="subtitle">Fevereiro 28, 2022 &mdash; 
-Guilherme Garcia
-</div>
-<!-- text begin -->
-
-<p><abbr title="muito grande; nem li">mg;nl</abbr>: Neste post vamos implementar o plugin <a href="https://pub.dev/packages/provider">Provider</a> num app em Flutter, para comunicar valores de estado através do aplicativo. Vamos também otimizar a estrutura de um app já existente e entender o uso de controllers no ambito do provider.</p>
-
-<p>Dando sequência ao que começamos <a href="https://guilhermegarcia.dev/blog/criando-um-app-com-flutter-e-sqlite.html">neste post</a>, vamos seguir desenvolvendo nosso app de acadêmia.</p>
-
-<p>No fim do post anterior, nosso app consistia em um seletor de linguagem e, ao trocarmos a linguagem, atualizavamos os valores da nossa listagem de exercícios.</p>
-
-<p>Neste post, vamos implementar o plugin <a href="https://pub.dev/packages/provider">Provider</a> para gerenciar o estado global do nosso app, assim como subdividir o código em uma estrura mais intuitiva, mostrando como podemos implementar o <code>Provider</code> para uma única, ou múltiplas, classes.</p>
-
-<p>O código finalizado desta postagem pode ser baixado <a href="https://github.com/guites/flutter-gym-app/tree/select_exercises">neste branch do repositório</a>.</p>
-
-<p class="readmore"><a href="./gerenciando-estado-num-app-flutter-com-provider.html">Ler mais...</a></p>
-<p>Tags: <a href='tag_flutter.html'>flutter</a></p>
-<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/gerenciando-estado-num-app-flutter-com-provider.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/gerenciando-estado-num-app-flutter-com-provider.html'><span id='count-13735'></span></a>&nbsp;</p>
 <div id="all_posts"><a href="todos_posts.html">Ver mais posts</a> &mdash; <a href="todas_tags.html">Todas as tags</a> &mdash; <a href="feed.rss">RSS feed</a></div>
 </div>
 <div id="footer">CC by-nc-nd <a href="https://twitter.com/gui_garcia67">Guilherme Garcia</a> &mdash; <a href="mailto:gui&#46;garcia67&#64;gmail&#46;com">gui&#46;garcia67&#64;gmail&#46;com</a><br/>
