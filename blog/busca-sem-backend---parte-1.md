@@ -422,11 +422,6 @@ Algumas keywords ainda estão repetidas, e outras não refletem o conteúdo do p
 
 Quando você estiver satisfeito com as palavras chave encontradas, podemos passar pro último passo, que é adicioná-las ao resultado.
 
-         - keywords = custom_kw_extractor.extract_keywords(content.get_text())
-         + keywords = custom_kw_extractor.extract_keywords(content_copy.get_text())
-           for kw in keywords:
-               print(kw)
-
          keywords = custom_kw_extractor.extract_keywords(content_copy.get_text())
       +  keyword_string = ""
       -  for kw in keywords:
@@ -478,24 +473,3 @@ Abraço.
 - <https://www.crummy.com/software/BeautifulSoup/bs4/doc/#extract>
 
 Tags: python, json, busca, nlp
-
-
-
-    [
-      {
-        "title":"Automatizando a geração de site map",
-        "permalink":"automatizando-a-geracao-de-site-map.html",
-        "published_date":"Fevereiro 06, 2022 ",
-        "summary":"mg;nl: Vamos falar sobre o porquê ...",
-        "keywords":"sitemap arquivo loc lastmod url tag RSS https Formato post ",
-        "tags":" seo  bash  bashblog"
-      },
-      {
-        "title":"Barra de buscas e consulta a API com Flutter",
-        "permalink":"barra-de-buscas-e-consulta-a-api-com-flutter.html",
-        "published_date":"Fevereiro 02, 2022 ",
-        "summary":"mg;nl: Tutorial para criar um app em flutter que ...",
-        "keywords":"Adicionar breeds listagem return Flutter Text API dados Barra http ",
-        "tags":" flutter  dart"
-      },
-    ]
