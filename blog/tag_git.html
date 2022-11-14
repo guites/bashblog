@@ -10,7 +10,7 @@
 <meta name='twitter:card' content='summary' />
 <meta name='twitter:site' content='@gui_garcia67' />
 <meta name='twitter:title' content='Blog do guilherme &mdash; Posts marcados com "git"' />
-<meta name='twitter:description' content=" Mantendo data de criação de arquivos no git   Fevereiro 06, 2022 &mdash;  Guilherme Garcia    mg;nl: Vamos desenvolver dois scripts, um pra adicionar a data da ultima alteração de um arquivo em forma de uma timestamp, evitando que ela seja perdi" />
+<meta name='twitter:description' content=" House cleaning com git   novembro 14, 2022 &mdash;  Guilherme Garcia    Nesse post eu quero compartilhar com vocês algumas operações que eu tive que realizar em uns repositórios antigos, que estavam mal gerenciados e abandonados, pra que eu pude" />
 </head><body>
 <div id="divbodyholder">
 <div class="headerholder"><div class="header">
@@ -19,6 +19,37 @@
 <div id="description">programação e outras coisas menos úteis</div>
 </div></div></div>
 <div id="divbody"><div class="content">
+<h3><a class="ablack" href="house-cleaning-com-git.html">
+House cleaning com git
+</a></h3>
+<!-- bashblog_timestamp: #202211141059.55# -->
+<div class="subtitle">novembro 14, 2022 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p>Nesse post eu quero compartilhar com vocês algumas operações que eu tive que realizar em uns repositórios antigos, que estavam mal gerenciados e abandonados, pra que eu pudesse voltar a desenvolver neles.</p>
+
+<p>As coisas que eu precisei aprender a fazer foram as seguintes:</p>
+
+<ul>
+<li>Listar autores de um repositório</li>
+<li>Filtrar os commits do repositório por autor, pra ver o que cada um contribuiu</li>
+<li>Relacionar combinações de autores/email diferentes de um mesmo usuário (usando o arquivo <code>.mailmap</code>)</li>
+<li>Em um commit, ver quais arquivos foram alterados</li>
+<li>Ver o que foi alterado em um arquivo específico dentro de um commit</li>
+<li>Verificar o histórico de alteração de um arquivo no repositório (git log arquivo.js)</li>
+<li>Alterar o nome e autor de alguns commits, utilizando o <a href="https://github.com/newren/git-filter-repo">git-filter-repo</a></li>
+</ul>
+
+<p>Essas tarefas são ótimas pra se familiarizar (ou relembrar) com o andamento de um projeto, ver o ritmo das alterações, quantas mudanças costumam ser embaladas num mesmo commit, e criar um feeling sobre o perfil dos desenvolvedores de um projeto.</p>
+
+<p>Também servem pra organizar e arrumar o histórico e os meta dados dos commits passados, e por isso eu chamo de "House cleaning".</p>
+
+<p class="readmore"><a href="house-cleaning-com-git.html">Ler mais...</a></p>
+<p>Tags: <a href='tag_git.html'>git</a></p>
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/house-cleaning-com-git.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/house-cleaning-com-git.html'><span id='count-17728'></span></a>&nbsp;</p>
 <h3><a class="ablack" href="mantendo-data-de-criacao-de-arquivos-no-git.html">
 Mantendo data de criação de arquivos no git
 </a></h3>
@@ -35,7 +66,7 @@ já deve ter reparado que, cada vez que você clona o repositório, a data de cr
 
 <p>Vou apresentar nesse post os métodos que eu utilizo para persistir essa informação.</p>
 
-<p class="readmore"><a href="./mantendo-data-de-criacao-de-arquivos-no-git.html">Ler mais...</a></p>
+<p class="readmore"><a href="mantendo-data-de-criacao-de-arquivos-no-git.html">Ler mais...</a></p>
 <p>Tags: <a href='tag_git.html'>git</a>, <a href='tag_bash.html'>bash</a></p>
 <p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/mantendo-data-de-criacao-de-arquivos-no-git.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
 <a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/mantendo-data-de-criacao-de-arquivos-no-git.html'><span id='count-28974'></span></a>&nbsp;</p>

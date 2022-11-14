@@ -1,0 +1,207 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="main.css" type="text/css" />
+<link rel="stylesheet" href="blog.css" type="text/css" />
+<link rel="stylesheet" href="code.css" type="text/css" />
+<link rel="alternate" type="application/rss+xml" title="Inscrever-se nesta página..." href="feed.rss" />
+<title>House cleaning com git</title>
+<meta name='twitter:card' content='summary' />
+<meta name='twitter:site' content='@gui_garcia67' />
+<meta name='twitter:title' content='House cleaning com git' />
+<meta name='twitter:description' content=" Nesse post eu quero compartilhar com vocês algumas operações que eu tive que realizar em uns repositórios antigos, que estavam mal gerenciados e abandonados, pra que eu pudesse voltar a desenvolver neles.  As coisas que eu precisei aprender a fa" />
+</head><body>
+<div id="divbodyholder">
+<div class="headerholder"><div class="header">
+<div id="title">
+<h1 class="nomargin"><a class="ablack" href="https://guilhermegarcia.dev/blog/index.html">Blog do guilherme</a></h1>
+<div id="description">programação e outras coisas menos úteis</div>
+</div></div></div>
+<div id="divbody"><div class="content">
+<!-- entry begin -->
+<h3><a class="ablack" href="house-cleaning-com-git.html">
+House cleaning com git
+</a></h3>
+<!-- bashblog_timestamp: #202211141059.55# -->
+<div class="subtitle">novembro 14, 2022 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p>Nesse post eu quero compartilhar com vocês algumas operações que eu tive que realizar em uns repositórios antigos, que estavam mal gerenciados e abandonados, pra que eu pudesse voltar a desenvolver neles.</p>
+
+<p>As coisas que eu precisei aprender a fazer foram as seguintes:</p>
+
+<ul>
+<li>Listar autores de um repositório</li>
+<li>Filtrar os commits do repositório por autor, pra ver o que cada um contribuiu</li>
+<li>Relacionar combinações de autores/email diferentes de um mesmo usuário (usando o arquivo <code>.mailmap</code>)</li>
+<li>Em um commit, ver quais arquivos foram alterados</li>
+<li>Ver o que foi alterado em um arquivo específico dentro de um commit</li>
+<li>Verificar o histórico de alteração de um arquivo no repositório (git log arquivo.js)</li>
+<li>Alterar o nome e autor de alguns commits, utilizando o <a href="https://github.com/newren/git-filter-repo">git-filter-repo</a></li>
+</ul>
+
+<p>Essas tarefas são ótimas pra se familiarizar (ou relembrar) com o andamento de um projeto, ver o ritmo das alterações, quantas mudanças costumam ser embaladas num mesmo commit, e criar um feeling sobre o perfil dos desenvolvedores de um projeto.</p>
+
+<p>Também servem pra organizar e arrumar o histórico e os meta dados dos commits passados, e por isso eu chamo de "House cleaning".</p>
+
+<hr/>
+
+<h2>Listar autores de um repositório</h2>
+
+<p>Vamos filtrar o <code>git log</code> em combinação com o comando <code>sort</code>, listando apenas as resultados não duplicados.</p>
+
+<pre><code>    git log | grep Author: | sort -u
+</code></pre>
+
+<p>Você vai ter um resultado nesse formato:</p>
+
+<pre><code>    Author: Guilherme Garcia &lt;guilherme67@gmail.com&gt;
+    Author: Guilherme &lt;guilherme@empresa.com&gt;
+    Author: guites &lt;6653499+guites@users.noreply.github.com&gt;
+    Author: guites &lt;guilherme67@gmail.com&gt;
+    Author: gustavo &lt;gustavo@empresa.com&gt;
+    Author: gustavo2112 &lt;gustavo2112@gmail.com&gt;
+</code></pre>
+
+<p>No github, nem todo autor representa uma conta separada. Isso porque a pessoa pode utilizar um <code>git config user.name</code> e <code>git config user.email</code> diferente em diferentes máquinas, conectadas a mesma conta do github.</p>
+
+<p>Como o identificador, no github, é o email, sabemos que o <code>guites &lt;guilherme67@gmail.com&gt;</code> e <code>Guilherme Garcia &lt;guilherme67@gmail.com&gt;</code> são a mesma conta.</p>
+
+<h2>Filtrar os commits do repositório por autor</h2>
+
+<p>Agora que temos os autores, podemos ver as contribuições de cada um usando</p>
+
+<pre><code>    git log --author=nome_ou_email
+</code></pre>
+
+<p>Aqui você não precisa digitar o nome ou email completo, pois ele funciona como um filtro. Usando o exemplo anterior, as seguintes combinações funcionariam:</p>
+
+<pre><code>    git log --author=gustavo #mostra resultados tanto de gustavo@empresa.com quanto gustavo2112@gmail.com
+    git log --author=guites #mostra resultados tanto de guites quanto 6653499+guites@users.noreply.github.com
+</code></pre>
+
+<h2>Relacionar combinações de autores/email diferentes de um mesmo usuário (usando o arquivo <code>.mailmap</code>)</h2>
+
+<p>No exemplo acima, um mesmo usuário tinha configurações locais diferentes, o que pode acabar dificultando a filtragem dos seus commits.</p>
+
+<p>Pra resolver isso, podemos criar um arquivo <code>.mailmap</code> na raíz do repositório (no mesmo diretório onde se encontra o diretório .git).</p>
+
+<p>A estrutura básica do mail map é a seguinte:</p>
+
+<pre><code>    Foo Name &lt;foo@email&gt; commit name &lt;commit@email&gt;
+    \--------+---------/ \----------+-------------/
+             |                      |
+          substituir por          buscar por
+</code></pre>
+
+<p>No nosso exemplo, digamos que os autores</p>
+
+<ul>
+<li>Author: Guilherme Garcia <a href="&#x6D;&#97;&#105;&#x6C;&#x74;&#x6F;:&#x67;&#117;&#105;&#108;&#104;&#x65;&#114;&#109;&#x65;&#54;&#55;&#64;&#x67;&#109;&#97;&#105;&#108;.&#x63;o&#109;">&#x67;&#117;&#105;&#108;&#104;&#x65;&#114;&#109;&#x65;&#54;&#55;&#64;&#x67;&#109;&#97;&#105;&#108;.&#x63;o&#109;</a></li>
+<li>Author: Guilherme <a href="&#x6D;&#97;&#105;&#x6C;&#x74;&#x6F;:&#x67;&#117;&#105;&#108;&#104;&#x65;&#114;&#109;&#x65;&#64;&#101;&#x6D;&#x70;&#114;&#101;&#115;&#97;.&#x63;o&#109;">&#x67;&#117;&#105;&#108;&#104;&#x65;&#114;&#109;&#x65;&#64;&#101;&#x6D;&#x70;&#114;&#101;&#115;&#97;.&#x63;o&#109;</a></li>
+<li>Author: guites &lt;6653499+guites@users.noreply.github.com></li>
+<li>Author: guites <a href="&#x6D;&#97;&#105;&#x6C;&#x74;&#x6F;:&#x67;&#117;&#105;&#108;&#104;&#x65;&#114;&#109;&#x65;&#54;&#55;&#64;&#x67;&#109;&#97;&#105;&#108;.&#x63;o&#109;">&#x67;&#117;&#105;&#108;&#104;&#x65;&#114;&#109;&#x65;&#54;&#55;&#64;&#x67;&#109;&#97;&#105;&#108;.&#x63;o&#109;</a></li>
+</ul>
+
+<p>Sejam a mesma pessoa, configurada em diferentes computadores com nomes e emails diferentes (por ex. usando tanto o email pessoal quanto o empresarial, e em uma outra máquina não configurou o email, daí ficou com um email auto associado do github).</p>
+
+<p>Podemos preencher um <code>.mailmap</code> com as seguintes entradas</p>
+
+<pre><code>   Guilherme Garcia &lt;guilherme67@gmail.com&gt; &lt;guilherme67@gmail.com&gt;
+   Guilherme Garcia &lt;guilherme67@gmail.com&gt; &lt;guilherme@empresa.com&gt;
+   Guilherme Garcia &lt;guilherme67@gmail.com&gt; &lt;6653499+guites@users.noreply.github.com&gt;
+</code></pre>
+
+<p>Agora, se rodarmos o filtro por autor uma segunda vez</p>
+
+<pre><code>    git log | grep Author: | sort -u
+</code></pre>
+
+<p>Vamos ter a seguinte saída:</p>
+
+<pre><code>    Author: Guilherme Garcia &lt;guilherme67@gmail.com&gt;
+    Author: gustavo &lt;gustavo@empresa.com&gt;
+    Author: gustavo2112 &lt;gustavo2112@gmail.com&gt;
+</code></pre>
+
+<h2>Em um commit, ver quais arquivos foram alterados</h2>
+
+<p>Se você quiser saber o que foi feito num commit, pode utilizar o <code>git show</code> no formato abaixo</p>
+
+<pre><code>    git show &lt;commit hash&gt;
+</code></pre>
+
+<p>Ele vai mostrar na tela um diff de tudo o que foi alterado naquele commit em relação ao anterior. Para commits grandes, pode ser uma boa ideia verificar quais arquivos foram alterados, ao invés de ver quais alterações foram feitas nos arquivos. Pra isso, podemos alterar o comando</p>
+
+<pre><code>    git show &lt;commit hash&gt; --name-only
+</code></pre>
+
+<p>E vamos receber uma listagem com o nome dos arquivos alterados.</p>
+
+<h2>Ver o que foi alterado em um arquivo específico dentro do commit</h2>
+
+<p>Depois de decidir qual arquivo você quer analisar dentro do commit selecionado, você pode ver apenas as alterações feitas nele, passando-o como argumento no <code>git show</code></p>
+
+<pre><code>    git show &lt;commit hash&gt; -- caminho/ate/o/arquivo.extensao
+</code></pre>
+
+<h2>Verificar o histórico de alteração de um arquivo no repositório</h2>
+
+<p>Se você precisar do caminho contrário, ou seja, quiser saber qual a sequência de alterações pelas quais um arquivo específico passou, você pode usá-lo como argumento diretamente no <code>git log</code></p>
+
+<pre><code>    git log caminho/ate/o/arquivo.extensao
+</code></pre>
+
+<p>E então pode ir usando <code>git show &lt;commit hash&gt; -- caminho/ate/o/arquivo.extensao</code> em cada commit da lista, pra ir acompanhando as alterações realizadas.</p>
+
+<h2>Alterar o nome e autor de alguns commits, utilizando o git-filter-repo</h2>
+
+<p>Essa é uma forma mais radical de corrigir autores e emails trocados, que envolve reescrever o histórico do repositório.</p>
+
+<p>Se você estiver trabalhando em conjunto nesse repositório, ou se as alterações que você fizer forem envolver commits que já foram enviados pro remote (com o <code>git push</code> por exemplo), essa opção pode dificultar a vida dos outros colaboradores.</p>
+
+<p>O <a href="https://github.com/newren/git-filter-repo">git-filter-repo</a> é um conjunto de scripts escrito em python que permite alterar e reescrever meta dados de um repositório.</p>
+
+<p>Você pode seguir as instruções de instalação no repositório acima, e utilizar o seguinte filtro pra, por exemplo, alterar todos os commits nos quais o autor é <code>guilherme@empresa.com</code> para <code>guilherme67@gmail.com</code>.</p>
+
+<p>Repare que o git possui dois campos de autoria: o autor do commit (commit.author), e a pessoa que registrou o commit (commit.committer).</p>
+
+<p>No caso abaixo, estou alterando ambos os campos.</p>
+
+<p>A flag <code>--force</code> pode ser removida e, nesse caso, o <code>git filter-repo</code> só permite rodar o filtro em um repositório que não possua alterações locais (ou seja, recém clonado).</p>
+
+<pre><code>    git filter-repo --force --commit-callback '
+        if commit.author_email == b"guilherme@empresa.com":
+            commit.author_email = b"guilherme67@gmail.com"
+            commit.author_name = b"guites"
+            commit.committer_email = b"guilherme67@gmail.com"
+            commit.committer_name = b"guites"
+    '
+</code></pre>
+
+<h2>Considerações finais</h2>
+
+<p>Espero que esses comandos te ajudem a navegar em novos repositórios, tentando se familiarizar com o código existente, ou a ajustar repositórios antigos bagunçados.</p>
+
+<p>Abraço!</p>
+
+<h2>Fontes</h2>
+
+<ul>
+<li><a href="https://lukasmestan.com/using-mailmap-in-git-repository/">https://lukasmestan.com/using-mailmap-in-git-repository/</a></li>
+<li><a href="https://stackoverflow.com/a/750182/14427854">https://stackoverflow.com/a/750182/14427854</a></li>
+</ul>
+
+<p>Tags: <a href='tag_git.html'>git</a></p>
+<!-- text end -->
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/house-cleaning-com-git.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/house-cleaning-com-git.html'><span id='count-17728'></span></a>&nbsp;</p>
+<!-- entry end -->
+</div>
+<div id="footer">CC by-nc-nd <a href="https://twitter.com/gui_garcia67">Guilherme Garcia</a> &mdash; <a href="mailto:gui&#46;garcia67&#64;gmail&#46;com">gui&#46;garcia67&#64;gmail&#46;com</a><br/>
+Generated with <a href="https://github.com/cfenollosa/bashblog">bashblog</a>, a single bash script to easily create blogs like this one</div>
+</div></div>
+</body></html>
