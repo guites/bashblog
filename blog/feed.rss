@@ -2,8 +2,8 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
 <channel><title>Blog do guilherme</title><link>https://guilhermegarcia.dev/blog/index.html</link>
 <description>programação e outras coisas menos úteis</description><language>en</language>
-<lastBuildDate>Mon, 14 Nov 2022 11:00:54 -0300</lastBuildDate>
-<pubDate>Mon, 14 Nov 2022 11:00:54 -0300</pubDate>
+<lastBuildDate>Mon, 14 Nov 2022 12:12:39 -0300</lastBuildDate>
+<pubDate>Mon, 14 Nov 2022 12:12:39 -0300</pubDate>
 <atom:link href="https://guilhermegarcia.dev/blog/feed.rss" rel="self" type="application/rss+xml" />
 <item><title>
 House cleaning com git
@@ -30,7 +30,7 @@ House cleaning com git
 <hr/>
 <p>Tags: <a href='tag_git.html'>git</a></p>
 <p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/house-cleaning-com-git.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/house-cleaning-com-git.html'><span id='count-17728'></span></a>&nbsp;</p>
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/house-cleaning-com-git.html'><span id='count-12366'></span></a>&nbsp;</p>
 ]]></description><link>https://guilhermegarcia.dev/blog/house-cleaning-com-git.html</link>
 <guid>https://guilhermegarcia.dev/blog/./house-cleaning-com-git.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>

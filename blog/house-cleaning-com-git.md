@@ -63,10 +63,10 @@ A estrutura básica do mail map é a seguinte:
 
 No nosso exemplo, digamos que os autores
 
-- Author: Guilherme Garcia <guilherme67@gmail.com>
-- Author: Guilherme <guilherme@empresa.com>
-- Author: guites <6653499+guites@users.noreply.github.com>
-- Author: guites <guilherme67@gmail.com>
+- Author: Guilherme Garcia &st;guilherme67@gmail.com&gt;
+- Author: Guilherme &st;guilherme@empresa.com&gt;
+- Author: guites &st;6653499+guites@users.noreply.github.com&gt;
+- Author: guites &st;guilherme67@gmail.com&gt;
 
 Sejam a mesma pessoa, configurada em diferentes computadores com nomes e emails diferentes (por ex. usando tanto o email pessoal quanto o empresarial, e em uma outra máquina não configurou o email, daí ficou com um email auto associado do github).
 
