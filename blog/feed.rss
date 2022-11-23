@@ -2,41 +2,9 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
 <channel><title>Blog do guilherme</title><link>https://guilhermegarcia.dev/blog/index.html</link>
 <description>programação e outras coisas menos úteis</description><language>en</language>
-<lastBuildDate>Wed, 23 Nov 2022 16:55:03 -0300</lastBuildDate>
-<pubDate>Wed, 23 Nov 2022 16:55:03 -0300</pubDate>
+<lastBuildDate>Wed, 23 Nov 2022 17:02:06 -0300</lastBuildDate>
+<pubDate>Wed, 23 Nov 2022 17:02:06 -0300</pubDate>
 <atom:link href="https://guilhermegarcia.dev/blog/feed.rss" rel="self" type="application/rss+xml" />
-<item><title>
-Sempre pode suas redes
-</title><description><![CDATA[
-
-<p>Sério, sempre pode suas redes. Docker networks abandonadas, desligadas de qualquer container podem destruir sua internet.</p>
-
-<p>Eu fiquei duas semanas com problema na internet da minha máquina: por algum motivo, na rede de casa, a conexão do ubuntu ficava falhando.</p>
-
-<p>Hora penava pra resolver DNSs, hora parava de funcionar completamente. Mas às vezes (geralmente quando eu pedia ajuda) ela funcionava.</p>
-
-<p>Tentei desabilitar o IPV6 nas configurações de rede, desinstalar o <code>systemd-resolved</code>, mexer com o network manager, editar o /etc/resolv.conf diretamente.</p>
-
-<p>Nada.</p>
-
-<p>Rodei um <code>docker network ls</code> um dia, e notei que tinha muita coisa na listagem.</p>
-
-<pre><code>    docker network prune
-    &gt;Yes
-</code></pre>
-
-<p>E problema resolvido.</p>
-
-<p>Sempre pode suas redes.</p>
-
-<p>Tags: <a href='tag_docker.html'>docker</a>, <a href='tag_dns.html'>dns</a>, <a href='tag_networking.html'>networking</a></p>
-<!-- text end -->
-<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/sempre-pode-suas-redes3067.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/sempre-pode-suas-redes3067.html'><span id='count-22914'></span></a>&nbsp;</p>
-]]></description><link>https://guilhermegarcia.dev/blog/sempre-pode-suas-redes3067.html</link>
-<guid>https://guilhermegarcia.dev/blog/./sempre-pode-suas-redes3067.html</guid>
-<dc:creator>Guilherme Garcia</dc:creator>
-<pubDate>Wed, 23 Nov 2022 16:47:09 -0300</pubDate></item>
 <item><title>
 Sempre pode suas redes
 </title><description><![CDATA[
@@ -70,9 +38,10 @@ Sempre pode suas redes
 <p>Mas lembre-se: sempre pode suas redes.</p>
 
 <p>Tags: <a href='tag_docker.html'>docker</a>, <a href='tag_dns.html'>dns</a>, <a href='tag_networking.html'>networking</a></p>
+
 <!-- text end -->
 <p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/sempre-pode-suas-redes.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/sempre-pode-suas-redes.html'><span id='count-25223'></span></a>&nbsp;</p>
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/sempre-pode-suas-redes.html'><span id='count-19502'></span></a>&nbsp;</p>
 ]]></description><link>https://guilhermegarcia.dev/blog/sempre-pode-suas-redes.html</link>
 <guid>https://guilhermegarcia.dev/blog/./sempre-pode-suas-redes.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
@@ -88,7 +57,7 @@ Making home of the WSL 2
 <hr/>
 <p>Tags: <a href='tag_windows.html'>windows</a>, <a href='tag_wsl.html'>wsl</a></p>
 <p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/making-home-of-the-wsl-2.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/making-home-of-the-wsl-2.html'><span id='count-27347'></span></a>&nbsp;</p>
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/making-home-of-the-wsl-2.html'><span id='count-5361'></span></a>&nbsp;</p>
 ]]></description><link>https://guilhermegarcia.dev/blog/making-home-of-the-wsl-2.html</link>
 <guid>https://guilhermegarcia.dev/blog/./making-home-of-the-wsl-2.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
@@ -118,7 +87,7 @@ House cleaning com git
 <hr/>
 <p>Tags: <a href='tag_git.html'>git</a></p>
 <p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/house-cleaning-com-git.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/house-cleaning-com-git.html'><span id='count-12366'></span></a>&nbsp;</p>
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/house-cleaning-com-git.html'><span id='count-21696'></span></a>&nbsp;</p>
 ]]></description><link>https://guilhermegarcia.dev/blog/house-cleaning-com-git.html</link>
 <guid>https://guilhermegarcia.dev/blog/./house-cleaning-com-git.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
@@ -144,7 +113,7 @@ Busca sem backend - parte 1
 <hr/>
 <p>Tags: <a href='tag_python.html'>python</a>, <a href='tag_json.html'>json</a>, <a href='tag_busca.html'>busca</a>, <a href='tag_nlp.html'>nlp</a></p>
 <p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/busca-sem-backend---parte-1.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/busca-sem-backend---parte-1.html'><span id='count-24794'></span></a>&nbsp;</p>
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/busca-sem-backend---parte-1.html'><span id='count-3209'></span></a>&nbsp;</p>
 ]]></description><link>https://guilhermegarcia.dev/blog/busca-sem-backend---parte-1.html</link>
 <guid>https://guilhermegarcia.dev/blog/./busca-sem-backend---parte-1.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
@@ -166,7 +135,7 @@ Comparando json na linha de comando
 <hr/>
 <p>Tags: <a href='tag_json.html'>json</a>, <a href='tag_vimdiff.html'>vimdiff</a>, <a href='tag_cli.html'>cli</a>, <a href='tag_bash.html'>bash</a></p>
 <p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/comparando-json-na-linha-de-comando.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/comparando-json-na-linha-de-comando.html'><span id='count-25112'></span></a>&nbsp;</p>
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/comparando-json-na-linha-de-comando.html'><span id='count-31865'></span></a>&nbsp;</p>
 ]]></description><link>https://guilhermegarcia.dev/blog/comparando-json-na-linha-de-comando.html</link>
 <guid>https://guilhermegarcia.dev/blog/./comparando-json-na-linha-de-comando.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
@@ -211,7 +180,7 @@ A ordem dos exports importa
 <hr/>
 <p>Tags: <a href='tag_react.html'>react</a>, <a href='tag_javascript.html'>javascript</a></p>
 <p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/a-ordem-dos-exports-importa.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/a-ordem-dos-exports-importa.html'><span id='count-17220'></span></a>&nbsp;</p>
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/a-ordem-dos-exports-importa.html'><span id='count-22163'></span></a>&nbsp;</p>
 ]]></description><link>https://guilhermegarcia.dev/blog/a-ordem-dos-exports-importa.html</link>
 <guid>https://guilhermegarcia.dev/blog/./a-ordem-dos-exports-importa.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
@@ -239,7 +208,7 @@ Remova o feed do github
 <hr/>
 <p>Tags: <a href='tag_bookmarklet.html'>bookmarklet</a>, <a href='tag_javascript.html'>javascript</a></p>
 <p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/remova-o-feed-do-github.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/remova-o-feed-do-github.html'><span id='count-22818'></span></a>&nbsp;</p>
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/remova-o-feed-do-github.html'><span id='count-20332'></span></a>&nbsp;</p>
 ]]></description><link>https://guilhermegarcia.dev/blog/remova-o-feed-do-github.html</link>
 <guid>https://guilhermegarcia.dev/blog/./remova-o-feed-do-github.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
@@ -269,7 +238,7 @@ com as requisições pelo terminal, ou via postman/insomnia:</p>
 <hr/>
 <p>Tags: <a href='tag_node.html'>node</a>, <a href='tag_puppeteer.html'>puppeteer</a>, <a href='tag_oauth2.html'>oauth2</a></p>
 <p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/interceptando-tokens-com-puppeteer.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/interceptando-tokens-com-puppeteer.html'><span id='count-9818'></span></a>&nbsp;</p>
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/interceptando-tokens-com-puppeteer.html'><span id='count-19757'></span></a>&nbsp;</p>
 ]]></description><link>https://guilhermegarcia.dev/blog/interceptando-tokens-com-puppeteer.html</link>
 <guid>https://guilhermegarcia.dev/blog/./interceptando-tokens-com-puppeteer.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
@@ -309,9 +278,31 @@ PoC: Stream de videos com javascript no navegador
 <hr/>
 <p>Tags: <a href='tag_streaming.html'>streaming</a>, <a href='tag_javascript.html'>javascript</a>, <a href='tag_node.html'>node</a>, <a href='tag_poc.html'>poc</a></p>
 <p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/poc-stream-de-videos-com-javascript-no-navegador.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/poc-stream-de-videos-com-javascript-no-navegador.html'><span id='count-12726'></span></a>&nbsp;</p>
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/poc-stream-de-videos-com-javascript-no-navegador.html'><span id='count-5125'></span></a>&nbsp;</p>
 ]]></description><link>https://guilhermegarcia.dev/blog/poc-stream-de-videos-com-javascript-no-navegador.html</link>
 <guid>https://guilhermegarcia.dev/blog/./poc-stream-de-videos-com-javascript-no-navegador.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
 <pubDate>Sat, 26 Mar 2022 19:40:00 -0300</pubDate></item>
+<item><title>
+Apps de linha de comando em dart
+</title><description><![CDATA[
+
+<p><abbr title="muito grande;nem li">mg;nl</abbr>: Vamos dar sequência ao app iniciado <a href="https://guilhermegarcia.dev/blog/oauth2-pela-linha-de-comando-em-dart.html">neste post</a>, explorando ferramentas da linguagem dart para tornar nosso aplicativo mais interativo, lendo e escrevendo input do usuário e arquivos, assim como permitindo ao usuário escolher entre possibilidades que alteram o fluxo do app.</p>
+
+<p>No <a href="https://guilhermegarcia.dev/blog/oauth2-pela-linha-de-comando-em-dart.html">post anterior</a> desenvolvemos um aplicativo que autentica o usuário através do protocolo OAuth2, e, com as permissões concedidas, gera uma listagem dos seus repositórios, públicos e privados, com o link para acessá-los no GitHub.</p>
+
+<p>Neste post, vamos extender algumas dessas funcionalidades, focando em tornar sua utilização mais fácil e intuitíva, facilitando o processo de configuração e partindo do princípio que o usuário final não possui conhecimentos de programação.</p>
+
+<p>Se você quiser ir programando junto, nosso ponto de partida é o <a href="https://github.com/guites/dart-github-app/tree/oauth2_flux">branch oauth2_flux deste repositório</a>.</p>
+
+<p>O código finalizado pode ser encontrado no branch <a href="https://github.com/guites/dart-github-app/tree/add_models">add_models</a></p>
+
+<hr/>
+<p>Tags: <a href='tag_dart.html'>dart</a>, <a href='tag_cli.html'>cli</a>, <a href='tag_api.html'>api</a>, <a href='tag_github.html'>github</a></p>
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/apps-de-linha-de-comando-em-dart.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/apps-de-linha-de-comando-em-dart.html'><span id='count-28374'></span></a>&nbsp;</p>
+]]></description><link>https://guilhermegarcia.dev/blog/apps-de-linha-de-comando-em-dart.html</link>
+<guid>https://guilhermegarcia.dev/blog/./apps-de-linha-de-comando-em-dart.html</guid>
+<dc:creator>Guilherme Garcia</dc:creator>
+<pubDate>Mon, 21 Mar 2022 22:49:43 -0300</pubDate></item>
 </channel></rss>
