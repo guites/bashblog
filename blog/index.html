@@ -10,7 +10,7 @@
 <meta name='twitter:card' content='summary' />
 <meta name='twitter:site' content='@gui_garcia67' />
 <meta name='twitter:title' content='Blog do guilherme' />
-<meta name='twitter:description' content=" Making home of the WSL 2   Novembro 22, 2022 &mdash;  Guilherme Garcia    Having recently migrated from Ubuntu to Windows as my work machine, many of the features that made my system feel like home were missing.  This post serves as a collection of " />
+<meta name='twitter:description' content=" Sempre pode suas redes   novembro 23, 2022 &mdash;  Guilherme Garcia    Sério, sempre pode suas redes. Docker networks abandonadas, desligadas de qualquer container podem destruir sua internet.  Eu fiquei duas semanas com problema na internet da mi" />
 </head><body>
 <div id="divbodyholder">
 <div class="headerholder"><div class="header">
@@ -19,6 +19,80 @@
 <div id="description">programação e outras coisas menos úteis</div>
 </div></div></div>
 <div id="divbody"><div class="content">
+<h3><a class="ablack" href="sempre-pode-suas-redes3067.html">
+Sempre pode suas redes
+</a></h3>
+<!-- bashblog_timestamp: #202211231647.09# -->
+<div class="subtitle">novembro 23, 2022 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p>Sério, sempre pode suas redes. Docker networks abandonadas, desligadas de qualquer container podem destruir sua internet.</p>
+
+<p>Eu fiquei duas semanas com problema na internet da minha máquina: por algum motivo, na rede de casa, a conexão do ubuntu ficava falhando.</p>
+
+<p>Hora penava pra resolver DNSs, hora parava de funcionar completamente. Mas às vezes (geralmente quando eu pedia ajuda) ela funcionava.</p>
+
+<p>Tentei desabilitar o IPV6 nas configurações de rede, desinstalar o <code>systemd-resolved</code>, mexer com o network manager, editar o /etc/resolv.conf diretamente.</p>
+
+<p>Nada.</p>
+
+<p>Rodei um <code>docker network ls</code> um dia, e notei que tinha muita coisa na listagem.</p>
+
+<pre><code>    docker network prune
+    &gt;Yes
+</code></pre>
+
+<p>E problema resolvido.</p>
+
+<p>Sempre pode suas redes.</p>
+
+<p>Tags: <a href='tag_docker.html'>docker</a>, <a href='tag_dns.html'>dns</a>, <a href='tag_networking.html'>networking</a></p>
+<!-- text end -->
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/sempre-pode-suas-redes3067.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/sempre-pode-suas-redes3067.html'><span id='count-22914'></span></a>&nbsp;</p>
+<h3><a class="ablack" href="sempre-pode-suas-redes.html">
+Sempre pode suas redes
+</a></h3>
+<!-- bashblog_timestamp: #202211231639.35# -->
+<div class="subtitle">novembro 23, 2022 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p>Sério, sempre pode suas redes. Docker networks abandonadas, desligadas de qualquer container podem destruir sua internet.</p>
+
+<p>Eu fiquei duas semanas com problema na internet da minha máquina: por algum motivo, na rede de casa, a conexão do ubuntu ficava falhando.</p>
+
+<p>Hora penava pra resolver DNSs, hora parava de funcionar completamente. Mas às vezes (geralmente quando eu pedia ajuda) ela funcionava.</p>
+
+<p>Tentei desabilitar o IPV6 nas configurações de rede, desinstalar o <code>systemd-resolved</code>, mexer com o network manager, editar o /etc/resolv.conf diretamente.</p>
+
+<p>Nada.</p>
+
+<p>Em outras redes, na casa de amigos, na cafeteria, a internet funcionava. Eu cheguei a achar que meu provedor estava de sacanagem.</p>
+
+<p>Até que tive que ficar num airBnb, e o problema voltou.</p>
+
+<p>Olhei pro roteador, e era o mesmo <code>d-link</code> que eu tinha em casa. Já comecei a desenvolver uma crendice.</p>
+
+<p>Acabou que não pude ir até o fim, pois um dia rodei um <code>docker network ls</code> e notei que tinha muita coisa na listagem.</p>
+
+<pre><code>    docker network prune
+    &gt;Yes
+</code></pre>
+
+<p>E problema resolvido.</p>
+
+<p>Se alguém souber mais sobre isso, ou como reproduzir o problema, por favor, <a href="mailto:gui.garcia67@gmail.com">entre em contato</a>.</p>
+
+<p>Mas lembre-se: sempre pode suas redes.</p>
+
+<p>Tags: <a href='tag_docker.html'>docker</a>, <a href='tag_dns.html'>dns</a>, <a href='tag_networking.html'>networking</a></p>
+<!-- text end -->
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/sempre-pode-suas-redes.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/sempre-pode-suas-redes.html'><span id='count-25223'></span></a>&nbsp;</p>
 <h3><a class="ablack" href="making-home-of-the-wsl-2.html">
 Making home of the WSL 2
 </a></h3>
@@ -192,78 +266,6 @@ Guilherme Garcia
 <p>Tags: <a href='tag_bookmarklet.html'>bookmarklet</a>, <a href='tag_javascript.html'>javascript</a></p>
 <p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/remova-o-feed-do-github.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
 <a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/remova-o-feed-do-github.html'><span id='count-22818'></span></a>&nbsp;</p>
-<h3><a class="ablack" href="interceptando-tokens-com-puppeteer.html">
-Interceptando tokens com puppeteer
-</a></h3>
-<!-- bashblog_timestamp: #202210101048.57# -->
-<div class="subtitle">outubro 10, 2022 &mdash; 
-Guilherme Garcia
-</div>
-<!-- text begin -->
-
-<p><abbr title="muito grande; nem li">mg;nl</abbr>: vamos ver como automatizar o login em um app e interceptar as requisições realizadas, com o objetivo de acessar os tokens gerados pelo front end de uma aplicação.</p>
-
-<p>Digamos que você esteja trabalhando com uma API que exige autenticação.</p>
-
-<p>Você consegue autenticar pelo frontend, mas gostaria de uma forma automatizada de acessar o token, para trabalhar
-com as requisições pelo terminal, ou via postman/insomnia:</p>
-
-<pre><code>    curl -X POST -H 'Bearer tokensecretogeradonofrontend' https://api-autenticada.net/resources
-</code></pre>
-
-<p>Dependendo da solução de identidade e autenticação utilizada na API, você pode tentar reproduzir as requisições e gerar o token no seu formato final.</p>
-
-<p>Mas alguns provedores, como o <a href="https://www.okta.com/">Okta</a> ou o <a href="https://www.keycloak.org/">Keycloak</a> dificultam essa tática, pois envolvem o uso de <a href="https://pt.wikipedia.org/wiki/Nonce">nonces</a> ou processamento adicional dos valores trocados entre cliente e servidor.</p>
-
-<p>Essas etapas são de difícil reprodução, e podem tomar muito tempo.</p>
-
-<p>Uma alternativa é a automatização do acesso realizado no front end com um navegador <code>headless</code>, como o puppeteer.</p>
-
-<p class="readmore"><a href="./interceptando-tokens-com-puppeteer.html">Ler mais...</a></p>
-<p>Tags: <a href='tag_node.html'>node</a>, <a href='tag_puppeteer.html'>puppeteer</a>, <a href='tag_oauth2.html'>oauth2</a></p>
-<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/interceptando-tokens-com-puppeteer.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/interceptando-tokens-com-puppeteer.html'><span id='count-9818'></span></a>&nbsp;</p>
-<h3><a class="ablack" href="poc-stream-de-videos-com-javascript-no-navegador.html">
-PoC: Stream de videos com javascript no navegador
-</a></h3>
-<!-- bashblog_timestamp: #202203261940.00# -->
-<div class="subtitle">Março 26, 2022 &mdash; 
-Guilherme Garcia
-</div>
-<!-- text begin -->
-
-<p><abbr title="muito grande; nemli">mg;nl</abbr>: vamos desenvolver um reprodutor de vídeos utilizando a API MediaSource do navegador e o conceito de fragmentação de vídeos, no modelo utilizado por sites como twitter, facebook e netflix.</p>
-
-<p>Ao acessar sites com stream de vídeo, como twitter, facebook ou netflix, e visualizar um vídeo, você pode se deparar com duas situações: Na primeira, o vídeo está encapsulado em uma tag <code>&lt;video&gt;</code>, com um <code>src</code> ou algumas tags <code>&lt;source&gt;</code>, indicando a URL do vídeo.</p>
-
-<p>Neste caso, você pode facilmente, inspecionando a tela, copiar a URL do vídeo e abrí-la em outra aba, ou salvar no seu computador.</p>
-
-<p>Por exemplo: <a href="https://twitter.com/TheOtaking/status/1507809616993742848">https://twitter.com/TheOtaking/status/1507809616993742848</a></p>
-
-<p>O GIF mostrado na página é, na verdade, um mp4, e, inspecionando a estrutura do html, descobrimos que ele está no seguinte formato:</p>
-
-<pre><code>&lt;video preload="auto" playsinline="" aria-label="Embedded video" disablepictureinpicture="" style="width: 100%; height: 100%; position: absolute; background-color: black; top: 0%; left: 0%; transform: rotate(0deg) scale(1.005);" poster="https://pbs.twimg.com/tweet_video_thumb/FOzEMPDXEAEE_e5.jpg" src="https://video.twimg.com/tweet_video/FOzEMPDXEAEE_e5.mp4" type="video/mp4"&gt;&lt;/video&gt;
-</code></pre>
-
-<p>Você pode facilmente salvar a URL <a href="https://video.twimg.com/tweet_video/FOzEMPDXEAEE_e5.mp4">https://video.twimg.com/tweet_video/FOzEMPDXEAEE_e5.mp4</a>, reproduzí-la em outros ambientes, ou fazer o download do arquivo.</p>
-
-<p>Na segunda situação, você também encontra uma tag <code>video</code>, mas seu atributo <code>src</code> não é uma URL comum: se trata de um blob.</p>
-
-<p>Exemplo: <a href="https://twitter.com/TheOtaking/status/1507278342176882730">https://twitter.com/TheOtaking/status/1507278342176882730</a></p>
-
-<p>O vídeo possui os controles habilitados, e, inspecionando a página, sua estrutura é a seguinte:</p>
-
-<pre><code>&lt;video preload="none" playsinline="" aria-label="Embedded video" disablepictureinpicture="" style="width: 100%; height: 100%; position: absolute; background-color: black; top: 0%; left: 0%; transform: rotate(0deg) scale(1.005);" poster="https://pbs.twimg.com/ext_tw_video_thumb/1507278264003440640/pu/img/1OLNuDRaCHoKzs1e.jpg" src="blob:https://twitter.com/dfc0270a-52b1-4ea8-a49d-bc9939732deb"&gt;&lt;/video&gt;
-</code></pre>
-
-<p>Se você tentar acessar a URL <blob:https://twitter.com/dfc0270a-52b1-4ea8-a49d-bc9939732deb>, ou mesmo <a href="https://twitter.com/dfc0270a-52b1-4ea8-a49d-bc9939732deb">https://twitter.com/dfc0270a-52b1-4ea8-a49d-bc9939732deb</a>, vai receber um erro de página não encontrada.</p>
-
-<p>Neste post, vamos entender o funcionamento das URLs blob, qual os benefícios do seu uso, e desenvolver uma prova de conceito mostrando como implementar uma funcionalidade de stream em javascript.</p>
-
-<p class="readmore"><a href="./poc-stream-de-videos-com-javascript-no-navegador.html">Ler mais...</a></p>
-<p>Tags: <a href='tag_streaming.html'>streaming</a>, <a href='tag_javascript.html'>javascript</a>, <a href='tag_node.html'>node</a>, <a href='tag_poc.html'>poc</a></p>
-<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/poc-stream-de-videos-com-javascript-no-navegador.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/poc-stream-de-videos-com-javascript-no-navegador.html'><span id='count-12726'></span></a>&nbsp;</p>
 <div id="all_posts"><a href="todos_posts.html">Ver mais posts</a> &mdash; <a href="todas_tags.html">Todas as tags</a> &mdash; <a href="feed.rss">RSS feed</a></div>
 </div>
 <div id="footer">CC by-nc-nd <a href="https://twitter.com/gui_garcia67">Guilherme Garcia</a> &mdash; <a href="mailto:gui&#46;garcia67&#64;gmail&#46;com">gui&#46;garcia67&#64;gmail&#46;com</a><br/>

@@ -1,0 +1,100 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="main.css" type="text/css" />
+<link rel="stylesheet" href="blog.css" type="text/css" />
+<link rel="stylesheet" href="code.css" type="text/css" />
+<link rel="alternate" type="application/rss+xml" title="Inscrever-se nesta página..." href="feed.rss" />
+<title>Blog do guilherme &mdash; Posts marcados com "networking"</title>
+<meta name='twitter:card' content='summary' />
+<meta name='twitter:site' content='@gui_garcia67' />
+<meta name='twitter:title' content='Blog do guilherme &mdash; Posts marcados com "networking"' />
+<meta name='twitter:description' content=" Sempre pode suas redes   novembro 23, 2022 &mdash;  Guilherme Garcia    Sério, sempre pode suas redes. Docker networks abandonadas, desligadas de qualquer container podem destruir sua internet.  Eu fiquei duas semanas com problema na internet da mi" />
+</head><body>
+<div id="divbodyholder">
+<div class="headerholder"><div class="header">
+<div id="title">
+<h1 class="nomargin"><a class="ablack" href="https://guilhermegarcia.dev/blog/index.html">Blog do guilherme</a></h1>
+<div id="description">programação e outras coisas menos úteis</div>
+</div></div></div>
+<div id="divbody"><div class="content">
+<h3><a class="ablack" href="sempre-pode-suas-redes3067.html">
+Sempre pode suas redes
+</a></h3>
+<!-- bashblog_timestamp: #202211231647.09# -->
+<div class="subtitle">novembro 23, 2022 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p>Sério, sempre pode suas redes. Docker networks abandonadas, desligadas de qualquer container podem destruir sua internet.</p>
+
+<p>Eu fiquei duas semanas com problema na internet da minha máquina: por algum motivo, na rede de casa, a conexão do ubuntu ficava falhando.</p>
+
+<p>Hora penava pra resolver DNSs, hora parava de funcionar completamente. Mas às vezes (geralmente quando eu pedia ajuda) ela funcionava.</p>
+
+<p>Tentei desabilitar o IPV6 nas configurações de rede, desinstalar o <code>systemd-resolved</code>, mexer com o network manager, editar o /etc/resolv.conf diretamente.</p>
+
+<p>Nada.</p>
+
+<p>Rodei um <code>docker network ls</code> um dia, e notei que tinha muita coisa na listagem.</p>
+
+<pre><code>    docker network prune
+    &gt;Yes
+</code></pre>
+
+<p>E problema resolvido.</p>
+
+<p>Sempre pode suas redes.</p>
+
+<p>Tags: <a href='tag_docker.html'>docker</a>, <a href='tag_dns.html'>dns</a>, <a href='tag_networking.html'>networking</a></p>
+<!-- text end -->
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/sempre-pode-suas-redes3067.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/sempre-pode-suas-redes3067.html'><span id='count-22914'></span></a>&nbsp;</p>
+<h3><a class="ablack" href="sempre-pode-suas-redes.html">
+Sempre pode suas redes
+</a></h3>
+<!-- bashblog_timestamp: #202211231639.35# -->
+<div class="subtitle">novembro 23, 2022 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p>Sério, sempre pode suas redes. Docker networks abandonadas, desligadas de qualquer container podem destruir sua internet.</p>
+
+<p>Eu fiquei duas semanas com problema na internet da minha máquina: por algum motivo, na rede de casa, a conexão do ubuntu ficava falhando.</p>
+
+<p>Hora penava pra resolver DNSs, hora parava de funcionar completamente. Mas às vezes (geralmente quando eu pedia ajuda) ela funcionava.</p>
+
+<p>Tentei desabilitar o IPV6 nas configurações de rede, desinstalar o <code>systemd-resolved</code>, mexer com o network manager, editar o /etc/resolv.conf diretamente.</p>
+
+<p>Nada.</p>
+
+<p>Em outras redes, na casa de amigos, na cafeteria, a internet funcionava. Eu cheguei a achar que meu provedor estava de sacanagem.</p>
+
+<p>Até que tive que ficar num airBnb, e o problema voltou.</p>
+
+<p>Olhei pro roteador, e era o mesmo <code>d-link</code> que eu tinha em casa. Já comecei a desenvolver uma crendice.</p>
+
+<p>Acabou que não pude ir até o fim, pois um dia rodei um <code>docker network ls</code> e notei que tinha muita coisa na listagem.</p>
+
+<pre><code>    docker network prune
+    &gt;Yes
+</code></pre>
+
+<p>E problema resolvido.</p>
+
+<p>Se alguém souber mais sobre isso, ou como reproduzir o problema, por favor, <a href="mailto:gui.garcia67@gmail.com">entre em contato</a>.</p>
+
+<p>Mas lembre-se: sempre pode suas redes.</p>
+
+<p>Tags: <a href='tag_docker.html'>docker</a>, <a href='tag_dns.html'>dns</a>, <a href='tag_networking.html'>networking</a></p>
+<!-- text end -->
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/sempre-pode-suas-redes.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/sempre-pode-suas-redes.html'><span id='count-25223'></span></a>&nbsp;</p>
+</div>
+<div id="footer">CC by-nc-nd <a href="https://twitter.com/gui_garcia67">Guilherme Garcia</a> &mdash; <a href="mailto:gui&#46;garcia67&#64;gmail&#46;com">gui&#46;garcia67&#64;gmail&#46;com</a><br/>
+Generated with <a href="https://github.com/cfenollosa/bashblog">bashblog</a>, a single bash script to easily create blogs like this one</div>
+</div></div>
+</body></html>
