@@ -10,7 +10,7 @@
 <meta name='twitter:card' content='summary' />
 <meta name='twitter:site' content='@gui_garcia67' />
 <meta name='twitter:title' content='Blog do guilherme' />
-<meta name='twitter:description' content=" Sempre pode suas redes   novembro 23, 2022 &mdash;  Guilherme Garcia    Sério, sempre pode suas redes. Docker networks abandonadas, desligadas de qualquer container podem destruir sua internet.  Eu fiquei duas semanas com problema na internet da mi" />
+<meta name='twitter:description' content=" Remova os gifs do medium   dezembro 15, 2022 &mdash;  Guilherme Garcia    A plataforma medium tem muito conteúdo bom, mas infelizmente muitas postagens ótimas são permeadas de gifs super coloridos, que eu considero distrativos.  Quando eu tô pro" />
 </head><body>
 <div id="divbodyholder">
 <div class="headerholder"><div class="header">
@@ -19,6 +19,38 @@
 <div id="description">programação e outras coisas menos úteis</div>
 </div></div></div>
 <div id="divbody"><div class="content">
+<h3><a class="ablack" href="remova-os-gifs-do-medium.html">
+Remova os gifs do medium
+</a></h3>
+<!-- bashblog_timestamp: #202212152027.42# -->
+<div class="subtitle">dezembro 15, 2022 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p>A plataforma medium tem muito conteúdo bom, mas infelizmente muitas postagens ótimas são permeadas de gifs super coloridos, que eu considero distrativos.</p>
+
+<p>Quando eu tô procurando direcionamento sobre um tópico, e finalmente acho um post sobre o assunto, eu não gosto muito da mudança de tom que os gifs trazem, inseridos a cada parágrafo, tipo um comic relief desnecessário (<a href="https://www.google.com/search?channel=fs&amp;client=ubuntu&amp;q=jar+jar+binks">ahem</a>).</p>
+
+<p>Daí esse snippet esconde todos os gifs e põe um botãozinho pra mostrar/esconder, aí você pode dar uma olhada e desligar a coisa.</p>
+
+<p><img src="./imgs/remova-os-gifs-do-medium/adding-bookmarklet.png" alt="Aba dos favoritos no firefox" title="Aba dos favoritos no firefox" /></p>
+
+<p>Você pode ir "Add Bookmarks" e adicionar o seguinte, com um nome tipo "hide-medium-gifs":</p>
+
+<pre><code>    javascript:(function() {const doc_imgs=document.querySelectorAll('img');function toggleImgVisibility(e){let prevSibling=e.target.previousElementSibling;while(prevSibling){if(prevSibling.classList.contains('hidden-g0f')){if(prevSibling.style.visibility=='hidden'){prevSibling.style.visibility='visible';}else{prevSibling.style.visibility='hidden';}break;}prevSibling=prevSibling.previousElementSibling;}}function createToggleBtn(){const button=document.createElement("BUTTON");button.innerText="Toggle gif visibility";button.addEventListener("click",toggleImgVisibility);return button;}doc_imgs.forEach((img) =&gt; {if (!img.src.includes('.gif')) return;img.classList.add("hidden-g0f");img.style.visibility = "hidden";img.parentElement.appendChild(createToggleBtn());});}())
+</code></pre>
+
+<p>Daí, em qualquer página do medium (por <a href="https://medium.com/perry-street-software-engineering/clean-api-architecture-2b57074084d5">exemplo...</a>), basta clicar no favorito criado, e pronto: gifs pausáveis.</p>
+
+<p><video controls style="width:100%;height:100%;"src="./imgs/remova-os-gifs-do-medium/hide-g0fs.mp4"></p>
+
+<p>Abaixo eu explico melhor a função.</p>
+
+<p class="readmore"><a href="./remova-os-gifs-do-medium.html">Ler mais...</a></p>
+<p>Tags: <a href='tag_bookmarklet.html'>bookmarklet</a></p>
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/remova-os-gifs-do-medium.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/remova-os-gifs-do-medium.html'><span id='count-14890'></span></a>&nbsp;</p>
 <h3><a class="ablack" href="sempre-pode-suas-redes.html">
 Sempre pode suas redes
 </a></h3>
@@ -234,39 +266,10 @@ Guilherme Garcia
 <p>Tags: <a href='tag_bookmarklet.html'>bookmarklet</a>, <a href='tag_javascript.html'>javascript</a></p>
 <p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/remova-o-feed-do-github.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
 <a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/remova-o-feed-do-github.html'><span id='count-20332'></span></a>&nbsp;</p>
-<h3><a class="ablack" href="interceptando-tokens-com-puppeteer.html">
-Interceptando tokens com puppeteer
-</a></h3>
-<!-- bashblog_timestamp: #202210101048.57# -->
-<div class="subtitle">outubro 10, 2022 &mdash; 
-Guilherme Garcia
-</div>
-<!-- text begin -->
-
-<p><abbr title="muito grande; nem li">mg;nl</abbr>: vamos ver como automatizar o login em um app e interceptar as requisições realizadas, com o objetivo de acessar os tokens gerados pelo front end de uma aplicação.</p>
-
-<p>Digamos que você esteja trabalhando com uma API que exige autenticação.</p>
-
-<p>Você consegue autenticar pelo frontend, mas gostaria de uma forma automatizada de acessar o token, para trabalhar
-com as requisições pelo terminal, ou via postman/insomnia:</p>
-
-<pre><code>    curl -X POST -H 'Bearer tokensecretogeradonofrontend' https://api-autenticada.net/resources
-</code></pre>
-
-<p>Dependendo da solução de identidade e autenticação utilizada na API, você pode tentar reproduzir as requisições e gerar o token no seu formato final.</p>
-
-<p>Mas alguns provedores, como o <a href="https://www.okta.com/">Okta</a> ou o <a href="https://www.keycloak.org/">Keycloak</a> dificultam essa tática, pois envolvem o uso de <a href="https://pt.wikipedia.org/wiki/Nonce">nonces</a> ou processamento adicional dos valores trocados entre cliente e servidor.</p>
-
-<p>Essas etapas são de difícil reprodução, e podem tomar muito tempo.</p>
-
-<p>Uma alternativa é a automatização do acesso realizado no front end com um navegador <code>headless</code>, como o puppeteer.</p>
-
-<p class="readmore"><a href="./interceptando-tokens-com-puppeteer.html">Ler mais...</a></p>
-<p>Tags: <a href='tag_node.html'>node</a>, <a href='tag_puppeteer.html'>puppeteer</a>, <a href='tag_oauth2.html'>oauth2</a></p>
-<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/interceptando-tokens-com-puppeteer.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/interceptando-tokens-com-puppeteer.html'><span id='count-19757'></span></a>&nbsp;</p>
 <div id="all_posts"><a href="todos_posts.html">Ver mais posts</a> &mdash; <a href="todas_tags.html">Todas as tags</a> &mdash; <a href="feed.rss">RSS feed</a></div>
 </div>
+<div id="footer">CC by-nc-nd <a href="https://twitter.com/gui_garcia67">Guilherme Garcia</a> &mdash; <a href="mailto:gui&#46;garcia67&#64;gmail&#46;com">gui&#46;garcia67&#64;gmail&#46;com</a><br/>
+Generated with <a href="https://github.com/cfenollosa/bashblog">bashblog</a>, a single bash script to easily create blogs like this one</div>
 <div id="footer">CC by-nc-nd <a href="https://twitter.com/gui_garcia67">Guilherme Garcia</a> &mdash; <a href="mailto:gui&#46;garcia67&#64;gmail&#46;com">gui&#46;garcia67&#64;gmail&#46;com</a><br/>
 Generated with <a href="https://github.com/cfenollosa/bashblog">bashblog</a>, a single bash script to easily create blogs like this one</div>
 </div></div>

@@ -6,11 +6,11 @@
 <link rel="stylesheet" href="blog.css" type="text/css" />
 <link rel="stylesheet" href="code.css" type="text/css" />
 <link rel="alternate" type="application/rss+xml" title="Inscrever-se nesta página..." href="feed.rss" />
-<title>Blog do guilherme &mdash; Posts marcados com "bookmarklet"</title>
+<title>Remova os gifs do medium</title>
 <meta name='twitter:card' content='summary' />
 <meta name='twitter:site' content='@gui_garcia67' />
-<meta name='twitter:title' content='Blog do guilherme &mdash; Posts marcados com "bookmarklet"' />
-<meta name='twitter:description' content=" Remova os gifs do medium   dezembro 15, 2022 &mdash;  Guilherme Garcia    A plataforma medium tem muito conteúdo bom, mas infelizmente muitas postagens ótimas são permeadas de gifs super coloridos, que eu considero distrativos.  Quando eu tô pro" />
+<meta name='twitter:title' content='Remova os gifs do medium' />
+<meta name='twitter:description' content=" A plataforma medium tem muito conteúdo bom, mas infelizmente muitas postagens ótimas são permeadas de gifs super coloridos, que eu considero distrativos.  Quando eu tô procurando direcionamento sobre um tópico, e finalmente acho um post sobre o" />
 </head><body>
 <div id="divbodyholder">
 <div class="headerholder"><div class="header">
@@ -19,6 +19,7 @@
 <div id="description">programação e outras coisas menos úteis</div>
 </div></div></div>
 <div id="divbody"><div class="content">
+<!-- entry begin -->
 <h3><a class="ablack" href="remova-os-gifs-do-medium.html">
 Remova os gifs do medium
 </a></h3>
@@ -47,39 +48,63 @@ Guilherme Garcia
 
 <p>Abaixo eu explico melhor a função.</p>
 
-<p class="readmore"><a href="remova-os-gifs-do-medium.html">Ler mais...</a></p>
+<hr/>
+
+<p>O código é o seguinte:</p>
+
+<pre><code>    const doc_imgs = document.querySelectorAll('img');
+
+    function toggleImgVisibility(e) {
+      let prevSibling = e.target.previousElementSibling;
+      while (prevSibling) {
+        if (prevSibling.classList.contains('hidden-g0f')) {
+          if (prevSibling.style.visibility == 'hidden') {
+            prevSibling.style.visibility = 'visible';
+          } else {
+            prevSibling.style.visibility = 'hidden';
+          }
+          break;
+        }
+        prevSibling = prevSibling.previousElementSibling;
+      }
+    }
+
+    function createToggleBtn() {
+      const button = document.createElement("BUTTON");
+      button.innerText = "Toggle gif visibility";
+      button.addEventListener("click", toggleImgVisibility);
+      return button;
+    }
+
+    doc_imgs.forEach((img) =&gt; {
+      if (!img.src.includes('.gif')) return;
+      img.classList.add("hidden-g0f");
+      img.style.visibility = "hidden";
+      img.parentElement.appendChild(createToggleBtn());
+    });
+</code></pre>
+
+<p>Eu pego todas as imagens da página na variável <code>doc_imgs</code>, e itero sobre elas, verificando se o <code>src</code> da imagem tem <code>.gif</code> nele.</p>
+
+<p>Se tiver, eu adiciono uma classe (hidden-g0f :P), e altero a propriedade <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/visibility">visibility</a> pra 'hidden'. Isso esconde o gif, mas ele continua ocupando espaço na página.</p>
+
+<p>Depois, pego o elemento pai e adiciono um botão, pela função <code>createToggleBtn</code>.</p>
+
+<p>Esse botão tem um <code>eventListener</code>, que é chamado no clique, a função <code>toggleImgVisibility</code>.</p>
+
+<p>Quando ela é chamada, ela itera pelos elementos irmãos do botão, e busca aquele que tiver a classe adicionada no passo anterior.</p>
+
+<p>Se tiver a classe, eu alterno a propriedade <code>visibility</code> entre <code>hidden</code> e <code>visible</code>.</p>
+
+<p>Daí fica fácil esconder/mostrar os gifs um por um.</p>
+
+<p>Fica a dica, medium ヽ(￣～￣　)ノ.</p>
+
 <p>Tags: <a href='tag_bookmarklet.html'>bookmarklet</a></p>
+<!-- text end -->
 <p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/remova-os-gifs-do-medium.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
 <a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/remova-os-gifs-do-medium.html'><span id='count-14890'></span></a>&nbsp;</p>
-<h3><a class="ablack" href="remova-o-feed-do-github.html">
-Remova o feed do github
-</a></h3>
-<!-- bashblog_timestamp: #202210102053.57# -->
-<div class="subtitle">outubro 10, 2022 &mdash; 
-Guilherme Garcia
-</div>
-<!-- text begin -->
-
-<p><abbr title="muito grande;nem li">mg;nl</abbr>: vamos criar um bookmarklet pra remover o feed da página inicial do github.</p>
-
-<p>Se você é como eu, provavelmente já entrou no seguinte loop:</p>
-
-<ol>
-<li>Você fica com dúvida sobre um projeto hospedado no github</li>
-<li>Você acessa <a href="https://github.com">https://github.com</a>.</li>
-<li>Você fica interessado no que as pessoas andaram fazendo, e acaba clicando em alguma coisa.</li>
-<li>Você mata a curiosidade e sai do github.</li>
-<li>????</li>
-<li>Você lembra da dúvida sobre o projeto</li>
-<li>repeat</li>
-</ol>
-
-<p>Vamos remover a distração da homepage do github usando um pouco de javascript.</p>
-
-<p class="readmore"><a href="remova-o-feed-do-github.html">Ler mais...</a></p>
-<p>Tags: <a href='tag_bookmarklet.html'>bookmarklet</a>, <a href='tag_javascript.html'>javascript</a></p>
-<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/remova-o-feed-do-github.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/remova-o-feed-do-github.html'><span id='count-20332'></span></a>&nbsp;</p>
+<!-- entry end -->
 </div>
 <div id="footer">CC by-nc-nd <a href="https://twitter.com/gui_garcia67">Guilherme Garcia</a> &mdash; <a href="mailto:gui&#46;garcia67&#64;gmail&#46;com">gui&#46;garcia67&#64;gmail&#46;com</a><br/>
 Generated with <a href="https://github.com/cfenollosa/bashblog">bashblog</a>, a single bash script to easily create blogs like this one</div>
