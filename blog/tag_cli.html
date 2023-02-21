@@ -10,7 +10,7 @@
 <meta name='twitter:card' content='summary' />
 <meta name='twitter:site' content='@gui_garcia67' />
 <meta name='twitter:title' content='Blog do guilherme &mdash; Posts marcados com "cli"' />
-<meta name='twitter:description' content=" Comparando json na linha de comando   outubro 25, 2022 &mdash;  Guilherme Garcia    mg;nl: vamos usar o vimdiff e o jq para comparar arquivos json independente da formatação.  Comparar arquivos json parecidos pode ser complicado. Muitas vezes os a" />
+<meta name='twitter:description' content=" Symlinking python3 for vim on macOS   Fevereiro 21, 2023 &mdash;  Guilherme Garcia    Managing binaries in macos can be a shitshow, even with the assistance of great projects like brew.  One of brew's most debatable feature is that installing a new " />
 </head><body>
 <div id="divbodyholder">
 <div class="headerholder"><div class="header">
@@ -19,6 +19,110 @@
 <div id="description">programação e outras coisas menos úteis</div>
 </div></div></div>
 <div id="divbody"><div class="content">
+<h3><a class="ablack" href="symlinking-python3-for-vim-on-macos.html">
+Symlinking python3 for vim on macOS
+</a></h3>
+<!-- bashblog_timestamp: #202302210722.20# -->
+<div class="subtitle">Fevereiro 21, 2023 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p>Managing binaries in macos can be a shitshow, even with the assistance of great projects like <a href="https://brew.sh/">brew</a>.</p>
+
+<p>One of brew's <a href="https://github.com/Homebrew/brew/issues/9285">most</a> <a href="https://docs.brew.sh/FAQ#why-does-brew-upgrade-formula-or-brew-install-formula-also-upgrade-a-bunch-of-other-stuff">debatable</a> feature is that installing a new package will, by default, trigger an automatic update of all existing packages. And this break things.</p>
+
+<p>By installing some package I don't really remember the name, I ended up updating my python3 version, or rather, installing a new one, Python 3.11 .</p>
+
+<p>This broke my beloved vim workflow :'( which uses <a href="https://github.com/psf/black">Black</a> for formatting (by running <code>:Black</code> inside vim) </p>
+
+<p>So if you're on macOS running into the following error when running <code>:Black</code> from inside vim:</p>
+
+<pre><code>    Error detected while processing /Users/guilhermegarcia/.vim/plugged/black/autoload/black.vim:
+    line  214:
+    Traceback (most recent call last):
+      File "&lt;string&gt;", line 113, in &lt;module&gt;
+      File "&lt;string&gt;", line 89, in _initialize_black_env
+      File "/opt/homebrew/Cellar/python@3.11/3.11.1/Frameworks/Python.framework/Versions/3.11/lib/python3.11
+    /venv/__init__.py", line 468, in create
+        builder.create(env_dir)
+      File "/opt/homebrew/Cellar/python@3.11/3.11.1/Frameworks/Python.framework/Versions/3.11/lib/python3.11
+    /venv/__init__.py", line 74, in create
+        self.setup_python(context)
+      File "/opt/homebrew/Cellar/python@3.11/3.11.1/Frameworks/Python.framework/Versions/3.11/lib/python3.11
+    /venv/__init__.py", line 292, in setup_python
+        copier(context.executable, path)
+      File "/opt/homebrew/Cellar/python@3.11/3.11.1/Frameworks/Python.framework/Versions/3.11/lib/python3.11
+    /venv/__init__.py", line 235, in symlink_or_copy
+        shutil.copyfile(src, dst)
+      File "/opt/homebrew/Cellar/python@3.11/3.11.1/Frameworks/Python.framework/Versions/3.11/lib/python3.11
+    /shutil.py", line 256, in copyfile
+        with open(src, 'rb') as fsrc:
+             ^^^^^^^^^^^^^^^
+    FileNotFoundError: [Errno 2] No such file or directory: '/opt/homebrew/opt/python@3.11/Frameworks/Python
+    .framework/Versions/3.11/bin/python3'
+    Error detected while processing function black#Black:
+    line   10:
+    Traceback (most recent call last):
+      File "&lt;string&gt;", line 1, in &lt;module&gt;
+    NameError: name 'Black' is not defined
+    Press ENTER or type command to continue
+</code></pre>
+
+<p>Turns out that somewhere, the psf/black plugin is trying to access a python binary that just isn't there:</p>
+
+<pre><code>    guites@macos ~ % ls -l /opt/homebrew/opt/python@3.11/Frameworks/Python.framework/Versions/3.11/bin/python3
+    ls: /opt/homebrew/opt/python@3.11/Frameworks/Python.framework/Versions/3.11/bin/python3: No such file or directory
+</code></pre>
+
+<p>It is actually at <code>/opt/homebrew/opt/python@3.11/Frameworks/Python.framework/Versions/3.11/bin/python3.11</code> (notice the <code>.11</code>)</p>
+
+<p>So the most straightforward fix I've found is just creating a link between the non existing binary name and the correct python installation:</p>
+
+<pre><code>    ln /opt/homebrew/opt/python@3.11/Frameworks/Python.framework/Versions/3.11/bin/python3.11 /opt/homebrew/opt/python@3.11/Frameworks/Python.framework/Versions/3.11/bin/python3
+</code></pre>
+
+<p>And from there on, it should just work. Inside vim:</p>
+
+<pre><code>    :Black
+
+    Please wait, one time setup for Black.
+
+    Creating a virtualenv in /Users/guilhermegarcia/.vim/black...
+    (this path can be customized in .vimrc by setting g:black_virtualenv)
+    Installing Black with pip...
+    DONE! You are all set, thanks for waiting ✨ 🍰 ✨
+    Pro-tip: to upgrade Black in the future, use the :BlackUpgrade command and restart Vim.
+    Black: already well formatted, good job. (took 0.0057s)
+    Press ENTER or type command to continue
+</code></pre>
+
+<p>Neat! You can safely remove the symlink (<code>unlink /opt/homebrew/opt/python@3.11/Frameworks/Python.framework/Versions/3.11/bin/python3</code>) after this step, but its not necessary.</p>
+
+<p>For reference, I'm running vim 9.0 with <a href="https://github.com/junegunn/vim-plug">vim-plug</a>, and installed Black by adding the following lines to my .vimrc:</p>
+
+<pre><code>    call plug#begin('~/.vim/plugged')
+
+    Plug 'psf/black', { 'branch': 'stable' }
+
+    call plug#end()
+</code></pre>
+
+<p>Some other links that didn't solve my problem:</p>
+
+<ul>
+<li><a href="https://github.com/psf/black/issues/2876">https://github.com/psf/black/issues/2876</a></li>
+<li><a href="https://github.com/psf/black/issues/2503">https://github.com/psf/black/issues/2503</a></li>
+<li><a href="https://github.com/psf/black/issues/2547">https://github.com/psf/black/issues/2547</a></li>
+<li><a href="https://github.com/psf/black/issues/1379">https://github.com/psf/black/issues/1379</a></li>
+<li><a href="https://stackoverflow.com/questions/36001966/unable-to-run-python-3-after-homebrew-installation">https://stackoverflow.com/questions/36001966/unable-to-run-python-3-after-homebrew-installation</a></li>
+<li><a href="https://www.digitalocean.com/community/tutorials/how-to-fix-python-no-such-file-or-directory-compiler-errors-when-installing-packages">https://www.digitalocean.com/community/tutorials/how-to-fix-python-no-such-file-or-directory-compiler-errors-when-installing-packages</a></li>
+</ul>
+
+<p>Tags: <a href='tag_vim.html'>vim</a>, <a href='tag_cli.html'>cli</a>, <a href='tag_python.html'>python</a>, <a href='tag_macos.html'>macos</a></p>
+<!-- text end -->
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/symlinking-python3-for-vim-on-macos.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/symlinking-python3-for-vim-on-macos.html'><span id='count-9305'></span></a>&nbsp;</p>
 <h3><a class="ablack" href="comparando-json-na-linha-de-comando.html">
 Comparando json na linha de comando
 </a></h3>
@@ -38,7 +142,7 @@ Guilherme Garcia
 
 <p><aside>Os exemplos usados foram gerados usando <a href="https://json-generator.com">https://json-generator.com</a></aside></p>
 
-<p class="readmore"><a href="./comparando-json-na-linha-de-comando.html">Ler mais...</a></p>
+<p class="readmore"><a href="comparando-json-na-linha-de-comando.html">Ler mais...</a></p>
 <p>Tags: <a href='tag_json.html'>json</a>, <a href='tag_vimdiff.html'>vimdiff</a>, <a href='tag_cli.html'>cli</a>, <a href='tag_bash.html'>bash</a></p>
 <p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/comparando-json-na-linha-de-comando.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
 <a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/comparando-json-na-linha-de-comando.html'><span id='count-31865'></span></a>&nbsp;</p>
@@ -61,7 +165,7 @@ Guilherme Garcia
 
 <p>O código finalizado pode ser encontrado no branch <a href="https://github.com/guites/dart-github-app/tree/add_models">add_models</a></p>
 
-<p class="readmore"><a href="./apps-de-linha-de-comando-em-dart.html">Ler mais...</a></p>
+<p class="readmore"><a href="apps-de-linha-de-comando-em-dart.html">Ler mais...</a></p>
 <p>Tags: <a href='tag_dart.html'>dart</a>, <a href='tag_cli.html'>cli</a>, <a href='tag_api.html'>api</a>, <a href='tag_github.html'>github</a></p>
 <p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/apps-de-linha-de-comando-em-dart.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
 <a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/apps-de-linha-de-comando-em-dart.html'><span id='count-28374'></span></a>&nbsp;</p>

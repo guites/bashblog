@@ -2,9 +2,112 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
 <channel><title>Blog do guilherme</title><link>https://guilhermegarcia.dev/blog/index.html</link>
 <description>programação e outras coisas menos úteis</description><language>en</language>
-<lastBuildDate>Thu, 15 Dec 2022 20:28:11 -0300</lastBuildDate>
-<pubDate>Thu, 15 Dec 2022 20:28:11 -0300</pubDate>
+<lastBuildDate>Tue, 21 Feb 2023 07:24:18 -0300</lastBuildDate>
+<pubDate>Tue, 21 Feb 2023 07:24:18 -0300</pubDate>
 <atom:link href="https://guilhermegarcia.dev/blog/feed.rss" rel="self" type="application/rss+xml" />
+<item><title>
+Symlinking python3 for vim on macOS
+</title><description><![CDATA[
+
+<p>Managing binaries in macos can be a shitshow, even with the assistance of great projects like <a href="https://brew.sh/">brew</a>.</p>
+
+<p>One of brew's <a href="https://github.com/Homebrew/brew/issues/9285">most</a> <a href="https://docs.brew.sh/FAQ#why-does-brew-upgrade-formula-or-brew-install-formula-also-upgrade-a-bunch-of-other-stuff">debatable</a> feature is that installing a new package will, by default, trigger an automatic update of all existing packages. And this break things.</p>
+
+<p>By installing some package I don't really remember the name, I ended up updating my python3 version, or rather, installing a new one, Python 3.11 .</p>
+
+<p>This broke my beloved vim workflow :'( which uses <a href="https://github.com/psf/black">Black</a> for formatting (by running <code>:Black</code> inside vim) </p>
+
+<p>So if you're on macOS running into the following error when running <code>:Black</code> from inside vim:</p>
+
+<pre><code>    Error detected while processing /Users/guilhermegarcia/.vim/plugged/black/autoload/black.vim:
+    line  214:
+    Traceback (most recent call last):
+      File "&lt;string&gt;", line 113, in &lt;module&gt;
+      File "&lt;string&gt;", line 89, in _initialize_black_env
+      File "/opt/homebrew/Cellar/python@3.11/3.11.1/Frameworks/Python.framework/Versions/3.11/lib/python3.11
+    /venv/__init__.py", line 468, in create
+        builder.create(env_dir)
+      File "/opt/homebrew/Cellar/python@3.11/3.11.1/Frameworks/Python.framework/Versions/3.11/lib/python3.11
+    /venv/__init__.py", line 74, in create
+        self.setup_python(context)
+      File "/opt/homebrew/Cellar/python@3.11/3.11.1/Frameworks/Python.framework/Versions/3.11/lib/python3.11
+    /venv/__init__.py", line 292, in setup_python
+        copier(context.executable, path)
+      File "/opt/homebrew/Cellar/python@3.11/3.11.1/Frameworks/Python.framework/Versions/3.11/lib/python3.11
+    /venv/__init__.py", line 235, in symlink_or_copy
+        shutil.copyfile(src, dst)
+      File "/opt/homebrew/Cellar/python@3.11/3.11.1/Frameworks/Python.framework/Versions/3.11/lib/python3.11
+    /shutil.py", line 256, in copyfile
+        with open(src, 'rb') as fsrc:
+             ^^^^^^^^^^^^^^^
+    FileNotFoundError: [Errno 2] No such file or directory: '/opt/homebrew/opt/python@3.11/Frameworks/Python
+    .framework/Versions/3.11/bin/python3'
+    Error detected while processing function black#Black:
+    line   10:
+    Traceback (most recent call last):
+      File "&lt;string&gt;", line 1, in &lt;module&gt;
+    NameError: name 'Black' is not defined
+    Press ENTER or type command to continue
+</code></pre>
+
+<p>Turns out that somewhere, the psf/black plugin is trying to access a python binary that just isn't there:</p>
+
+<pre><code>    guites@macos ~ % ls -l /opt/homebrew/opt/python@3.11/Frameworks/Python.framework/Versions/3.11/bin/python3
+    ls: /opt/homebrew/opt/python@3.11/Frameworks/Python.framework/Versions/3.11/bin/python3: No such file or directory
+</code></pre>
+
+<p>It is actually at <code>/opt/homebrew/opt/python@3.11/Frameworks/Python.framework/Versions/3.11/bin/python3.11</code> (notice the <code>.11</code>)</p>
+
+<p>So the most straightforward fix I've found is just creating a link between the non existing binary name and the correct python installation:</p>
+
+<pre><code>    ln /opt/homebrew/opt/python@3.11/Frameworks/Python.framework/Versions/3.11/bin/python3.11 /opt/homebrew/opt/python@3.11/Frameworks/Python.framework/Versions/3.11/bin/python3
+</code></pre>
+
+<p>And from there on, it should just work. Inside vim:</p>
+
+<pre><code>    :Black
+
+    Please wait, one time setup for Black.
+
+    Creating a virtualenv in /Users/guilhermegarcia/.vim/black...
+    (this path can be customized in .vimrc by setting g:black_virtualenv)
+    Installing Black with pip...
+    DONE! You are all set, thanks for waiting ✨ 🍰 ✨
+    Pro-tip: to upgrade Black in the future, use the :BlackUpgrade command and restart Vim.
+    Black: already well formatted, good job. (took 0.0057s)
+    Press ENTER or type command to continue
+</code></pre>
+
+<p>Neat! You can safely remove the symlink (<code>unlink /opt/homebrew/opt/python@3.11/Frameworks/Python.framework/Versions/3.11/bin/python3</code>) after this step, but its not necessary.</p>
+
+<p>For reference, I'm running vim 9.0 with <a href="https://github.com/junegunn/vim-plug">vim-plug</a>, and installed Black by adding the following lines to my .vimrc:</p>
+
+<pre><code>    call plug#begin('~/.vim/plugged')
+
+    Plug 'psf/black', { 'branch': 'stable' }
+
+    call plug#end()
+</code></pre>
+
+<p>Some other links that didn't solve my problem:</p>
+
+<ul>
+<li><a href="https://github.com/psf/black/issues/2876">https://github.com/psf/black/issues/2876</a></li>
+<li><a href="https://github.com/psf/black/issues/2503">https://github.com/psf/black/issues/2503</a></li>
+<li><a href="https://github.com/psf/black/issues/2547">https://github.com/psf/black/issues/2547</a></li>
+<li><a href="https://github.com/psf/black/issues/1379">https://github.com/psf/black/issues/1379</a></li>
+<li><a href="https://stackoverflow.com/questions/36001966/unable-to-run-python-3-after-homebrew-installation">https://stackoverflow.com/questions/36001966/unable-to-run-python-3-after-homebrew-installation</a></li>
+<li><a href="https://www.digitalocean.com/community/tutorials/how-to-fix-python-no-such-file-or-directory-compiler-errors-when-installing-packages">https://www.digitalocean.com/community/tutorials/how-to-fix-python-no-such-file-or-directory-compiler-errors-when-installing-packages</a></li>
+</ul>
+
+<p>Tags: <a href='tag_vim.html'>vim</a>, <a href='tag_cli.html'>cli</a>, <a href='tag_python.html'>python</a>, <a href='tag_macos.html'>macos</a></p>
+<!-- text end -->
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/symlinking-python3-for-vim-on-macos.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/symlinking-python3-for-vim-on-macos.html'><span id='count-9305'></span></a>&nbsp;</p>
+]]></description><link>https://guilhermegarcia.dev/blog/symlinking-python3-for-vim-on-macos.html</link>
+<guid>https://guilhermegarcia.dev/blog/./symlinking-python3-for-vim-on-macos.html</guid>
+<dc:creator>Guilherme Garcia</dc:creator>
+<pubDate>Tue, 21 Feb 2023 07:22:20 -0300</pubDate></item>
 <item><title>
 Remova os gifs do medium
 </title><description><![CDATA[
@@ -274,44 +377,4 @@ com as requisições pelo terminal, ou via postman/insomnia:</p>
 <guid>https://guilhermegarcia.dev/blog/./interceptando-tokens-com-puppeteer.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
 <pubDate>Mon, 10 Oct 2022 10:48:57 -0300</pubDate></item>
-<item><title>
-PoC: Stream de videos com javascript no navegador
-</title><description><![CDATA[
-
-<p><abbr title="muito grande; nemli">mg;nl</abbr>: vamos desenvolver um reprodutor de vídeos utilizando a API MediaSource do navegador e o conceito de fragmentação de vídeos, no modelo utilizado por sites como twitter, facebook e netflix.</p>
-
-<p>Ao acessar sites com stream de vídeo, como twitter, facebook ou netflix, e visualizar um vídeo, você pode se deparar com duas situações: Na primeira, o vídeo está encapsulado em uma tag <code>&lt;video&gt;</code>, com um <code>src</code> ou algumas tags <code>&lt;source&gt;</code>, indicando a URL do vídeo.</p>
-
-<p>Neste caso, você pode facilmente, inspecionando a tela, copiar a URL do vídeo e abrí-la em outra aba, ou salvar no seu computador.</p>
-
-<p>Por exemplo: <a href="https://twitter.com/TheOtaking/status/1507809616993742848">https://twitter.com/TheOtaking/status/1507809616993742848</a></p>
-
-<p>O GIF mostrado na página é, na verdade, um mp4, e, inspecionando a estrutura do html, descobrimos que ele está no seguinte formato:</p>
-
-<pre><code>&lt;video preload="auto" playsinline="" aria-label="Embedded video" disablepictureinpicture="" style="width: 100%; height: 100%; position: absolute; background-color: black; top: 0%; left: 0%; transform: rotate(0deg) scale(1.005);" poster="https://pbs.twimg.com/tweet_video_thumb/FOzEMPDXEAEE_e5.jpg" src="https://video.twimg.com/tweet_video/FOzEMPDXEAEE_e5.mp4" type="video/mp4"&gt;&lt;/video&gt;
-</code></pre>
-
-<p>Você pode facilmente salvar a URL <a href="https://video.twimg.com/tweet_video/FOzEMPDXEAEE_e5.mp4">https://video.twimg.com/tweet_video/FOzEMPDXEAEE_e5.mp4</a>, reproduzí-la em outros ambientes, ou fazer o download do arquivo.</p>
-
-<p>Na segunda situação, você também encontra uma tag <code>video</code>, mas seu atributo <code>src</code> não é uma URL comum: se trata de um blob.</p>
-
-<p>Exemplo: <a href="https://twitter.com/TheOtaking/status/1507278342176882730">https://twitter.com/TheOtaking/status/1507278342176882730</a></p>
-
-<p>O vídeo possui os controles habilitados, e, inspecionando a página, sua estrutura é a seguinte:</p>
-
-<pre><code>&lt;video preload="none" playsinline="" aria-label="Embedded video" disablepictureinpicture="" style="width: 100%; height: 100%; position: absolute; background-color: black; top: 0%; left: 0%; transform: rotate(0deg) scale(1.005);" poster="https://pbs.twimg.com/ext_tw_video_thumb/1507278264003440640/pu/img/1OLNuDRaCHoKzs1e.jpg" src="blob:https://twitter.com/dfc0270a-52b1-4ea8-a49d-bc9939732deb"&gt;&lt;/video&gt;
-</code></pre>
-
-<p>Se você tentar acessar a URL <blob:https://twitter.com/dfc0270a-52b1-4ea8-a49d-bc9939732deb>, ou mesmo <a href="https://twitter.com/dfc0270a-52b1-4ea8-a49d-bc9939732deb">https://twitter.com/dfc0270a-52b1-4ea8-a49d-bc9939732deb</a>, vai receber um erro de página não encontrada.</p>
-
-<p>Neste post, vamos entender o funcionamento das URLs blob, qual os benefícios do seu uso, e desenvolver uma prova de conceito mostrando como implementar uma funcionalidade de stream em javascript.</p>
-
-<hr/>
-<p>Tags: <a href='tag_streaming.html'>streaming</a>, <a href='tag_javascript.html'>javascript</a>, <a href='tag_node.html'>node</a>, <a href='tag_poc.html'>poc</a></p>
-<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/poc-stream-de-videos-com-javascript-no-navegador.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/poc-stream-de-videos-com-javascript-no-navegador.html'><span id='count-5125'></span></a>&nbsp;</p>
-]]></description><link>https://guilhermegarcia.dev/blog/poc-stream-de-videos-com-javascript-no-navegador.html</link>
-<guid>https://guilhermegarcia.dev/blog/./poc-stream-de-videos-com-javascript-no-navegador.html</guid>
-<dc:creator>Guilherme Garcia</dc:creator>
-<pubDate>Sat, 26 Mar 2022 19:40:00 -0300</pubDate></item>
 </channel></rss>
