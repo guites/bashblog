@@ -1,0 +1,216 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="main.css" type="text/css" />
+<link rel="stylesheet" href="blog.css" type="text/css" />
+<link rel="stylesheet" href="code.css" type="text/css" />
+<link rel="alternate" type="application/rss+xml" title="Inscrever-se nesta página..." href="feed.rss" />
+<title>Usando submódulos do git em pipelines do Azure DevOps</title>
+<meta name='twitter:card' content='summary' />
+<meta name='twitter:site' content='@gui_garcia67' />
+<meta name='twitter:title' content='Usando submódulos do git em pipelines do Azure DevOps' />
+<meta name='twitter:description' content=" Este post explica como configurar o uso de git submodules em pipelines de CI/CD no Azure DevOps.  Em específico, como configurar quando os submódulos fazem parte do mesmo projeto.  A solução envolve habilitar o 'Checkout submodules' pelo painel " />
+</head><body>
+<div id="divbodyholder">
+<div class="headerholder"><div class="header">
+<div id="title">
+<h1 class="nomargin"><a class="ablack" href="https://guilhermegarcia.dev/blog/index.html">Blog do guilherme</a></h1>
+<div id="description">programação e outras coisas menos úteis</div>
+</div></div></div>
+<div id="divbody"><div class="content">
+<!-- entry begin -->
+<h3><a class="ablack" href="usando-submodulos-do-git-em-pipelines-do-azure-devops.html">
+Usando submódulos do git em pipelines do Azure DevOps
+</a></h3>
+<!-- bashblog_timestamp: #202302231827.10# -->
+<div class="subtitle">fevereiro 23, 2023 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p>Este post explica como configurar o uso de git submodules em pipelines de CI/CD no Azure DevOps.</p>
+
+<p>Em específico, como configurar quando os <strong>submódulos fazem parte do mesmo projeto</strong>.</p>
+
+<p>A solução envolve habilitar o "Checkout submodules" pelo painel do Azure, utilizar URLs relativas no arquivo .gitmodules e adicionar uma chave "resources" no arquivo .yaml da sua pipeline.</p>
+
+<hr/>
+
+<h2>Estrutura do projeto</h2>
+
+<p>Você tem um projeto no Azure chamado "Meu App Foda".</p>
+
+<p>Esse projeto tem vários repos:</p>
+
+<ul>
+<li>frontend_app (URL: https://dev.azure.com/Minha-Organization/Meu%20App%20Foda/_git/frontend_app)</li>
+<li>backend_app (URL: https://dev.azure.com/Minha-Organization/Meu%20App%20Foda/_git/backend_app)</li>
+<li>frontend_dependencies (URL: https://dev.azure.com/Minha-Organization/Meu%20App%20Foda/_git/frontend_dependencies)</li>
+</ul>
+
+<p>E você está usando o "frontend_dependencies" como um submódulo dentro de "frontend_app".</p>
+
+<p>A estrutura do "frontend_app" é:</p>
+
+<pre><code>    - frontend_app
+    - frontend_app/.git
+    - frontend_app/.gitmodules
+    - frontend_app/src
+    - frontend_app/package.json
+    - frontend_app/package-lock.json
+    - frontend_app/frontend_dependencies
+</code></pre>
+
+<p>Isso quer dizer que você iniciou o "frontend_dependencies" como um submódulo, com esse comando:</p>
+
+<pre><code>    # dentro de frontend_app
+    git submodule add git@ssh.dev.azure.com:v3/Minha-Organization/Meu%20App%20Foda/frontend_dependencies frontend_dependencies
+</code></pre>
+
+<p>E você possui um <strong>pipeline</strong> configurado no Azure, com o seguinte arquivo .yaml:</p>
+
+<pre><code>    pool:
+      vmImage: ubuntu-latest
+    steps:
+    - script: npm install
+      displayName: 'Installs frontend packages'
+
+    - script: npm test
+      displayName: 'Run frontend test suite'
+</code></pre>
+
+<p>Mas existe um problema: pra conseguir rodar os testes, você precisa do submódulo.</p>
+
+<p>Se você tentar rodar o <code>npm install</code> sem ele, vai cair em um erro do tipo (lá nos logs da sua pipeline):</p>
+
+<pre><code>    Generating script.
+    Script contents:
+    npm install
+    ========================== Starting Command Output ===========================
+    /usr/bin/bash --noprofile --norc /home/vsts/work/_temp/d91f7be5-82d1-4241-bfbe-ab849ccbd3c6.sh
+    npm ERR! code ENOENT
+    npm ERR! syscall open
+    npm ERR! path /home/vsts/work/1/s/frontend_app/frontend_dependencies/package.json
+    npm ERR! errno -2
+    npm ERR! enoent ENOENT: no such file or directory, open '/home/vsts/work/1/s/frontend_app/frontend_dependencies/package.json'
+    npm ERR! enoent This is related to npm not being able to find a file.
+    npm ERR! enoent
+
+    ##[error]Bash exited with code '254'.
+</code></pre>
+
+<h2>Iniciando os submodulos na pipeline</h2>
+
+<p>A configuração acontece em três passos:</p>
+
+<ol>
+<li>Habilitar o "Checkout submodules" pelo painel do Azure.</li>
+<li>Utilizar URLs relativas no arquivo .gitmodules.</li>
+<li>Adicionar uma chave "resources" no arquivo .yaml da sua pipeline.</li>
+</ol>
+
+<h3>Habilitar o "Checkout submodules" pelo painel do Azure</h3>
+
+<p>Você precisa acessar a aba "⚡ Triggers" dentro da tela de edição do pipeline.</p>
+
+<p>Vá em pipelines e acesse o pipeline desejado, clique em "Edit", e, no canto superior direito, clique no Kebab (...) e "⚡ Triggers".</p>
+
+<p>Ali, selecione a aba "YAML" (você vai estar em "Triggers"), clique em "Get sources", e, na tela da direita, selecione "Azure Repos Git" (esse passo a passo é para repositórios que estão no mesmo projeto do Azure).</p>
+
+<p>Em "Repository" selecione o repositório que precisa utilizar o submódulo (frontend_app), e <strong>marque a opção "Checkout Submodules"</strong>.</p>
+
+<p>No dropdown logo abaixo, escolha se você precisa iniciar o submódulo de forma recursiva (se o seu submódulo carrega outros submódulos...) ou apenas carregá-lo ("Top level submodules only").</p>
+
+<p>Agora o seu pipeline vai tentar iniciar todos os submódulos listados no seu .gitmodules, sempre!</p>
+
+<h3>Utilizar URLs relativas no arquivo .gitmodules</h3>
+
+<p>Se você concluiu o passo anterior, vai receber um erro de permissão: de dentro da VM do Azure, você não vai ter acesso aos seus repositórios.</p>
+
+<pre><code>    Please make sure you have the correct access rights
+    and the repository exists.
+    fatal: clone of 'git@ssh.dev.azure.com:v3/Minha-Organization/Meu%20App%20Foda/frontend_dependencies' into submodule path '/home/vsts/work/1/s/frontend_app/frontend_dependencies' failed
+    Failed to clone 'frontend_app/frontend_dependencies'. Retry scheduled
+    Cloning into '/home/vsts/work/1/s/frontend_app/frontend_dependencies'...
+    Permission denied, please try again.
+    Permission denied, please try again.
+    git@ssh.dev.azure.com: Permission denied (password,publickey).
+    fatal: Could not read from remote repository.
+</code></pre>
+
+<p>Precisamos alterar a URL dos submodulos de URL absoluta para URL relativa.</p>
+
+<p>Edite o arquivo <code>frontend_app/.gitmodules</code></p>
+
+<pre><code>    [submodule "frontend_dependencies"]
+        path = frontend_dependencies
+     -  url = git@ssh.dev.azure.com:v3/Minha-Organization/Meu%20App%20Foda/frontend_dependencies
+     +  url = ../frontend_dependencies
+        branch = main
+</code></pre>
+
+<p>Como os dois repos estão no mesmo projeto, podemos usar a sintaxe "../".</p>
+
+<h3>Adicionar uma chave "resources" no arquivo .yaml da sua pipeline</h3>
+
+<p>Após ajustar as URLs, sua pipeline pode imediatamente funcionar (nesse caso, <strong>CONGRATS</strong>!!), ou você pode receber o seguinte erro:</p>
+
+<pre><code>    Submodule 'frontend_dependencies' (https://dev.azure.com/Minha-Organization/Meu%20App%20Foda/_git/frontend_dependencies) registered for path 'frontend_dependencies'
+    Cloning into '/home/vsts/work/1/s/frontend_app/frontend_dependencies'...
+    remote: TF401019: The Git repository with name or identifier frontend_dependencies does not exist or you do not have permissions for the operation you are attempting.
+    fatal: repository 'https://dev.azure.com/Minha-Organization/Meu%20App%20Foda/_git/frontend_dependencies' not found
+    fatal: clone of 'https://dev.azure.com/Minha-Organization/Meu%20App%20Foda/_git/frontend_dependencies' into submodule path '/home/vsts/work/1/s/frontend_app/frontend_dependencies' failed
+    Failed to clone 'frontend_dependencies'. Retry scheduled
+</code></pre>
+
+<p>O Erro <strong>TF401019</strong> significa que seu projeto bloqueia o acesso entre repositórios. Nesse caso, você precisa listar explicitamente quais repositórios sua pipeline pode acessar.</p>
+
+<p>No seu arquivo .yaml, adicione a seguinte chave:</p>
+
+<pre><code>  + resources:
+  +   repositories:
+  +     - repository: frontend_dependencies # nome do repositório usado como submódulo
+  +       type: git
+  +       name: frontend_dependencies # use o mesmo que acima
+  +       branch: main # defina o branch onde os arquivos que você precisa estão
+  +
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+    - script: npm install
+      displayName: 'Installs frontend packages'
+
+    - script: npm test
+      displayName: 'Run frontend test suite'
+</code></pre>
+
+<h3>Conclusão e referências</h3>
+
+<p>Agora sua pipeline consegue acessar submódulos do mesmo projeto do Azure.</p>
+
+<p>Alguns pontos negativos dessa solução são que você sempre vai carregar todos os submodulos no pipeline, mesmo que seu pipeline precise de apenas alguns deles, e que você precisa listar todos os repositórios dentro do arquivo .yaml, assim como ajustar suas urls no .gitmodule.</p>
+
+<p>Referências:</p>
+
+<ul>
+<li><a href="https://www.timschaeps.be/post/what-you-should-not-forget-when-running-azure-pipelines-with-git-and-submodules/">https://www.timschaeps.be/post/what-you-should-not-forget-when-running-azure-pipelines-with-git-and-submodules/</a></li>
+<li><a href="https://www.timschaeps.be/post/dealing-with-error-tf401019-submodules-azure-pipelines/">https://www.timschaeps.be/post/dealing-with-error-tf401019-submodules-azure-pipelines/</a></li>
+<li><a href="https://developercommunity.visualstudio.com/t/unable-to-clone-private-github-submodule-repositor/430126">https://developercommunity.visualstudio.com/t/unable-to-clone-private-github-submodule-repositor/430126</a></li>
+<li><a href="https://stackoverflow.com/a/64999223">https://stackoverflow.com/a/64999223</a></li>
+<li><a href="https://stackoverflow.com/a/56095467">https://stackoverflow.com/a/56095467</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/devops/pipelines/repos/pipeline-options-for-git?view=azure-devops&amp;tabs=yaml#checkout-submodules">https://learn.microsoft.com/en-us/azure/devops/pipelines/repos/pipeline-options-for-git?view=azure-devops&amp;tabs=yaml#checkout-submodules</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/devops/pipelines/yaml-schema/steps-checkout?view=azure-pipelines">https://learn.microsoft.com/en-us/azure/devops/pipelines/yaml-schema/steps-checkout?view=azure-pipelines</a></li>
+<li><a href="https://www.damirscorner.com/blog/posts/20210423-ChangingUrlsOfGitSubmodules.html">https://www.damirscorner.com/blog/posts/20210423-ChangingUrlsOfGitSubmodules.html</a></li>
+</ul>
+
+<p>Tags: <a href='tag_azure.html'>azure</a>, <a href='tag_git.html'>git</a>, <a href='tag_ci.html'>ci</a></p>
+<!-- text end -->
+<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/usando-submodulos-do-git-em-pipelines-do-azure-devops.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
+<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/usando-submodulos-do-git-em-pipelines-do-azure-devops.html'><span id='count-12143'></span></a>&nbsp;</p>
+<!-- entry end -->
+</div>
+<div id="footer">CC by-nc-nd <a href="https://twitter.com/gui_garcia67">Guilherme Garcia</a> &mdash; <a href="mailto:gui&#46;garcia67&#64;gmail&#46;com">gui&#46;garcia67&#64;gmail&#46;com</a><br/>
+Generated with <a href="https://github.com/cfenollosa/bashblog">bashblog</a>, a single bash script to easily create blogs like this one</div>
+</div></div>
+</body></html>
