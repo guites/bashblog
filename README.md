@@ -1,7 +1,7 @@
 # Blog do guilherme
 
-eu posto coisas sobre programação e outros tópicos away aqui.
+Eu posto coisas sobre programação e outros tópicos away aqui.
 
-você pode acessar o blog na url <https://guilhermegarcia.dev/blog> .
+Você pode acessar o blog na url <https://guilhermegarcia.dev/blog> .
 
-a parte de programação foi originamente desenvolvida por [Carlos Fenollosa](https://cfenollosa.com/blog/creating-a-simple-blog-system-with-a-500-line-bash-script.html)
+Sobre a estrutura do blog, ver README.md do branch [guites_fork](https://github.com/guites/bashblog/tree/guites_fork).
