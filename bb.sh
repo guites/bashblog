@@ -868,9 +868,9 @@ create_includes() {
 
     if [[ -f $header_file ]]; then cp "$header_file" .header.html
     else {
-        echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">'
-        echo '<html xmlns="http://www.w3.org/1999/xhtml"><head>'
-        echo '<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />'
+        echo '<!DOCTYPE html>'
+        echo "<html><head>"
+        echo '<meta charset="UTF-8" />'
         echo '<meta name="viewport" content="width=device-width, initial-scale=1.0" />'
         printf '<link rel="stylesheet" href="%s" type="text/css" />\n' "${css_include[@]}"
         if [[ -z $global_feedburner ]]; then
@@ -885,8 +885,8 @@ create_includes() {
     else {
         protected_mail=${global_email//@/&#64;}
         protected_mail=${protected_mail//./&#46;}
-        echo "<div id=\"footer\">$global_license <a href=\"$global_author_url\">$global_author</a> &mdash; <a href=\"mailto:$protected_mail\">$protected_mail</a><br/>"
-        echo 'Generated with <a href="https://github.com/cfenollosa/bashblog">bashblog</a>, a single bash script to easily create blogs like this one</div>'
+        echo "<footer id=\"footer\">$global_license <a href=\"$global_author_url\">$global_author</a> &mdash; <a href=\"mailto:$protected_mail\">$protected_mail</a><br/>"
+        echo 'Generated with <a href="https://github.com/cfenollosa/bashblog">bashblog</a>, a single bash script to easily create blogs like this one</footer>'
         } >> ".footer.html"
     fi
 }
