@@ -2,8 +2,8 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
 <channel><title>Blog do guilherme</title><link>https://guilhermegarcia.dev/blog/index.html</link>
 <description>programação e outras coisas menos úteis</description><language>en</language>
-<lastBuildDate>Thu, 23 Feb 2023 18:28:01 -0300</lastBuildDate>
-<pubDate>Thu, 23 Feb 2023 18:28:01 -0300</pubDate>
+<lastBuildDate>Sun, 26 Feb 2023 11:10:56 -0300</lastBuildDate>
+<pubDate>Sun, 26 Feb 2023 11:10:56 -0300</pubDate>
 <atom:link href="https://guilhermegarcia.dev/blog/feed.rss" rel="self" type="application/rss+xml" />
 <item><title>
 Usando submódulos do git em pipelines do Azure DevOps
@@ -17,8 +17,6 @@ Usando submódulos do git em pipelines do Azure DevOps
 
 <hr/>
 <p>Tags: <a href='tag_azure.html'>azure</a>, <a href='tag_git.html'>git</a>, <a href='tag_ci.html'>ci</a></p>
-<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/usando-submodulos-do-git-em-pipelines-do-azure-devops.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/usando-submodulos-do-git-em-pipelines-do-azure-devops.html'><span id='count-12143'></span></a>&nbsp;</p>
 ]]></description><link>https://guilhermegarcia.dev/blog/usando-submodulos-do-git-em-pipelines-do-azure-devops.html</link>
 <guid>https://guilhermegarcia.dev/blog/./usando-submodulos-do-git-em-pipelines-do-azure-devops.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
@@ -119,9 +117,9 @@ Symlinking python3 for vim on macOS
 </ul>
 
 <p>Tags: <a href='tag_vim.html'>vim</a>, <a href='tag_cli.html'>cli</a>, <a href='tag_python.html'>python</a>, <a href='tag_macos.html'>macos</a></p>
+
+
 <!-- text end -->
-<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/symlinking-python3-for-vim-on-macos.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/symlinking-python3-for-vim-on-macos.html'><span id='count-9305'></span></a>&nbsp;</p>
 ]]></description><link>https://guilhermegarcia.dev/blog/symlinking-python3-for-vim-on-macos.html</link>
 <guid>https://guilhermegarcia.dev/blog/./symlinking-python3-for-vim-on-macos.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
@@ -151,8 +149,6 @@ Remova os gifs do medium
 
 <hr/>
 <p>Tags: <a href='tag_bookmarklet.html'>bookmarklet</a></p>
-<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/remova-os-gifs-do-medium.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/remova-os-gifs-do-medium.html'><span id='count-14890'></span></a>&nbsp;</p>
 ]]></description><link>https://guilhermegarcia.dev/blog/remova-os-gifs-do-medium.html</link>
 <guid>https://guilhermegarcia.dev/blog/./remova-os-gifs-do-medium.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
@@ -191,9 +187,9 @@ Sempre pode suas redes
 
 <p>Tags: <a href='tag_docker.html'>docker</a>, <a href='tag_dns.html'>dns</a>, <a href='tag_networking.html'>networking</a></p>
 
+
+
 <!-- text end -->
-<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/sempre-pode-suas-redes.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/sempre-pode-suas-redes.html'><span id='count-19502'></span></a>&nbsp;</p>
 ]]></description><link>https://guilhermegarcia.dev/blog/sempre-pode-suas-redes.html</link>
 <guid>https://guilhermegarcia.dev/blog/./sempre-pode-suas-redes.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
@@ -208,8 +204,6 @@ Making home of the WSL 2
 
 <hr/>
 <p>Tags: <a href='tag_windows.html'>windows</a>, <a href='tag_wsl.html'>wsl</a></p>
-<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/making-home-of-the-wsl-2.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/making-home-of-the-wsl-2.html'><span id='count-5361'></span></a>&nbsp;</p>
 ]]></description><link>https://guilhermegarcia.dev/blog/making-home-of-the-wsl-2.html</link>
 <guid>https://guilhermegarcia.dev/blog/./making-home-of-the-wsl-2.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
@@ -238,8 +232,6 @@ House cleaning com git
 
 <hr/>
 <p>Tags: <a href='tag_git.html'>git</a></p>
-<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/house-cleaning-com-git.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/house-cleaning-com-git.html'><span id='count-21696'></span></a>&nbsp;</p>
 ]]></description><link>https://guilhermegarcia.dev/blog/house-cleaning-com-git.html</link>
 <guid>https://guilhermegarcia.dev/blog/./house-cleaning-com-git.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
@@ -264,8 +256,6 @@ Busca sem backend - parte 1
 
 <hr/>
 <p>Tags: <a href='tag_python.html'>python</a>, <a href='tag_json.html'>json</a>, <a href='tag_busca.html'>busca</a>, <a href='tag_nlp.html'>nlp</a></p>
-<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/busca-sem-backend---parte-1.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/busca-sem-backend---parte-1.html'><span id='count-3209'></span></a>&nbsp;</p>
 ]]></description><link>https://guilhermegarcia.dev/blog/busca-sem-backend---parte-1.html</link>
 <guid>https://guilhermegarcia.dev/blog/./busca-sem-backend---parte-1.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
@@ -286,8 +276,6 @@ Comparando json na linha de comando
 
 <hr/>
 <p>Tags: <a href='tag_json.html'>json</a>, <a href='tag_vimdiff.html'>vimdiff</a>, <a href='tag_cli.html'>cli</a>, <a href='tag_bash.html'>bash</a></p>
-<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/comparando-json-na-linha-de-comando.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/comparando-json-na-linha-de-comando.html'><span id='count-31865'></span></a>&nbsp;</p>
 ]]></description><link>https://guilhermegarcia.dev/blog/comparando-json-na-linha-de-comando.html</link>
 <guid>https://guilhermegarcia.dev/blog/./comparando-json-na-linha-de-comando.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
@@ -331,8 +319,6 @@ A ordem dos exports importa
 
 <hr/>
 <p>Tags: <a href='tag_react.html'>react</a>, <a href='tag_javascript.html'>javascript</a></p>
-<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/a-ordem-dos-exports-importa.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/a-ordem-dos-exports-importa.html'><span id='count-22163'></span></a>&nbsp;</p>
 ]]></description><link>https://guilhermegarcia.dev/blog/a-ordem-dos-exports-importa.html</link>
 <guid>https://guilhermegarcia.dev/blog/./a-ordem-dos-exports-importa.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
@@ -359,8 +345,6 @@ Remova o feed do github
 
 <hr/>
 <p>Tags: <a href='tag_bookmarklet.html'>bookmarklet</a>, <a href='tag_javascript.html'>javascript</a></p>
-<p id='twitter'><a href='http://twitter.com/intent/tweet?url=https://guilhermegarcia.dev/blog/remova-o-feed-do-github.html&text=&lt;Escreva seu comentário aqui mas mantenha a url para outras pessoas seguirem o comentário&gt;&via=gui_garcia67'>Comentários? Tweet</a> 
-<a href='https://twitter.com/search?q=https://guilhermegarcia.dev/blog/remova-o-feed-do-github.html'><span id='count-20332'></span></a>&nbsp;</p>
 ]]></description><link>https://guilhermegarcia.dev/blog/remova-o-feed-do-github.html</link>
 <guid>https://guilhermegarcia.dev/blog/./remova-o-feed-do-github.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
