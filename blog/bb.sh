@@ -36,13 +36,6 @@ global_variables() {
     # CC by-nc-nd is a good starting point, you can change this to "&copy;" for Copyright
     global_license="CC by-nc-nd"
 
-    # If you have a Google Analytics ID (UA-XXXXX) and wish to use the standard
-    # embedding code, put it on global_analytics
-    # If you have custom analytics code (i.e. non-google) or want to use the Universal
-    # code, leave global_analytics empty and specify a global_analytics_file
-    global_analytics=""
-    global_analytics_file=""
-
     # Leave this empty (i.e. "") if you don't want to use feedburner, 
     # or change it to your own URL
     global_feedburner=""
@@ -144,6 +137,12 @@ global_variables() {
     # Markdown location. Trying to autodetect by default.
     # The invocation must support the signature 'markdown_bin in.md > out.html'
     [[ -f Markdown.pl ]] && markdown_bin=./Markdown.pl || markdown_bin=$(which Markdown.pl 2>/dev/null || which markdown 2>/dev/null)
+
+    # Description meta tag for the index page. Should be about 160 characters long.
+    index_description_meta=""
+    # Language code used in the html "lang" attribute and RSS <language> element
+    # https://www.w3.org/TR/REC-html40-971218/types.html#h-6.8
+    html_lang="en"
 }
 
 # Check for the validity of some variables
@@ -176,29 +175,6 @@ markdown() {
     echo "$out"
 }
 
-
-# Prints the required google analytics code
-google_analytics() {
-    [[ -z $global_analytics && -z $global_analytics_file ]]  && return
-
-    if [[ -z $global_analytics_file ]]; then
-        echo "<script type=\"text/javascript\">
-
-        var _gaq = _gaq || [];
-        _gaq.push(['_setAccount', '${global_analytics}']);
-        _gaq.push(['_trackPageview']);
-
-        (function() {
-        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-        })();
-
-        </script>"
-    else
-        cat "$global_analytics_file"
-    fi
-}
 
 # Reads HTML file from stdin, prints its content to stdout
 # $1    where to start ("text" or "entry")
@@ -287,13 +263,13 @@ edit() {
 #
 # $1 the file
 #
-# Return 0 (bash return value 'true') if the input file is a component (footer, header, analytics)
+# Return 0 (bash return value 'true') if the input file is a component (footer, header)
 # or 1 (bash return value 'false') if it is a complete page
 is_included_in_sitemaps() {
     name=${1#./}
 
     case $name in
-    ( "$footer_file" | "$header_file" | "$global_analytics_file" )
+    ( "$footer_file" | "$header_file" )
         return 0 ;;
     esac
 
@@ -316,7 +292,7 @@ is_boilerplate_file() {
     done
 
     case $name in
-    ( "$index_file" | "$archive_index" | "$tags_index" | "$footer_file" | "$header_file" | "$global_analytics_file" | "$prefix_tags"* )
+    ( "$index_file" | "$archive_index" | "$tags_index" | "$footer_file" | "$header_file" | "$prefix_tags"* )
         return 0 ;;
     ( * ) # Check for excluded
         for excl in "${html_exclude[@]}"; do
@@ -351,7 +327,9 @@ create_html_page() {
     {
         cat ".header.html"
         echo "<title>$title</title>"
-        google_analytics
+        if [[ $index == yes ]] && [ -n "$index_description_meta" ]; then
+            echo "<meta name='description' content='$index_description_meta'>"
+        fi
         echo "</head><body>"
         # stuff to add before the actual body content
         [[ -n $body_begin_file ]] && cat "$body_begin_file"
@@ -829,7 +807,7 @@ make_rss() {
         echo '<?xml version="1.0" encoding="UTF-8" ?>' 
         echo '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">' 
         echo "<channel><title>$global_title</title><link>$global_url/$index_file</link>"
-        echo "<description>$global_description</description><language>en</language>"
+        echo "<description>$global_description</description><language>$html_lang</language>"
         echo "<lastBuildDate>$pubdate</lastBuildDate>"
         echo "<pubDate>$pubdate</pubDate>"
         echo "<atom:link href=\"$global_url/$blog_feed\" rel=\"self\" type=\"application/rss+xml\" />"
@@ -868,9 +846,9 @@ create_includes() {
 
     if [[ -f $header_file ]]; then cp "$header_file" .header.html
     else {
-        echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">'
-        echo '<html xmlns="http://www.w3.org/1999/xhtml"><head>'
-        echo '<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />'
+        echo '<!DOCTYPE html>'
+        echo "<html lang='$html_lang'><head>"
+        echo '<meta charset="UTF-8" />'
         echo '<meta name="viewport" content="width=device-width, initial-scale=1.0" />'
         printf '<link rel="stylesheet" href="%s" type="text/css" />\n' "${css_include[@]}"
         if [[ -z $global_feedburner ]]; then
@@ -885,8 +863,8 @@ create_includes() {
     else {
         protected_mail=${global_email//@/&#64;}
         protected_mail=${protected_mail//./&#46;}
-        echo "<div id=\"footer\">$global_license <a href=\"$global_author_url\">$global_author</a> &mdash; <a href=\"mailto:$protected_mail\">$protected_mail</a><br/>"
-        echo 'Generated with <a href="https://github.com/cfenollosa/bashblog">bashblog</a>, a single bash script to easily create blogs like this one</div>'
+        echo "<footer id=\"footer\">$global_license <a href=\"$global_author_url\">$global_author</a> &mdash; <a href=\"mailto:$protected_mail\">$protected_mail</a><br/>"
+        echo 'Generated with <a href="https://github.com/cfenollosa/bashblog">bashblog</a>, a single bash script to easily create blogs like this one</footer>'
         } >> ".footer.html"
     fi
 }
