@@ -47,10 +47,6 @@ global_variables() {
     # or change it to your own URL
     global_feedburner=""
 
-    # Change this to your disqus username to use disqus for comments
-    global_disqus_username=""
-
-
     # Blog generated files
     # index page of blog (it is usually good to use "index.html" here)
     index_file="index.html"
@@ -202,43 +198,6 @@ google_analytics() {
     else
         cat "$global_analytics_file"
     fi
-}
-
-# Prints the required code for disqus comments
-disqus_body() {
-    [[ -z $global_disqus_username ]] && return
-
-    echo '<div id="disqus_thread"></div>
-            <script type="text/javascript">
-            /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-               var disqus_shortname = '"'$global_disqus_username'"'; // required: replace example with your forum shortname
-
-            /* * * DONT EDIT BELOW THIS LINE * * */
-            (function() {
-            var dsq = document.createElement("script"); dsq.type = "text/javascript"; dsq.async = true;
-            dsq.src = "//" + disqus_shortname + ".disqus.com/embed.js";
-            (document.getElementsByTagName("head")[0] || document.getElementsByTagName("body")[0]).appendChild(dsq);
-            })();
-            </script>
-            <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-            <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>'
-}
-
-# Prints the required code for disqus in the footer
-disqus_footer() {
-    [[ -z $global_disqus_username ]] && return
-    echo '<script type="text/javascript">
-        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-        var disqus_shortname = '"'$global_disqus_username'"'; // required: replace example with your forum shortname
-
-        /* * * DONT EDIT BELOW THIS LINE * * */
-        (function () {
-        var s = document.createElement("script"); s.async = true;
-        s.type = "text/javascript";
-        s.src = "//" + disqus_shortname + ".disqus.com/count.js";
-        (document.getElementsByTagName("HEAD")[0] || document.getElementsByTagName("BODY")[0]).appendChild(s);
-    }());
-    </script>'
 }
 
 # Reads HTML file from stdin, prints its content to stdout
@@ -440,14 +399,10 @@ create_html_page() {
 
         echo '</div>' # content
 
-        # Add disqus commments except for index and all_posts pages
-        [[ $index == no ]] && disqus_body
-
         # page footer
         cat .footer.html
         # close divs
         echo '</div></div>' # divbody and divbodyholder 
-        disqus_footer
         [[ -n $body_end_file ]] && cat "$body_end_file"
         echo '</body></html>'
     } > "$filename"
