@@ -2,9 +2,39 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
 <channel><title>Blog do guilherme</title><link>https://guilhermegarcia.dev/blog/index.html</link>
 <description>programação e outras coisas menos úteis</description><language>pt-br</language>
-<lastBuildDate>Sun, 26 Feb 2023 13:08:15 -0300</lastBuildDate>
-<pubDate>Sun, 26 Feb 2023 13:08:15 -0300</pubDate>
+<lastBuildDate>Sun, 26 Feb 2023 15:12:07 -0300</lastBuildDate>
+<pubDate>Sun, 26 Feb 2023 15:12:07 -0300</pubDate>
 <atom:link href="https://guilhermegarcia.dev/blog/feed.rss" rel="self" type="application/rss+xml" />
+<item><title>
+Optando pelo fork
+</title><description><![CDATA[
+
+<p>Open source é uma faca de dois gumes: você libera seu código fonte pro mundo, e todos podem inspecionar, aprender e interagir com a sua criação.</p>
+
+<p>Isso cria uma expectativa nos usuários, a ideia de que você deve dar suporte pra correção de bugs, implementação de novas funcionalidades, e manter seu software atualizado e seguro.</p>
+
+<p>Mas isso não é verdade: subir um projeto no github com uma licensa aberta, criar uma documentação boa e mesmo colocar um guideline pra contribuição não criam nenhum vínculo de responsabilidade.</p>
+
+<p>O criador de um projeto aberto não é obrigado a nada.</p>
+
+<p><a href="https://en.wikipedia.org/wiki/Feature_creep">Feature creep</a> é um conceito que costuma ser utilizado nesses casos, quando um produto tem uma diversidade muito grande de usuários, e o criador acaba tentando espandir suas funcionalidades pra suprir cada uso-caso individual.</p>
+
+<p>Muito pior, porém, é a <a href="https://en.wikipedia.org/wiki/Job_creep">responsability creep</a>, que costuma acontecer em situações de empregador-empregado, onde uma pessoa eficiente no que faz acaba sempre recebendo mais e mais demandas.</p>
+
+<p>No ambiente corporativo, a saída é relativamente direta: se você ganhou mais responsabilidades, exija um aumento.</p>
+
+<p>E no open source? Ninguém pode te impedir de ser um otário, mas se você notar que os mantenedores do projeto não estão resolvendo o seu problema, siga os 3 Fs: <a href="https://boyter.org/posts/the-three-f-s-of-open-source/">fix it, fork it or fuck off</a>.</p>
+
+<p>Em projetos menores esse comportamento ocorre em sua melhor forma: a pessoa pedindo alteração geralmente propõe a solução com um pull request.</p>
+
+<p>Então, se você acompanha algum projeto que foi abandonado, e se viu precisando de alguma alteração, que tal criar um fork?</p>
+
+<p>Tags: <a href='tag_open-source.html'>open-source</a>, <a href='tag_git.html'>git</a>, <a href='tag_github.html'>github</a></p>
+<!-- text end -->
+]]></description><link>https://guilhermegarcia.dev/blog/optando-pelo-fork.html</link>
+<guid>https://guilhermegarcia.dev/blog/./optando-pelo-fork.html</guid>
+<dc:creator>Guilherme Garcia</dc:creator>
+<pubDate>Sun, 26 Feb 2023 15:10:15 -0300</pubDate></item>
 <item><title>
 Usando submódulos do git em pipelines do Azure DevOps
 </title><description><![CDATA[
@@ -327,30 +357,4 @@ A ordem dos exports importa
 <guid>https://guilhermegarcia.dev/blog/./a-ordem-dos-exports-importa.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
 <pubDate>Wed, 12 Oct 2022 01:57:25 -0300</pubDate></item>
-<item><title>
-Remova o feed do github
-</title><description><![CDATA[
-
-<p><abbr title="muito grande;nem li">mg;nl</abbr>: vamos criar um bookmarklet pra remover o feed da página inicial do github.</p>
-
-<p>Se você é como eu, provavelmente já entrou no seguinte loop:</p>
-
-<ol>
-<li>Você fica com dúvida sobre um projeto hospedado no github</li>
-<li>Você acessa <a href="https://github.com">https://github.com</a>.</li>
-<li>Você fica interessado no que as pessoas andaram fazendo, e acaba clicando em alguma coisa.</li>
-<li>Você mata a curiosidade e sai do github.</li>
-<li>????</li>
-<li>Você lembra da dúvida sobre o projeto</li>
-<li>repeat</li>
-</ol>
-
-<p>Vamos remover a distração da homepage do github usando um pouco de javascript.</p>
-
-<hr/>
-<p>Tags: <a href='tag_bookmarklet.html'>bookmarklet</a>, <a href='tag_javascript.html'>javascript</a></p>
-]]></description><link>https://guilhermegarcia.dev/blog/remova-o-feed-do-github.html</link>
-<guid>https://guilhermegarcia.dev/blog/./remova-o-feed-do-github.html</guid>
-<dc:creator>Guilherme Garcia</dc:creator>
-<pubDate>Mon, 10 Oct 2022 20:53:57 -0300</pubDate></item>
 </channel></rss>
