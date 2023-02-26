@@ -147,6 +147,9 @@ global_variables() {
 
     # Description meta tag for the index page. Should be about 160 characters long.
     index_description_meta=""
+    # Language code used in the html "lang" attribute and RSS <language> element
+    # https://www.w3.org/TR/REC-html40-971218/types.html#h-6.8
+    html_lang="en"
 }
 
 # Check for the validity of some variables
@@ -835,7 +838,7 @@ make_rss() {
         echo '<?xml version="1.0" encoding="UTF-8" ?>' 
         echo '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">' 
         echo "<channel><title>$global_title</title><link>$global_url/$index_file</link>"
-        echo "<description>$global_description</description><language>en</language>"
+        echo "<description>$global_description</description><language>$html_lang</language>"
         echo "<lastBuildDate>$pubdate</lastBuildDate>"
         echo "<pubDate>$pubdate</pubDate>"
         echo "<atom:link href=\"$global_url/$blog_feed\" rel=\"self\" type=\"application/rss+xml\" />"
@@ -875,7 +878,7 @@ create_includes() {
     if [[ -f $header_file ]]; then cp "$header_file" .header.html
     else {
         echo '<!DOCTYPE html>'
-        echo "<html><head>"
+        echo "<html lang='$html_lang'><head>"
         echo '<meta charset="UTF-8" />'
         echo '<meta name="viewport" content="width=device-width, initial-scale=1.0" />'
         printf '<link rel="stylesheet" href="%s" type="text/css" />\n' "${css_include[@]}"
