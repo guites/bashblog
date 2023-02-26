@@ -144,6 +144,9 @@ global_variables() {
     # Markdown location. Trying to autodetect by default.
     # The invocation must support the signature 'markdown_bin in.md > out.html'
     [[ -f Markdown.pl ]] && markdown_bin=./Markdown.pl || markdown_bin=$(which Markdown.pl 2>/dev/null || which markdown 2>/dev/null)
+
+    # Description meta tag for the index page. Should be about 160 characters long.
+    index_description_meta=""
 }
 
 # Check for the validity of some variables
@@ -351,6 +354,9 @@ create_html_page() {
     {
         cat ".header.html"
         echo "<title>$title</title>"
+        if [[ $index == yes ]] && [ -n "$index_description_meta" ]; then
+            echo "<meta name='description' content='$index_description_meta'>"
+        fi
         google_analytics
         echo "</head><body>"
         # stuff to add before the actual body content
