@@ -16,6 +16,23 @@
 <div id="description">programação e outras coisas menos úteis</div>
 </div></div></div>
 <div id="divbody"><div class="content">
+<h3><a class="ablack" href="o-minimo-para-manter-a-sanidade-com-tabs-no-vim.html">
+O mínimo para manter a sanidade com tabs no vim
+</a></h3>
+<!-- bashblog_timestamp: #202303040113.48# -->
+<div class="subtitle">março 04, 2023 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p>Eu adoro quando vou fazer algo que é pra ser simples e acabo saindo horrorizado com as possibilidades. </p>
+
+<p>O vim é o melhor exemplo de algo que pode ser customizado de tantos jeitos, que 90% das soluções pra qualquer problema envolvem scripts bizarros e key maps alienígenas, que funcionam pra pessoas específicas (a pessoa que inventou, no momento em que inventou, com a chance de funcionar diminuindo pra ela mesma em função do tempo) e falham para todo o resto de forma desastrosa.</p>
+
+<p>Tópico de hoje: tabs. Especificamente, como criar, fechar, criar uma tab a partir de um buffer e <strong>gasp</strong> mesclar duas tabs em um só buffer.</p>
+
+<p class="readmore"><a href="./o-minimo-para-manter-a-sanidade-com-tabs-no-vim.html">Ler mais...</a></p>
+<p>Tags: <a href='tag_vim.html'>vim</a></p>
 <h3><a class="ablack" href="optando-pelo-fork.html">
 Optando pelo fork
 </a></h3>
@@ -288,31 +305,6 @@ Guilherme Garcia
 
 <p class="readmore"><a href="./house-cleaning-com-git.html">Ler mais...</a></p>
 <p>Tags: <a href='tag_git.html'>git</a></p>
-<h3><a class="ablack" href="busca-sem-backend---parte-1.html">
-Busca sem backend - parte 1
-</a></h3>
-<!-- bashblog_timestamp: #202211061536.37# -->
-<div class="subtitle">Novembro 06, 2022 &mdash; 
-Guilherme Garcia
-</div>
-<!-- text begin -->
-
-<p><abbr title="muito grande;nem li">mg;nl</abbr>: Vamos ver como adicionar um mecanismo de busca em um site estático. Neste post vamos criar um script que gera um arquivo json contendo os conteúdos do site, juntando o título, sumário, tags e palavras chave geradas utilizando a ferramenta <a href="https://github.com/LIAAD/yake">yake</a>.</p>
-
-<p>A barra de busca: essencial, mas de dificil implementação se você não tiver acesso a um banco de dados. </p>
-
-<p>Em sites dinâmicos, no qual o conteúdo é resgatado de um banco de dados a cada acesso, você pode utilizar um formulário, que envia os valores digitados pelo usuário (termos de busca) a um endpoint que as utiliza para realizar uma consulta no banco de dados, e retorna os resultados para o usuário.</p>
-
-<p>Em sites estáticos (como esse, que é hospedado no <a href="https://pages.github.com/">github pages</a>), todo o conteúdo disponível para o usuário precisa ser previamente criado e hospedado. Ou seja, não temos como responder de forma dinâmica às combinações (praticamente infinitas) de palavras chave que um usuário pode buscar.</p>
-
-<p>Para um site pequeno, porém, podemos estruturar o conteúdo em um formato de fácil consulta, como o <a href="https://www.json.org/json-en.html">json</a>, e deixá-lo salvo no servidor. </p>
-
-<p>Daí podemos receber os termos de busca digitados pelo usuário e usar algumas linhas de javascript para carregar o arquivo, aplicar o filtro, e retornar os resultados.</p>
-
-<p>Neste primeiro post, vamos desenvolver um script em python que percorre as publicações do site e formata as informações essenciais em um formato facilmente consultável.</p>
-
-<p class="readmore"><a href="./busca-sem-backend---parte-1.html">Ler mais...</a></p>
-<p>Tags: <a href='tag_python.html'>python</a>, <a href='tag_json.html'>json</a>, <a href='tag_busca.html'>busca</a>, <a href='tag_nlp.html'>nlp</a></p>
 <div id="all_posts"><a href="todos_posts.html">Ver mais posts</a> &mdash; <a href="todas_tags.html">Todas as tags</a> &mdash; <a href="feed.rss">RSS feed</a></div>
 </div>
 <footer id="footer">CC by-nc-nd <a href="https://github.com/guites">Guilherme Garcia</a> &mdash; <a href="mailto:gui&#46;garcia67&#64;gmail&#46;com">gui&#46;garcia67&#64;gmail&#46;com</a><br/>

@@ -2,9 +2,25 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
 <channel><title>Blog do guilherme</title><link>https://guilhermegarcia.dev/blog/index.html</link>
 <description>programação e outras coisas menos úteis</description><language>pt-br</language>
-<lastBuildDate>Sun, 26 Feb 2023 15:12:07 -0300</lastBuildDate>
-<pubDate>Sun, 26 Feb 2023 15:12:07 -0300</pubDate>
+<lastBuildDate>Sat, 04 Mar 2023 01:16:44 -0300</lastBuildDate>
+<pubDate>Sat, 04 Mar 2023 01:16:44 -0300</pubDate>
 <atom:link href="https://guilhermegarcia.dev/blog/feed.rss" rel="self" type="application/rss+xml" />
+<item><title>
+O mínimo para manter a sanidade com tabs no vim
+</title><description><![CDATA[
+
+<p>Eu adoro quando vou fazer algo que é pra ser simples e acabo saindo horrorizado com as possibilidades. </p>
+
+<p>O vim é o melhor exemplo de algo que pode ser customizado de tantos jeitos, que 90% das soluções pra qualquer problema envolvem scripts bizarros e key maps alienígenas, que funcionam pra pessoas específicas (a pessoa que inventou, no momento em que inventou, com a chance de funcionar diminuindo pra ela mesma em função do tempo) e falham para todo o resto de forma desastrosa.</p>
+
+<p>Tópico de hoje: tabs. Especificamente, como criar, fechar, criar uma tab a partir de um buffer e <strong>gasp</strong> mesclar duas tabs em um só buffer.</p>
+
+<hr/>
+<p>Tags: <a href='tag_vim.html'>vim</a></p>
+]]></description><link>https://guilhermegarcia.dev/blog/o-minimo-para-manter-a-sanidade-com-tabs-no-vim.html</link>
+<guid>https://guilhermegarcia.dev/blog/./o-minimo-para-manter-a-sanidade-com-tabs-no-vim.html</guid>
+<dc:creator>Guilherme Garcia</dc:creator>
+<pubDate>Sat, 04 Mar 2023 01:13:48 -0300</pubDate></item>
 <item><title>
 Optando pelo fork
 </title><description><![CDATA[
@@ -314,47 +330,4 @@ Comparando json na linha de comando
 <guid>https://guilhermegarcia.dev/blog/./comparando-json-na-linha-de-comando.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
 <pubDate>Tue, 25 Oct 2022 22:45:36 -0300</pubDate></item>
-<item><title>
-A ordem dos exports importa
-</title><description><![CDATA[
-
-<p><abbr title="muito grande;nem li">mg;nl</abbr>: quando você utiliza um arquivo index.js para exportar módulos no react, a ordem dos exports pode quebrar seu app se dois módulos importam um ao outro, causando um <code>Uncaught TypeError: _MyModule__WEBPACK_IMPORTED_MODULE_1__ is undefined</code>.</p>
-
-<p>O react tem uma funcionalidade muito boa, o <a href="https://create-react-app.dev/docs/importing-a-component/#absolute-imports">absolute imports</a>, que ajuda você a não precisar ficar lidando com o caminho relativo entre os arquivos.</p>
-
-<p>Se seu app tem uma estrutura do tipo</p>
-
-<pre><code>    - src/
-        - components/
-        - pages/
-</code></pre>
-
-<p>Você pode, num arquivo em <code>src/pages/Home.jsx</code>, importar módulos de duas formas</p>
-
-<pre><code>    // bad! &gt;:(
-    import { ButtonGroup } from '../components/ButtonGroup';
-    import { MyButton } from '../components/RadioGroup';
-
-    // good! &gt;:)
-    import { ButtonGroup, MyButton } from 'components';
-</code></pre>
-
-<p>Basta você largar um arquivo <code>jsconfig.json</code> na raíz do seu projeto, passando o diretório <code>src/</code> como <code>baseUrl</code>:</p>
-
-<pre><code>    {
-      "compilerOptions": {
-        "baseUrl": "src"
-      },
-      "include": ["src"]
-    }
-</code></pre>
-
-<p>Porém existem algum gotchas quando você começa a agrupar seus exports.</p>
-
-<hr/>
-<p>Tags: <a href='tag_react.html'>react</a>, <a href='tag_javascript.html'>javascript</a></p>
-]]></description><link>https://guilhermegarcia.dev/blog/a-ordem-dos-exports-importa.html</link>
-<guid>https://guilhermegarcia.dev/blog/./a-ordem-dos-exports-importa.html</guid>
-<dc:creator>Guilherme Garcia</dc:creator>
-<pubDate>Wed, 12 Oct 2022 01:57:25 -0300</pubDate></item>
 </channel></rss>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang='pt-br'><head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="main.css" type="text/css" />
+<link rel="stylesheet" href="blog.css" type="text/css" />
+<link rel="stylesheet" href="code.css" type="text/css" />
+<link rel="alternate" type="application/rss+xml" title="Inscrever-se nesta página..." href="feed.rss" />
+<title>O mínimo para manter a sanidade com tabs no vim</title>
+</head><body>
+<div id="divbodyholder">
+<div class="headerholder"><div class="header">
+<div id="title">
+<h1 class="nomargin"><a class="ablack" href="https://guilhermegarcia.dev/blog/index.html">Blog do guilherme</a></h1>
+<div id="description">programação e outras coisas menos úteis</div>
+</div></div></div>
+<div id="divbody"><div class="content">
+<!-- entry begin -->
+<h3><a class="ablack" href="o-minimo-para-manter-a-sanidade-com-tabs-no-vim.html">
+O mínimo para manter a sanidade com tabs no vim
+</a></h3>
+<!-- bashblog_timestamp: #202303040113.48# -->
+<div class="subtitle">março 04, 2023 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p>Eu adoro quando vou fazer algo que é pra ser simples e acabo saindo horrorizado com as possibilidades. </p>
+
+<p>O vim é o melhor exemplo de algo que pode ser customizado de tantos jeitos, que 90% das soluções pra qualquer problema envolvem scripts bizarros e key maps alienígenas, que funcionam pra pessoas específicas (a pessoa que inventou, no momento em que inventou, com a chance de funcionar diminuindo pra ela mesma em função do tempo) e falham para todo o resto de forma desastrosa.</p>
+
+<p>Tópico de hoje: tabs. Especificamente, como criar, fechar, criar uma tab a partir de um buffer e <strong>gasp</strong> mesclar duas tabs em um só buffer.</p>
+
+<hr/>
+
+<h2>Buffers</h2>
+
+<p>O vim é feito de buffers. Buffers são áreas que o Vim aloca na sua memória, e usa pra segurar o texto de um arquivo.</p>
+
+<p>Mas um buffer também podem ser criado sem associação a um arquivo.</p>
+
+<p>É assim que você usa o vim pra criar um arquivo do zero, e é assim que o arquivo existe antes que você use <code>:w</code> pra salvá-lo.</p>
+
+<pre><code>    vim eu-nao-existo-antes-de-ser-salvo.md
+</code></pre>
+
+<p>Mas você também pode criar um buffer desassociado de arquivo, de dentro do vim, com <code>:new</code>.</p>
+
+<p>Comandos padrões do vim, como <code>:help</code>, também abrem em um novo buffer. Cada buffer é associado à uma janela.</p>
+
+<p><img src="./imgs/2-buffer-windows.png" alt="VIM com dois buffers abertos, divididos horizontalmente, um mostrando um arquivo de texto sendo editado e o outro com a tela de ajuda" title="Dois buffers abertos no VIM" /></p>
+
+<p>Um mesmo buffer pode aparecer em duas janelas. Isso faz com que a edição do buffer em uma janela seja refletida na outra.</p>
+
+<p><aside>
+Você pode separar seu buffer em duas janelas com <kbd>CTRL-w</kbd> seguido de <kbd>v</kbd>, ou com <code>:vplist</code> (<code>:split</code> pra separar na horizontal).</p>
+
+<p>Você pode fechar um buffer com <kbd>CTRL-w</kbd> seguido de <kbd>c</kbd>.  </aside></p>
+
+<p>Várias janelas, contendo um ou mais buffers, são agrupadas em tabs.</p>
+
+<p><strong>TABS</strong>!!</p>
+
+<h2>Tabs</h2>
+
+<p>O vim permite que você use tabs.</p>
+
+<p><aside>Para abrir vários arquivos, cada um em uma tab, use <code>vim -p index.html styles.css</code>.</aside></p>
+
+<p>Buffers podem estar presentes em uma ou mais tabs, dentro de uma ou mais janelas.</p>
+
+<p><aside>Para criar uma nova tab de dentro do vim, basta <code>:tabe nome-do-arquivo.extensao</code>.</aside></p>
+
+<p>Você pode facilmente transformar buffers em tabs, mas o vim não te permite juntar duas tabs no mesmo buffer. </p>
+
+<p><aside>Para separar cada buffer em uma tab, use <code>:tab ba</code>.</aside></p>
+
+<p>Parece algo direto, sempre que você pode fazer uma transformação em um sentido</p>
+
+<pre><code>    ┌────────┬────────┐
+    │        │ b2     │
+    │ b1     │        │
+    │        │        │
+    ├────────┼────────┤
+    │  b3    │        │
+    │        │        │
+    │        │   b4   │
+    └────────┴────────┘
+
+             │
+             ▼
+
+         `:tab ba`
+
+             │
+             ▼
+    ┌────┬────┬───┬───┐
+    │ b1 │ b2 │ b3│ b4│
+    ├────┴────┴───┴───┤
+    │                 │
+    │                 │
+    │                 │
+    │                 │
+    │                 │
+    └─────────────────┘
+</code></pre>
+
+<p>Você poder fazer no sentido inverso, certo?</p>
+
+<pre><code>    ┌────┬────┬───┬───┐
+    │ b1 │ b2 │ b3│ b4│
+    ├────┴────┴───┴───┤
+    │                 │
+    │                 │
+    │                 │
+    │                 │
+    │                 │
+    └─────────────────┘
+             │
+             ▼
+
+         `???????`
+
+             │
+             ▼
+    ┌────────┬───┬────┐
+    │   b1   │ b3│ b4 │
+    ├────────┼───┴────┤
+    │        │        │
+    │   b1   │   b2   │
+    │        │        │
+    │        │        │
+    │        │        │
+    └────────┴────────┘
+</code></pre>
+
+<p>Mas não! Cada um pode tentar resolver do seu jeito. Yay</p>
+
+<h2>Instalando o Tabmerge</h2>
+
+<p><a href="https://stackoverflow.com/a/4616653">Existem</a> <a href="https://vim.fandom.com/wiki/Move_current_window_between_tabs">alternativas</a> mas a forma mais direta parece ser o plugin <a href="https://www.vim.org/scripts/script.php?script_id=1961">Tabmerge.vim</a>, que resolve de forma prática o problema.</p>
+
+<pre><code>    :Tabmerge [tab number] [top|bottom|left|right]
+</code></pre>
+
+<p>Que pode ser diminuido para</p>
+
+<pre><code>    :Tabm 1
+</code></pre>
+
+<p>Ou o número da tab que você quer juntar com a sua tab atual.</p>
+
+<p>As instruções são bem diretas: coloque o script no seu diretório de plugins e acesse-o diretamente.</p>
+
+<p><aside>Use a <a href="https://www.vim.org/scripts/download_script.php?src_id=8828">versão 0.3</a> caso seu vim seja entre 7.0 e 8.0, e a <a href="https://www.vim.org/scripts/download_script.php?src_id=28138">versão 0.4</a> caso seu vim seja versão 9.0</aside></p>
+
+<p>Se você usa uma versão do vim maior que a 8 (ver com <code>vim --version | head -n 1</code>), você pode instalá-lo manualmente, criando um diretório <code>plugin</code> direto em <code>~/.vim</code>:</p>
+
+<pre><code>    mkdir -p ~/.vim/plugin
+</code></pre>
+
+<p>E depois, movendo-o pra lá:</p>
+
+<pre><code>    wget https://www.vim.org/scripts/download_script.php?src_id=8828 -O ~/.vim/plugin/Tabmerge.vim
+</code></pre>
+
+<p>E ele deve funcionar a partir da próxima vez que você abrir o vim. :)</p>
+
+<p>Se você não puder instalar da forma manual, pode utilizar também o <a href="https://github.com/junegunn/vim-plug">VimPlug</a>, adicionando no seu .vimrc</p>
+
+<pre><code>    Plug 'https://github.com/vim-scripts/Tabmerge.git'
+</code></pre>
+
+<p>E depois, rodar <code>:PlugInstall</code>. </p>
+
+<p>Agora você tem suas tabs, mas lembre-se: <a href="https://stackoverflow.com/a/26745051">tabs</a> <a href="https://stackoverflow.com/a/61471567">não</a> <a href="https://joshldavis.com/2014/04/05/vim-tab-madness-buffers-vs-tabs/">são</a> <a href="https://stackoverflow.com/a/16084326">substitutos</a> <a href="https://stackoverflow.com/a/103590">para</a> buffers!</p>
+
+<h2>Referências</h2>
+
+<ul>
+<li><a href="https://vim.fandom.com/wiki/Buffers">https://vim.fandom.com/wiki/Buffers</a></li>
+</ul>
+
+<p>Tags: <a href='tag_vim.html'>vim</a></p>
+<!-- text end -->
+<!-- entry end -->
+</div>
+<footer id="footer">CC by-nc-nd <a href="https://github.com/guites">Guilherme Garcia</a> &mdash; <a href="mailto:gui&#46;garcia67&#64;gmail&#46;com">gui&#46;garcia67&#64;gmail&#46;com</a><br/>
+Generated with <a href="https://github.com/cfenollosa/bashblog">bashblog</a>, a single bash script to easily create blogs like this one</footer>
+</div></div>
+</body></html>
