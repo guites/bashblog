@@ -16,6 +16,35 @@
 <div id="description">programação e outras coisas menos úteis</div>
 </div></div></div>
 <div id="divbody"><div class="content">
+<h3><a class="ablack" href="servidor-http-com-netcat-e-bash.html">
+Servidor HTTP com netcat e bash
+</a></h3>
+<!-- bashblog_timestamp: #202303121855.18# -->
+<div class="subtitle">março 12, 2023 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p><abbr title="muito grande; nem li">mg;nl</abbr>: Escrevi um relato dos meus estudos tentando criar um servidor com o comando <code>netcat</code> e outras ferramentas básicas do terminal, que consiga lidar com requisições GET, POST e validar o corpo das requisições.</p>
+
+<p>Como parte de um projeto de fim de semana, precisei criar um servidor HTTP. Como estou estudando o uso da linha de comandos e scripts em bash, achei digno tentar criar um servidor que processasse o protocolo http "do zero" usando ferramentas básicas do terminal, como <code>netcat</code>, <code>read</code>, <code>mkfifo</code>, <code>sed</code>, <code>cut</code> e outros.</p>
+
+<p>Dei uma pesquisada e achei projetos bem avançados, como o <a href="https://github.com/dfletcher/tsws">totally simple web server</a>, mas nenhum deles tinha suporte para requisições POST, para envio de informações mais complexas.</p>
+
+<p>Decidi por fazer minha implementação com o seguinte escopo:</p>
+
+<ol>
+<li>O servidor deve processar HTTP na versão 1.1.</li>
+<li>O servidor deve lidar com requisições GET e POST, e deve ser estensível para outros verbos http (PUT, PATCH, DELETE...) sem muita alteração na lógica.</li>
+<li>O servidor deve ser capaz de processar o corpo das requisições e retornar respostas dinâmicas, com regra de negócio customizável.</li>
+</ol>
+
+<p>Como prova de conceito, implementei um endpoint GET que retorna um status de sucesso e um endpoint POST que recebe uma URL e verifica se ela é um link válido.</p>
+
+<p>Você pode ver o código completo <a href="https://gist.github.com/guites/904b7ead024fbd4a2a48a769434a44f8">neste gist</a>.</p>
+
+<p class="readmore"><a href="./servidor-http-com-netcat-e-bash.html">Ler mais...</a></p>
+<p>Tags: <a href='tag_bash.html'>bash</a>, <a href='tag_http.html'>http</a></p>
 <h3><a class="ablack" href="o-minimo-para-manter-a-sanidade-com-tabs-no-vim.html">
 O mínimo para manter a sanidade com tabs no vim
 </a></h3>
@@ -276,35 +305,6 @@ Guilherme Garcia
 
 <p class="readmore"><a href="./making-home-of-the-wsl-2.html">Ler mais...</a></p>
 <p>Tags: <a href='tag_windows.html'>windows</a>, <a href='tag_wsl.html'>wsl</a></p>
-<h3><a class="ablack" href="house-cleaning-com-git.html">
-House cleaning com git
-</a></h3>
-<!-- bashblog_timestamp: #202211141059.55# -->
-<div class="subtitle">Novembro 14, 2022 &mdash; 
-Guilherme Garcia
-</div>
-<!-- text begin -->
-
-<p>Nesse post eu quero compartilhar com vocês algumas operações que eu tive que realizar em uns repositórios antigos, que estavam mal gerenciados e abandonados, pra que eu pudesse voltar a desenvolver neles.</p>
-
-<p>As coisas que eu precisei aprender a fazer foram as seguintes:</p>
-
-<ul>
-<li>Listar autores de um repositório</li>
-<li>Filtrar os commits do repositório por autor, pra ver o que cada um contribuiu</li>
-<li>Relacionar combinações de autores/email diferentes de um mesmo usuário (usando o arquivo <code>.mailmap</code>)</li>
-<li>Em um commit, ver quais arquivos foram alterados</li>
-<li>Ver o que foi alterado em um arquivo específico dentro de um commit</li>
-<li>Verificar o histórico de alteração de um arquivo no repositório (git log arquivo.js)</li>
-<li>Alterar o nome e autor de alguns commits, utilizando o <a href="https://github.com/newren/git-filter-repo">git-filter-repo</a></li>
-</ul>
-
-<p>Essas tarefas são ótimas pra se familiarizar (ou relembrar) com o andamento de um projeto, ver o ritmo das alterações, quantas mudanças costumam ser embaladas num mesmo commit, e criar um feeling sobre o perfil dos desenvolvedores de um projeto.</p>
-
-<p>Também servem pra organizar e arrumar o histórico e os meta dados dos commits passados, e por isso eu chamo de "House cleaning".</p>
-
-<p class="readmore"><a href="./house-cleaning-com-git.html">Ler mais...</a></p>
-<p>Tags: <a href='tag_git.html'>git</a></p>
 <div id="all_posts"><a href="todos_posts.html">Ver mais posts</a> &mdash; <a href="todas_tags.html">Todas as tags</a> &mdash; <a href="feed.rss">RSS feed</a></div>
 </div>
 <footer id="footer">CC by-nc-nd <a href="https://github.com/guites">Guilherme Garcia</a> &mdash; <a href="mailto:gui&#46;garcia67&#64;gmail&#46;com">gui&#46;garcia67&#64;gmail&#46;com</a><br/>

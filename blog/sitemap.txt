@@ -1,12 +1,14 @@
 https://guilhermegarcia.dev/blog/todas_tags.html
 https://guilhermegarcia.dev/blog/todos_posts.html
 https://guilhermegarcia.dev/blog/index.html
+https://guilhermegarcia.dev/blog/tag_http.html
+https://guilhermegarcia.dev/blog/tag_bash.html
+https://guilhermegarcia.dev/blog/servidor-http-com-netcat-e-bash.html
 https://guilhermegarcia.dev/blog/tag_vim.html
 https://guilhermegarcia.dev/blog/o-minimo-para-manter-a-sanidade-com-tabs-no-vim.html
 https://guilhermegarcia.dev/blog/tag_api.html
 https://guilhermegarcia.dev/blog/tag_azure.html
 https://guilhermegarcia.dev/blog/tag_bashblog.html
-https://guilhermegarcia.dev/blog/tag_bash.html
 https://guilhermegarcia.dev/blog/tag_bookmarklet.html
 https://guilhermegarcia.dev/blog/tag_busca.html
 https://guilhermegarcia.dev/blog/tag_ci.html

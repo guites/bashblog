@@ -2,9 +2,37 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
 <channel><title>Blog do guilherme</title><link>https://guilhermegarcia.dev/blog/index.html</link>
 <description>programação e outras coisas menos úteis</description><language>pt-br</language>
-<lastBuildDate>Sat, 04 Mar 2023 01:16:44 -0300</lastBuildDate>
-<pubDate>Sat, 04 Mar 2023 01:16:44 -0300</pubDate>
+<lastBuildDate>Sun, 12 Mar 2023 18:55:22 -0300</lastBuildDate>
+<pubDate>Sun, 12 Mar 2023 18:55:22 -0300</pubDate>
 <atom:link href="https://guilhermegarcia.dev/blog/feed.rss" rel="self" type="application/rss+xml" />
+<item><title>
+Servidor HTTP com netcat e bash
+</title><description><![CDATA[
+
+<p><abbr title="muito grande; nem li">mg;nl</abbr>: Escrevi um relato dos meus estudos tentando criar um servidor com o comando <code>netcat</code> e outras ferramentas básicas do terminal, que consiga lidar com requisições GET, POST e validar o corpo das requisições.</p>
+
+<p>Como parte de um projeto de fim de semana, precisei criar um servidor HTTP. Como estou estudando o uso da linha de comandos e scripts em bash, achei digno tentar criar um servidor que processasse o protocolo http "do zero" usando ferramentas básicas do terminal, como <code>netcat</code>, <code>read</code>, <code>mkfifo</code>, <code>sed</code>, <code>cut</code> e outros.</p>
+
+<p>Dei uma pesquisada e achei projetos bem avançados, como o <a href="https://github.com/dfletcher/tsws">totally simple web server</a>, mas nenhum deles tinha suporte para requisições POST, para envio de informações mais complexas.</p>
+
+<p>Decidi por fazer minha implementação com o seguinte escopo:</p>
+
+<ol>
+<li>O servidor deve processar HTTP na versão 1.1.</li>
+<li>O servidor deve lidar com requisições GET e POST, e deve ser estensível para outros verbos http (PUT, PATCH, DELETE...) sem muita alteração na lógica.</li>
+<li>O servidor deve ser capaz de processar o corpo das requisições e retornar respostas dinâmicas, com regra de negócio customizável.</li>
+</ol>
+
+<p>Como prova de conceito, implementei um endpoint GET que retorna um status de sucesso e um endpoint POST que recebe uma URL e verifica se ela é um link válido.</p>
+
+<p>Você pode ver o código completo <a href="https://gist.github.com/guites/904b7ead024fbd4a2a48a769434a44f8">neste gist</a>.</p>
+
+<hr/>
+<p>Tags: <a href='tag_bash.html'>bash</a>, <a href='tag_http.html'>http</a></p>
+]]></description><link>https://guilhermegarcia.dev/blog/servidor-http-com-netcat-e-bash.html</link>
+<guid>https://guilhermegarcia.dev/blog/./servidor-http-com-netcat-e-bash.html</guid>
+<dc:creator>Guilherme Garcia</dc:creator>
+<pubDate>Sun, 12 Mar 2023 18:55:18 -0300</pubDate></item>
 <item><title>
 O mínimo para manter a sanidade com tabs no vim
 </title><description><![CDATA[
@@ -310,24 +338,4 @@ Busca sem backend - parte 1
 <guid>https://guilhermegarcia.dev/blog/./busca-sem-backend---parte-1.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
 <pubDate>Sun, 06 Nov 2022 15:36:37 -0300</pubDate></item>
-<item><title>
-Comparando json na linha de comando
-</title><description><![CDATA[
-
-<p><abbr title="muito grande;nem li">mg;nl</abbr>: vamos usar o <a href="https://vimdoc.sourceforge.net/htmldoc/diff.html">vimdiff</a> e o <a href="https://stedolan.github.io/jq/">jq</a> para comparar arquivos json independente da formatação.</p>
-
-<p>Comparar arquivos json parecidos pode ser complicado. Muitas vezes os arquivos foram formatados com espaçamentos diferentes, ou a diferença não ocorre no mesmo nível hierarquico.</p>
-
-<p>Vamos criar um script simples pra comparar arquivos json diretamente pelo terminal, usando o programa <code>jq</code> e o <code>vimdiff</code>.</p>
-
-<p>Vamos ver também como preparar um script bash pra lidar com erros conhecidos, como arquivos com json inválido ou de outro formato.</p>
-
-<p><aside>Os exemplos usados foram gerados usando <a href="https://json-generator.com">https://json-generator.com</a></aside></p>
-
-<hr/>
-<p>Tags: <a href='tag_json.html'>json</a>, <a href='tag_vimdiff.html'>vimdiff</a>, <a href='tag_cli.html'>cli</a>, <a href='tag_bash.html'>bash</a></p>
-]]></description><link>https://guilhermegarcia.dev/blog/comparando-json-na-linha-de-comando.html</link>
-<guid>https://guilhermegarcia.dev/blog/./comparando-json-na-linha-de-comando.html</guid>
-<dc:creator>Guilherme Garcia</dc:creator>
-<pubDate>Tue, 25 Oct 2022 22:45:36 -0300</pubDate></item>
 </channel></rss>

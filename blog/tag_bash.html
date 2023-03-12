@@ -16,6 +16,35 @@
 <div id="description">programação e outras coisas menos úteis</div>
 </div></div></div>
 <div id="divbody"><div class="content">
+<h3><a class="ablack" href="servidor-http-com-netcat-e-bash.html">
+Servidor HTTP com netcat e bash
+</a></h3>
+<!-- bashblog_timestamp: #202303121855.18# -->
+<div class="subtitle">março 12, 2023 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p><abbr title="muito grande; nem li">mg;nl</abbr>: Escrevi um relato dos meus estudos tentando criar um servidor com o comando <code>netcat</code> e outras ferramentas básicas do terminal, que consiga lidar com requisições GET, POST e validar o corpo das requisições.</p>
+
+<p>Como parte de um projeto de fim de semana, precisei criar um servidor HTTP. Como estou estudando o uso da linha de comandos e scripts em bash, achei digno tentar criar um servidor que processasse o protocolo http "do zero" usando ferramentas básicas do terminal, como <code>netcat</code>, <code>read</code>, <code>mkfifo</code>, <code>sed</code>, <code>cut</code> e outros.</p>
+
+<p>Dei uma pesquisada e achei projetos bem avançados, como o <a href="https://github.com/dfletcher/tsws">totally simple web server</a>, mas nenhum deles tinha suporte para requisições POST, para envio de informações mais complexas.</p>
+
+<p>Decidi por fazer minha implementação com o seguinte escopo:</p>
+
+<ol>
+<li>O servidor deve processar HTTP na versão 1.1.</li>
+<li>O servidor deve lidar com requisições GET e POST, e deve ser estensível para outros verbos http (PUT, PATCH, DELETE...) sem muita alteração na lógica.</li>
+<li>O servidor deve ser capaz de processar o corpo das requisições e retornar respostas dinâmicas, com regra de negócio customizável.</li>
+</ol>
+
+<p>Como prova de conceito, implementei um endpoint GET que retorna um status de sucesso e um endpoint POST que recebe uma URL e verifica se ela é um link válido.</p>
+
+<p>Você pode ver o código completo <a href="https://gist.github.com/guites/904b7ead024fbd4a2a48a769434a44f8">neste gist</a>.</p>
+
+<p class="readmore"><a href="servidor-http-com-netcat-e-bash.html">Ler mais...</a></p>
+<p>Tags: <a href='tag_bash.html'>bash</a>, <a href='tag_http.html'>http</a></p>
 <h3><a class="ablack" href="comparando-json-na-linha-de-comando.html">
 Comparando json na linha de comando
 </a></h3>
@@ -35,7 +64,7 @@ Guilherme Garcia
 
 <p><aside>Os exemplos usados foram gerados usando <a href="https://json-generator.com">https://json-generator.com</a></aside></p>
 
-<p class="readmore"><a href="./comparando-json-na-linha-de-comando.html">Ler mais...</a></p>
+<p class="readmore"><a href="comparando-json-na-linha-de-comando.html">Ler mais...</a></p>
 <p>Tags: <a href='tag_json.html'>json</a>, <a href='tag_vimdiff.html'>vimdiff</a>, <a href='tag_cli.html'>cli</a>, <a href='tag_bash.html'>bash</a></p>
 <h3><a class="ablack" href="mantendo-data-de-criacao-de-arquivos-no-git.html">
 Mantendo data de criação de arquivos no git
@@ -53,7 +82,7 @@ já deve ter reparado que, cada vez que você clona o repositório, a data de cr
 
 <p>Vou apresentar nesse post os métodos que eu utilizo para persistir essa informação.</p>
 
-<p class="readmore"><a href="./mantendo-data-de-criacao-de-arquivos-no-git.html">Ler mais...</a></p>
+<p class="readmore"><a href="mantendo-data-de-criacao-de-arquivos-no-git.html">Ler mais...</a></p>
 <p>Tags: <a href='tag_git.html'>git</a>, <a href='tag_bash.html'>bash</a></p>
 <h3><a class="ablack" href="automatizando-a-geracao-de-site-map.html">
 Automatizando a geração de site map
@@ -70,7 +99,7 @@ Guilherme Garcia
 
 <p>Faço um panorama dos formatos de sitemap existente, suas diferenças, e depois proponho uma função, escrita em bash, para gerar um sitemap baseado numa listagem de arquivos html presentes num diretório. </p>
 
-<p class="readmore"><a href="./automatizando-a-geracao-de-site-map.html">Ler mais...</a></p>
+<p class="readmore"><a href="automatizando-a-geracao-de-site-map.html">Ler mais...</a></p>
 <p>Tags: <a href='tag_seo.html'>seo</a>, <a href='tag_bash.html'>bash</a>, <a href='tag_bashblog.html'>bashblog</a></p>
 <h3><a class="ablack" href="coisas-que-eu-nao-sabia-sobre-bash.html">
 Coisas que eu não sabia sobre bash
@@ -94,7 +123,7 @@ Guilherme Garcia
 
 <p>ps. com o quarto item eu consegui gerar um <a href="https://github.com/cfenollosa/bashblog/pull/168">pull request</a></p>
 
-<p class="readmore"><a href="./coisas-que-eu-nao-sabia-sobre-bash.html">Ler mais...</a></p>
+<p class="readmore"><a href="coisas-que-eu-nao-sabia-sobre-bash.html">Ler mais...</a></p>
 <p>Tags: <a href='tag_bash.html'>bash</a></p>
 </div>
 <footer id="footer">CC by-nc-nd <a href="https://github.com/guites">Guilherme Garcia</a> &mdash; <a href="mailto:gui&#46;garcia67&#64;gmail&#46;com">gui&#46;garcia67&#64;gmail&#46;com</a><br/>

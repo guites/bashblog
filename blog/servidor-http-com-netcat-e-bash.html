@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang='pt-br'><head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="main.css" type="text/css" />
+<link rel="stylesheet" href="blog.css" type="text/css" />
+<link rel="stylesheet" href="code.css" type="text/css" />
+<link rel="alternate" type="application/rss+xml" title="Inscrever-se nesta página..." href="feed.rss" />
+<title>Servidor HTTP com netcat e bash</title>
+</head><body>
+<div id="divbodyholder">
+<div class="headerholder"><div class="header">
+<div id="title">
+<h1 class="nomargin"><a class="ablack" href="https://guilhermegarcia.dev/blog/index.html">Blog do guilherme</a></h1>
+<div id="description">programação e outras coisas menos úteis</div>
+</div></div></div>
+<div id="divbody"><div class="content">
+<!-- entry begin -->
+<h3><a class="ablack" href="servidor-http-com-netcat-e-bash.html">
+Servidor HTTP com netcat e bash
+</a></h3>
+<!-- bashblog_timestamp: #202303121855.18# -->
+<div class="subtitle">março 12, 2023 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p><abbr title="muito grande; nem li">mg;nl</abbr>: Escrevi um relato dos meus estudos tentando criar um servidor com o comando <code>netcat</code> e outras ferramentas básicas do terminal, que consiga lidar com requisições GET, POST e validar o corpo das requisições.</p>
+
+<p>Como parte de um projeto de fim de semana, precisei criar um servidor HTTP. Como estou estudando o uso da linha de comandos e scripts em bash, achei digno tentar criar um servidor que processasse o protocolo http "do zero" usando ferramentas básicas do terminal, como <code>netcat</code>, <code>read</code>, <code>mkfifo</code>, <code>sed</code>, <code>cut</code> e outros.</p>
+
+<p>Dei uma pesquisada e achei projetos bem avançados, como o <a href="https://github.com/dfletcher/tsws">totally simple web server</a>, mas nenhum deles tinha suporte para requisições POST, para envio de informações mais complexas.</p>
+
+<p>Decidi por fazer minha implementação com o seguinte escopo:</p>
+
+<ol>
+<li>O servidor deve processar HTTP na versão 1.1.</li>
+<li>O servidor deve lidar com requisições GET e POST, e deve ser estensível para outros verbos http (PUT, PATCH, DELETE...) sem muita alteração na lógica.</li>
+<li>O servidor deve ser capaz de processar o corpo das requisições e retornar respostas dinâmicas, com regra de negócio customizável.</li>
+</ol>
+
+<p>Como prova de conceito, implementei um endpoint GET que retorna um status de sucesso e um endpoint POST que recebe uma URL e verifica se ela é um link válido.</p>
+
+<p>Você pode ver o código completo <a href="https://gist.github.com/guites/904b7ead024fbd4a2a48a769434a44f8">neste gist</a>.</p>
+
+<hr/>
+
+<h2>Endpoint raíz</h2>
+
+<p>O protocolo HTTP é construido em cima do protocolo TCP. A ferramenta básica pra lidar com TCP pelo terminal é o netcat (o canivete suíço do TCP), e grande parte da funcionalidade que precisamos já existe no programa.</p>
+
+<h3>O comando <code>nc</code></h3>
+
+<p><aside>Dependendo da distribuição do nc na sua máquina, algumas flags utilizadas podem ter nomes diferentes. Na dúvida, verifique com <code>man nc</code>.</aside></p>
+
+<p>Podemos usar o <code>nc</code> pra ouvir uma porta arbitrária na máquina e começar as comunicações.</p>
+
+<p><aside>O terminal que estiver ouvindo (usando a flag <code>-l</code>) vai ser chamado de server ou servidor.</aside></p>
+
+<pre><code># flag -l indica que queremos ouvir (listen) na porta estipulada
+nc -l localhost 18000
+</code></pre>
+
+<p>Em um segundo terminal, você pode testar que a porta foi ativada estabelecendo uma conexão e enviando uma mensagem.</p>
+
+<pre><code>nc localhost 18000
+"Hello from terminal 2"
+</code></pre>
+
+<p>Repare que a mensagem foi recebida no servidor. E essa comunicação é bilateral: qualquer coisa enviada em um terminal, vai pro outro.</p>
+
+<p>O próximo passo é reagir às mensagens enviadas, e não só repetí-las. Para isso, vamos usar o conceito de <em>named pipes</em> no linux.</p>
+
+<p>Eles funcionam como os pipes normais (<code>|</code>), ou seja, representam uma futura comunicação entre a saída de um programa e a entrada de outro, mas possuem um nome específico e são atrelados a um arquivo.</p>
+
+<h3>O comando <code>mkfifo</code></h3>
+
+<p>O comando utilizado pra criar um named pipe é <code>mkfifo</code>.</p>
+
+<pre><code>$ mkfifo my-pipe
+$ ls -l my-pipe
+prw-rw-r-- 1 guites guites 0 mar  5 01:52 my-pipe
+</code></pre>
+
+<p>Repare o <em>p</em> antes das permissões do arquivo, indicando que se trata de um pipe.</p>
+
+<p><aside>
+O nome do comando pode enganar(fifo significa <em>first in first out</em>) pois no caso dos named pipes, o primeiro valor adicionado na escrita não é o primeiro valor recebido na leitura.</p>
+
+<p>O vídeo abaixo ilustra o comportamento dos pipes.</p>
+
+<p><video style="max-width: 100%" src="./imgs/mkfifo-2023-03-05_02.04.58.mp4" controls/></p>
+
+<p>Repare que ao escrever no pipe os terminais ficam bloqueados. Você pode imaginar que cada terminal será desbloqueado quando seu valor for lido do pipe, mas quando o processo de leitura inicia, os dois terminais de escrita são desbloqueados ao mesmo tempo.</p>
+
+<p>Outro detalhe importante é que o valor "second test" é usado primeiro na leitura do que "first test", ou seja, ordem contrária à qual foram adicionados (o <em>named pipe</em> funciona como uma pilha, ou stack).
+</aside></p>
+
+<h3>Estruturando o consumo dos pipes com netcat</h3>
+
+<p>Vamos utilizar uma arquitetura proposta por <a href="https://github.com/dfletcher">Dave Fletcher</a> para processar, no server, os valores recebidos pelo netcat antes de devolvê-los.</p>
+
+<pre><code>       +----------+
+       | nc client|
+       +----------+
+         ^
+         |            
+         |
+         v
+        +---------+(1)
+        |nc server|---writes to --&gt; FIFO pipe     
+        +---------+                    |
+           (0)^                        |
+              |                     is read by
+              |                        |
+              |                        | 
+              |                        v
+              +------------------- callback
+                                   function
+
+- 1: saída do `nc server`, com a mensagem recebida do client
+- 0: entrada do `nc server`, com os valores prontos pra serem enviados
+de volta pro client
+</code></pre>
+
+<p>O servidor vai escrever cada mensagem recebida no pipe. Enquanto isso, a função de callback roda paralelamente e lê os valores adicionados ao pipe, processando-os e enviando de volta pro servidor, que os envia para o cliente.</p>
+
+<p>Graças ao efeito "bloqueador" dos named pipes (quem escreve fica bloqueado até que ocorra uma leitura), o callback vai rodar exatamente uma vez para cada valor adicionado na fila.</p>
+
+<p>Vamos começar com uma versão simplificada.</p>
+
+<pre><code>mkfifo test-pipe
+nc -kl 18000 \
+    0&lt; &lt;(while read -r line; do echo "Você enviou: $line"; done &lt; "test-pipe") \ 
+    1&gt; &gt;(while : ; do cat - &gt; "test-pipe"; done)
+</code></pre>
+
+<p>Primeiro, criamos nosso pipe. Depois, iniciamos o server ouvindo na porta 18000, e então definimos os valores de entrada e saída do programa.</p>
+
+<p>No primeiro loop, (onde temos o <code>0&lt;</code>) estamos dizendo que o valor de entrada (STDIN) deve ser definido pela função</p>
+
+<pre><code>while read -r line; do echo "Você enviou: $line"; done &lt; "test-pipe"
+</code></pre>
+
+<p>Ou seja, o valor que entra no servidor vai ser lido da fila e processado, e depois enviado para o client.</p>
+
+<p>No segundo loop (onde temos o <code>1&gt;</code>), estamos dizendo que o valor de saída (STDOUT), que são as mensagens recebidas no server (enviadas pelo client), devem ser enviadas para a fila.</p>
+
+<p>Isso mantém o processo sincronizado (é feita uma escrita seguida de uma leitura), mesmo com dois loops ocorrendo simultaneamente.</p>
+
+<h3>Evoluindo para HTTP</h3>
+
+<p>Agora que controlamos os valores devolvidos para o client, podemos processá-los com a lógica necessária.</p>
+
+<p>Caso nosso client continuasse um <code>nc</code>, fazendo requisições TCP simples, poderíamos manter o processamento de uma linha por vez.</p>
+
+<p>Mas as requisições vão chegar falando HTTP. Pra entender como nosso programa se comporta nesse caso, podemos simular uma requisição com <code>curl</code>.</p>
+
+<p>Com o server rodando em um terminal, vamos abrindo um segundo terminal e</p>
+
+<pre><code>$ curl http://localhost:18000
+
+curl: (1) Received HTTP/0.9 when not allowed
+</code></pre>
+
+<p><aside>HTTP/0.9 é o nome dado a versão inicial do protocolo, que enviava as informações da requisição em uma unica linha. Foi utilizada no início da década de 90, quando a internet ainda tinha poucos servidores rodando fora da CERN (<a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Evolution_of_HTTP#http0.9_%E2%80%93_the_one-line_protocol">fonte</a>).</aside></p>
+
+<p>Esse erro indica que o curl considera nossa resposta mal formatada. De fato, o protocolo HTTP tem um padrão bem específico. Uma requisição GET HTTP vai ter a seguinte estrutura:</p>
+
+<pre><code>GET /hello.txt HTTP/1.1 &lt;-- Request-Line
+Host: www.example.com   &lt;-- Host do destinatário
+Accept-Language: en, mi &lt;--- headers (um ou mais)
+                            &lt;-- linha em branco!
+</code></pre>
+
+<p>A primeira linha é a mais importante e define três valores: o verbo utilizado (GET, POST, PUT..), o recurso a ser acessado no servidor e a versão do protocolo utilizada.</p>
+
+<p><aside>O HTTP/2 já é bem difundido, mas tanto o <code>curl</code> quanto o método <code>xhr</code> e <code>fetch</code> do javascript ainda utilizam a v1.1 como padrão.</aside></p>
+
+<p>Se tratando de HTTP, nossa resposta deve conter obrigatóriamente alguns campos, assim como a requisição.</p>
+
+<p>A estrutura básica para uma resposta bem sucedida é:</p>
+
+<pre><code>http/1.1 200 ok
+server: netcat
+content-length: 123
+content-type: text; charset=utf-8
+connection: close
+                 # &lt;!-- linha em branco!
+</code></pre>
+
+<p>A primeira linha indica que tudo ocorreu bem, e o status de saída é um 200 (OK).</p>
+
+<p>Depois, temos uma identificação básica do server, que aceita qualquer string.</p>
+
+<p><code>content-length</code> define o tamanho do corpo da resposta da requisição. Esse campo vai instruir quantos bytes o cliente que buscou a URL deve aguardar na resposta. Caso este valor não esteja presente, ou você coloque um valor maior do que o enviado, <strong>o cliente pode ficar aguardando no outro lado da conexão por tempo indeterminado</strong>.</p>
+
+<p><code>content-type</code> indica qual o formato da saída. Aqui, mantemos "text" pela simplicidade, mas poderiamos usar "text/html" para html ou "application/json" para JSON. Em seguida, definimos o padrão de codificação do conteúdo da resposta (o <code>charset</code>).</p>
+
+<p><code>connection</code> indica se a requisição deve ser mantida após a transferência do número de bytes especificado em <code>content-length</code>. Os navegadores utilizam isso para agilizar o download de diferentes recursos, diminuindo a quantidade de etapas necessárias na comunicação. Vamos utilizar <code>close</code> pra indicar que nossa comunicação é fechada a cada requisições.</p>
+
+<p>Vamos formatar os cabeçalhos da nossa resposta em uma função separada:</p>
+
+<pre><code>http_response() {
+    printf $'HTTP/1.1 200 ok\r\n'
+    printf $'Content-Length: 0\r\n'
+    printf $'Content-Type: text/plain\r\n'
+    printf $'Connection: close\r\n'
+    printf $'\r\n'
+}
+</code></pre>
+
+<p>Repare que todos os valores acabam com <code>\r\n</code>. Esse é o fim de linha (CR-LF) utilizado no padrão http.</p>
+
+<blockquote>
+  <p>In HTTP version 1.x, header fields are transmitted after the request line (in case of a request HTTP message) or the response line (in case of a response HTTP message), which is the first line of a message. Header fields are colon-separated key-value pairs in clear-text string format, terminated by a carriage return (CR) and line feed (LF) character sequence. The end of the header section is indicated by an empty field line, resulting in the transmission of two consecutive CR-LF pairs. fonte: <a href="https://forum.arduino.cc/t/http-header-lines-delineated-with-r-n-or-just-n-or-r/195640/3">1</a>, <a href="https://en.wikipedia.org/wiki/List_of_HTTP_header_fields">2</a></p>
+</blockquote>
+
+<p>Ou seja, sabemos que o corpo da requisição vai começar quando recebermos dois CR-LF (conjuntos de <code>\r\n</code>) seguidos, indicando que uma das linhas estava em branco:</p>
+
+<pre><code>...
+Connection: close\r\n
+\r\n
+</code></pre>
+
+<p>Logo mais vamos filtrar os <code>\r</code> das linhas, o que vai nos permitir verificar com qual parte da requisição estamos lidando baseado no fato de ser um linha vazia ou não.</p>
+
+<h3>Preparando a resposta no netcat</h3>
+
+<p>Vamos separar a lógica do tratamento da resposta em uma função <code>generate_response</code>: ela vai ser responsável por identificar a linha com o verbo http e decidir quando possui informações suficientes pra começar a enviar a resposta.</p>
+
+<p><aside>o <code>if [ -n "${variavel}" ]</code> e <code>if [ -z "${variavel}" ]</code> são aquivalentes a "se a variável NÃO estiver vazia" e "se a variável estiver vazia", respectivamente.</aside></p>
+
+<pre><code>generate_response() {
+    local verb # restringe a variável ao escopo da função
+    verb="" # vamos usar essa variával pra decidir se já recebemos o verbo http
+    while read -r line; do
+        line="$(sed 's/\r//g' &lt;&lt;&lt; "${line}")" # (1)
+        if [ -n "${line}" ]; then
+            if [ -z "${verb}" ]; then
+                # caso não tenhamos salvo o verbo HTTP ainda,
+                # estamos lidando com a Request Line, no formato
+                # POST / HTTP/1.1
+                read -r verb _ _ &lt;&lt;&lt; "${line}" 
+                continue
+            fi
+        else
+            # se cairmos aqui, signfica que recebemos uma linha vazia
+            # vamos enviar nossa resposta
+            http_response
+            # limpamos a variável verb para lidar com a próxima requisição
+            verb=""
+        fi
+    done &lt; "$1"
+}
+</code></pre>
+
+<p>Em (1), estamos removendo o <code>\r</code> das linhas (lembre-se que as linhas no HTTP acabam sempre em <code>\r\n</code>). Isso nos permite verificar se as linhas estão vazias ou não na hora de implementar nossa lógica.</p>
+
+<p>Pra rodar o código de agora em diante, salve as funções <code>http_response</code> e <code>generate_response</code>, assim como a chamada ao <code>nc</code> em um arquivo separado. Você pode vê-lo na integra clicando abaixo.</p>
+
+<p><details><summary>Clique para ver o código completo do script.</summary></p>
+
+<pre><code>#!/bin/bash
+
+http_response() {
+    printf $'HTTP/1.1 200 ok\r\n'
+    printf $'Content-Length: 0\r\n'
+    printf $'Content-Type: text/plain\r\n'
+    printf $'Connection: close\r\n'
+    printf $'\r\n'
+}
+
+
+generate_response()  {
+    local verb
+    verb=""
+    while read -r line; do
+        line="$(sed 's/\r//g' &lt;&lt;&lt; "${line}")"
+        if [ -n "${line}" ]; then
+            if [ -z "${verb}" ]; then
+                read -r verb _ _ &lt;&lt;&lt; "${line}" 
+                continue
+            fi
+        else
+            http_response
+            verb=""
+        fi
+    done &lt; "$1"
+}
+
+# sempre removemos o named pipe, se ele já existir
+if [ -a "test-pipe" ]; then
+    rm test-pipe
+fi
+
+mkfifo test-pipe
+
+nc -kl 18000 \
+    0&lt; &lt;(generate_response "test-pipe") \
+    1&gt; &gt;(while : ; do cat - &gt; "test-pipe"; done)
+</code></pre>
+
+<p></details></p>
+
+<p>Vou considerar que você colocou o código em <code>server.bash</code>.</p>
+
+<p>Em um terminal, inicie o servidor com</p>
+
+<pre><code>bash server.bash
+</code></pre>
+
+<p>Em um segundo terminal, faça uma requisição usando <code>curl</code></p>
+
+<pre><code>$ curl -i http://localhost:8000
+HTTP/1.1 200 ok
+Content-Length: 0
+Content-Type: text/plain
+Connection: close
+</code></pre>
+
+<p>A flag <code>-i</code> permite ver os cabeçalhos recebidos na resposta. Parece estar tudo certo!</p>
+
+<h2>Lógica de negócios e corpo da requisição</h2>
+
+<p>Agora que nosso servidor HTTP está funcional, precisamos adaptá-lo para requisições que contenham dados no corpo.</p>
+
+<p>O corpo normalmente é usado em requisições POST, PUT e PATCH. Esses dados podem ser estruturados de diversas formas, as mais comuns sendo <code>multipart/form-data</code> (quando ocorre o envio de arquivos junto com a requisição) e <code>x-www-form-urlencoded</code>.</p>
+
+<p>Usado o content-type <code>application/x-www-form-urlencoded</code>, a requisição recebida fica nesse formato:</p>
+
+<pre><code>POST /test HTTP/1.1
+Host: foo.example
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 27
+
+field1=value1&amp;field2=value2
+</code></pre>
+
+<h3>Recebendo o corpo da requisição</h3>
+
+<p>Um problema que vamos enfrentar usando o <code>while read</code> é que ele só processa uma linha quando encontra um delimitador. Por padrão, o delimitador é o <em>newline</em> (<code>\n</code>), que até agora resolvia nosso problema, pois todos os campos vinham acompanhados de um <code>\r\n</code>.</p>
+
+<p>O corpo da requisição http, porém, não contém um <em>newline</em> no final. Isso vai travar nosso programa.</p>
+
+<p><img src="./imgs/http-request-post.png" alt="Estrutura de uma requisição HTTP POST" title="Estrutura de uma requisição HTTP POST" /></p>
+
+<p><small><a href="https://www.aosabook.org/en/500L/a-simple-web-server.html">fonte da imagem</a></small></p>
+
+<p>Para visualizar esse bug vamos rodar o script do servidor com a flag <code>-x</code>, que faz o bash printar os comandos e argumentos conforme são executados.</p>
+
+<p>Em um terminal, rode:</p>
+
+<pre><code>$ bash -x server.bash
++ '[' -a test-pipe ']'
++ rm test-pipe
++ mkfifo test-pipe
++ nc -kl 18000
+++ generate_response test-pipe
+++ local verb
+++ verb=
+++ :
+++ cat -
+++ read -r line
+</code></pre>
+
+<p><aside>Compare o output inicial com as primeiras linhas do nosso código, e veja que o processo roda até chegar na parte em que consumimos o named pipe.</aside></p>
+
+<p>Em um segundo terminal, envie uma requisição POST contendo um corpo. Você pode fazer isso com a flag <code>-d</code> do curl.</p>
+
+<pre><code>curl -i -d "link=https://google.com" http://localhost:18000
+</code></pre>
+
+<p>No nosso server, vamos ter o seguinte output (mostro apenas as partes de interesse pra economizar espaço):</p>
+
+<pre><code>+++ sed 's/\r//g'
+++ line='POST / HTTP/1.1'
+++ line='Host: localhost:18000'
+++ line='User-Agent: curl/7.68.0'
+++ line='Accept: */*'
+++ line='Content-Length: 23'
+++ line='Content-Type: application/x-www-form-urlencoded'
+</code></pre>
+
+<p>Onde está o corpo da requisição? Vamos fazer nosso curl mais uma vez:</p>
+
+<pre><code>curl -i -d "link=https://google.com" http://localhost:18000
+</code></pre>
+
+<p>E no output do server:</p>
+
+<pre><code>++ line='link=https://google.comPOST / HTTP/1.1' # &lt;!--- bug !!
+++ line='Host: localhost:18000'
+++ line='User-Agent: curl/7.68.0'
+++ line='Accept: */*'
+++ line='Content-Length: 23'
+++ line='Content-Type: application/x-www-form-urlencoded'
+++ line=
+</code></pre>
+
+<p>Como o <code>while read</code> não encontrou uma <em>newline</em> no fim da primeira requisição, nosso programa não entendeu que o corpo era algo separado do início da segunda requisição.</p>
+
+<p>Vamos contornar essa limitação definindo um timeout, ou seja, se a linha que estivermos lendo não receber um <code>\n</code> dentro de um tempo limite, utilizamos o que foi recebido até então.</p>
+
+<p><aside>Essa solução traz seus próprios problemas: atrasos na conexão ou linhas muito grandes que demorem mais que o tempo limite para serem processadas vão acabar sendo cortadas na metade. Como estamos trabalhando em um ambiente controlado, não vamos sofrer com isso.</aside></p>
+
+<p>Vamos alterar a lógica dentro da função <code>generate_response</code>.</p>
+
+<pre><code>generate_response() {
+    local verb
+    verb=""
+  - while read -r line; do
+  + while true; do
+      + if read -t 0.3 -r line; then
+            line="$(sed 's/\r//g' &lt;&lt;&lt; "${line}")"
+            if [ -n "${line}" ]; then
+                if [ -z "${verb}" ]; then
+                    read -r verb _ _ &lt;&lt;&lt; "${line}" 
+                    continue
+                fi
+            else
+                http_response
+                verb=""
+            fi
+      + else
+      +     # o processamento da linha passou
+      +     # do tempo limite, vamos lidar com o
+      +     # que recebemos!
+      + fi
+    done &lt; "$1"
+}
+</code></pre>
+
+<p><aside>Optei por 0.3 segundos (300ms) como limite de timeout, mas como estamos rodando um servidor local, poderiamos utilizar valores ainda menores.</aside></p>
+
+<h3>Processando valores recebidos</h3>
+
+<p>O corpo de uma requisição de content-type <code>application/x-www-form-urlencoded</code> é um conjunto de parâmetros e valores (param=value) separados por ampersands (<code>&amp;</code>).</p>
+
+<p>O programa <code>readarray</code> nos permite separar um string em um array, usando um delimitador.</p>
+
+<pre><code>$ raw_body="parametro1=valor1&amp;parametro2=valor2"
+$ readarray -d \&amp; parsed_body &lt;&lt;&lt; "$raw_body"
+$ echo ${parsed_body[@]}
+parametro1=valor1&amp; parametro2=valor2
+$ echo ${parsed_body[0]}
+parametro1=valor1&amp; # &lt;!-- o delimitador está sendo salvo junto
+</code></pre>
+
+<p>Podemos usar a flag <code>-t</code> pra evitar que o delimitador seja considerado parte do array:</p>
+
+<pre><code>$ readarray -t -d \&amp; parsed_body &lt;&lt;&lt; "$raw_body"
+$ echo ${parsed_body[0]}
+parametro1=valor1
+</code></pre>
+
+<p>Vamos utilizar o comando <code>cut</code> dentro de um loop, pra separar o parametro do seu valor associado.</p>
+
+<pre><code>$ for values in "${parsed_body[@]}"; do \
+   param=$(echo $values | cut -d"=" -f1); \
+   value=$(echo $values | cut -d"=" -f2); \
+   echo "parametro \"$param\": $value"; \
+ done
+parametro "parametro1": valor1
+parametro "parametro2": valor2
+</code></pre>
+
+<p><aside><code>cut -d"=" -f1</code> significa "corte o texto recebido sempre onde houver um <code>=</code>, e retorne tudo antes do primeiro símbolo."</aside></p>
+
+<p>Vamos juntar essa lógica em uma função dentro de <code>server.bash</code>.</p>
+
+<pre><code># o argumento $1 vai conter a linha com o corpo da requisição
+# no formato `parametro1=valor1&amp;parametro2=valor2&amp;...`
+parse_request_body() {
+    readarray -t -d \&amp; request_values &lt;&lt;&lt; "$1"
+    response_body=""
+    for values in "${request_values[@]}"; do
+        param=$(echo "$values" | cut -d"=" -f1)
+        value=$(echo "$values" | cut -d"=" -f2)
+        response_body+="You have sent $param: $value"$'\n'
+    done
+
+    echo "$response_body"
+}
+</code></pre>
+
+<p>Precisamos adaptar nossa função que cria a resposta (<code>http_response</code>), pois seu <code>Content-Length</code> vai ser variável (ele depende da resposta que vamos enviar), e deve incluir o corpo gerado em <code>parse_request_body</code>, caso se trate de uma requisição POST.</p>
+
+<pre><code># $1 vai ser o corpo da resposta a ser enviada
+http_response() {
+    content_length=$(echo -n "$1" | wc -c) # calcula o número de bytes no corpo da resposta
+    printf $'HTTP/1.1 200 ok\r\n'
+    printf $'Content-Length: %s\r\n' "$content_length"
+    printf $'Content-Type: text/plain\r\n'
+    printf $'Connection: close\r\n'
+    printf $'\r\n'
+    if [ -n "$1" ]; then
+        # caso o corpo da resposta não seja vazio, vamos enviá-lo
+        printf $'%s' "$1"
+    fi
+}
+</code></pre>
+
+<p>Em <code>generate_response</code>, temos que dividir seu uso para requisições com ou sem corpo.</p>
+
+<p><aside>Vamos assumir que requisições sem corpo são GET, e requisições com corpo são POST. Num ambiente real, os usuários podem tentar combinações diferentes, que acabariam derrubando nosso server!</aside></p>
+
+<pre><code>generate_response() {
+    local verb
+    verb=""
+    while true; do
+        if read -t 0.3 -r line; then
+            line="$(sed 's/\r//g' &lt;&lt;&lt; "${line}")"
+            if [ -n "${line}" ]; then
+                if [ -z "${verb}" ]; then
+                    read -r verb _ _ &lt;&lt;&lt; "${line}" 
+                    continue
+                fi
+            else
+              + if [ "$verb" == 'GET' ]; then
+              +     http_response ""
+                    verb=""
+                    continue
+              + fi
+            fi
+        else
+            # o processamento da linha passou
+            # do tempo limite, vamos lidar com o
+            # que recebemos!
+          + if [ "$verb" == "POST" ]; then
+          +     response_body=$(parse_request_body "$line")
+          +     http_response "$response_body"
+          +     verb=""
+          +     continue
+          + fi
+        fi
+    done &lt; "$1"
+}
+</code></pre>
+
+<p>Podemos testar nosso servidor rodando, em um terminal:</p>
+
+<pre><code>bash server.bash
+</code></pre>
+
+<p>E, num segundo terminal:</p>
+
+<pre><code>$ curl -i -d "link=https://google.com" http://localhost:18000
+HTTP/1.1 200 ok
+Content-Length: 38
+Content-Type: text/plain
+Connection: close
+
+You have sent link: https://google.com
+$ curl -i -d "link=https://google.com&amp;link2=https://you.com" http://localhost:18000
+HTTP/1.1 200 ok
+Content-Length: 75
+Content-Type: text/plain
+Connection: close
+
+You have sent link: https://google.com
+You have sent link2: https://you.com
+</code></pre>
+
+<p>Tudo parece ok!</p>
+
+<p><details><summary>Clique para ver o código atualizado do script.</summary></p>
+
+<pre><code>#!/bin/bash
+
+# $1 vai ser o corpo da resposta a ser enviada
+http_response() {
+    content_length=$(echo -n "$1" | wc -c) # calcula o número de bytes no corpo da resposta
+    printf $'HTTP/1.1 200 ok\r\n'
+    printf $'Content-Length: %s\r\n' "$content_length"
+    printf $'Content-Type: text/plain\r\n'
+    printf $'Connection: close\r\n'
+    printf $'\r\n'
+    if [ -n "$1" ]; then
+        # caso o corpo da resposta não seja vazio, vamos enviá-lo
+        printf $'%s' "$1"
+    fi
+}
+
+# o argumento $1 vai conter a linha com o corpo da requisição
+# no formato `parametro1=valor1&amp;parametro2=valor2&amp;...`
+parse_request_body() {
+    readarray -t -d \&amp; request_values &lt;&lt;&lt; "$1"
+    response_body="" 
+    for values in "${request_values[@]}"; do
+        param=$(echo "$values" | cut -d"=" -f1)
+        value=$(echo "$values" | cut -d"=" -f2)
+        response_body+="You have sent $param: $value"$'\n'
+    done
+
+    echo "$response_body"
+}
+
+
+generate_response() {
+    local verb
+    verb=""
+    while true; do
+        if read -t 0.3 -r line; then
+            line="$(sed 's/\r//g' &lt;&lt;&lt; "${line}")"
+            if [ -n "${line}" ]; then
+                if [ -z "${verb}" ]; then
+                    read -r verb _ _ &lt;&lt;&lt; "${line}" 
+                    continue
+                fi
+            else
+                if [ "$verb" == 'GET' ]; then
+                    http_response ""
+                    verb=""
+                    continue
+                fi
+            fi
+        else
+            # o processamento da linha passou
+            # do tempo limite, vamos lidar com o
+            # que recebemos!
+            if [ "$verb" == "POST" ]; then
+                response_body=$(parse_request_body "$line")
+                http_response "$response_body"
+                verb=""
+                continue
+            fi
+        fi
+    done &lt; "$1"
+}
+
+if [ -a "test-pipe" ]; then
+    rm test-pipe
+fi
+
+mkfifo test-pipe
+
+nc -kl 18000 \
+    0&lt; &lt;(generate_response "test-pipe") \
+    1&gt; &gt;(while : ; do cat - &gt; "test-pipe"; done)
+</code></pre>
+
+<p></details></p>
+
+<h2>Finalizando a prova de conceito</h2>
+
+<p>Temos tudo que é necessário para implementar as funcionalidades da nossa prova de conceito.</p>
+
+<p>Para isso, vamos validar os seguintes pontos:</p>
+
+<ol>
+<li>[x] Um endpoint <code>GET</code> que retorna uma mensagem de sucesso.</li>
+<li>[ ] Um endpoint <code>POST</code> que:
+<ol>
+<li>[ ] Recebe um parâmetro <code>url</code> no corpo da requisição</li>
+<li>[ ] Permite apenas uma <code>url</code> por requisição</li>
+<li>[ ] Retorna um resposta indicando se o link é válido ou não.</li>
+</ol></li>
+</ol>
+
+<h3>Validando o recebimento de uma url</h3>
+
+<p>Podemos começar as validações restringindo a função <code>parse_request_body</code>.</p>
+
+<pre><code>parse_request_body() {
+    readarray -t -d \&amp; request_values &lt;&lt;&lt; "$1"
+    values="${request_values[0]}"
+    param=$(echo "$values" | cut -d"=" -f1)
+    value=$(echo "$values" | cut -d"=" -f2)
+    if [ "$param" != "url" ]; then
+        echo "false" &amp;&amp; return
+    fi
+    if ! validate_url "$value"; then
+        echo "false" &amp;&amp; return
+    fi
+    echo "$value"
+}
+</code></pre>
+
+<p>Ainda utilizamos o <code>readarray</code> para lidar com o corpo da requisição, mas agora exigimos que o primeiro parametro seja chamado de "url". Caso negativo, a função retorna a string <code>false</code>.</p>
+
+<p>Depois, chamamos uma função <code>validate_url</code>, que retorna um booleano dizendo se a url é válida ou não. Vamos implementar essa função usando o programa <code>wget</code>:</p>
+
+<pre><code># $1 é uma url que precisamos verificar
+validate_url () {
+    wget --spider --timeout 1 "$1" 2&gt;/dev/null
+}
+</code></pre>
+
+<p>A flag <code>--spider</code> valida que a url existe, sem fazer download do seu conteúdo.</p>
+
+<p>Com essas alterações, já temos um webserver que valida URLs corretamente.</p>
+
+<pre><code>$ curl -i -d 'url=https://gouehueogle.com' localhost:18000
+HTTP/1.1 200 ok
+Content-Length: 5
+Content-Type: text/plain
+Connection: close
+
+false # &lt;!--- url inválida!
+
+$ curl -i -d 'link=https://google.com' localhost:18000
+HTTP/1.1 200 ok
+Content-Length: 5
+Content-Type: text/plain
+Connection: close
+
+false # &lt;!--- o campo esperado é "url" e não "link"!
+
+$ curl -i -d 'url=https://guilhermegarcia.dev' localhost:18000
+HTTP/1.1 200 ok
+Content-Length: 27
+Content-Type: text/plain
+Connection: close
+
+https://guilhermegarcia.dev # &lt;!-- URL válida!
+</code></pre>
+
+<p><details><summary>Clique para ver o código atualizado do script.</summary></p>
+
+<pre><code>#!/bin/bash
+
+# $1 vai ser o corpo da resposta a ser enviada
+http_response() {
+    content_length=$(echo -n "$1" | wc -c) # calcula o número de bytes no corpo da resposta
+    printf $'HTTP/1.1 200 ok\r\n'
+    printf $'Content-Length: %s\r\n' "$content_length"
+    printf $'Content-Type: text/plain\r\n'
+    printf $'Connection: close\r\n'
+    printf $'\r\n'
+    if [ -n "$1" ]; then
+        # caso o corpo da resposta não seja vazio, vamos enviá-lo
+        printf $'%s' "$1"
+    fi
+}
+
+
+# $1 é uma url que precisamos verificar
+validate_url() {
+    wget --spider --timeout 1 "$1" 2&gt;/dev/null
+}
+
+
+# o argumento $1 vai conter a linha com o corpo da requisição
+# no formato `parametro1=valor1&amp;parametro2=valor2&amp;...`
+parse_request_body() {
+    readarray -t -d \&amp; request_values &lt;&lt;&lt; "$1"
+    values="${request_values[0]}"
+    param=$(echo "$values" | cut -d"=" -f1)
+    value=$(echo "$values" | cut -d"=" -f2)
+    if [ "$param" != "url" ]; then
+        echo "false" &amp;&amp; return
+    fi
+    if ! validate_url "$value"; then
+        echo "false" &amp;&amp; return
+    fi
+    echo "$value"
+}
+
+
+generate_response() {
+    local verb
+    verb=""
+    while true; do
+        if read -t 0.3 -r line; then
+            line="$(sed 's/\r//g' &lt;&lt;&lt; "${line}")"
+            if [ -n "${line}" ]; then
+                if [ -z "${verb}" ]; then
+                    read -r verb _ _ &lt;&lt;&lt; "${line}"
+                    continue
+                fi
+            else
+                if [ "$verb" == 'GET' ]; then
+                    http_response ""
+                    verb=""
+                    continue
+                fi
+            fi
+        else
+            # o processamento da linha passou
+            # do tempo limite, vamos lidar com o
+            # que recebemos!
+            if [ "$verb" == "POST" ]; then
+                response_body=$(parse_request_body "$line")
+                http_response "$response_body"
+                verb=""
+                continue
+            fi
+        fi
+    done &lt; "$1"
+}
+
+if [ -a "test-pipe" ]; then
+    rm test-pipe
+fi
+
+mkfifo test-pipe
+
+nc -kl 18000 \
+    0&lt; &lt;(generate_response "test-pipe") \
+    1&gt; &gt;(while : ; do cat - &gt; "test-pipe"; done)
+</code></pre>
+
+<p></details></p>
+
+<p>Completamos o escopo da nossa prova de conceito:</p>
+
+<ol>
+<li>[x] Um endpoint <code>GET</code> que retorna uma mensagem de sucesso.</li>
+<li>[x] Um endpoint <code>POST</code> que:
+<ol>
+<li>[x] Recebe um parâmetro <code>url</code> no corpo da requisição</li>
+<li>[x] Permite apenas uma <code>url</code> por requisição</li>
+<li>[x] Retorna um resposta indicando se o link é válido ou não.</li>
+</ol></li>
+</ol>
+
+<h2>Conclusão e referências</h2>
+
+<p>Implementamos um servidor, usando as ferramentas básicas da linha de comando, que consegue lidar com requisições no protocolo HTTP, nos métodos GET e POST.</p>
+
+<p>Essa implementação tem muitos buracos e com certeza é facilmente quebrada, mas eu acredito que existe um potencial pedagógico muito grande em entender seu funcionamento e testar a estenção das suas funcionalidades. Alguns pontos interessantes seriam:</p>
+
+<ol>
+<li>Aceitar requisições PUT, PATCH e DELETE.</li>
+<li>Permitir que o cliente acesse caminhos diferentes no servidor (por exemplo, /api, /sobre-mim, etc)</li>
+<li>Retornar HTML a partir de um arquivo no servidor.</li>
+</ol>
+
+<p>Abraço!</p>
+
+<p>Referências:</p>
+
+<ul>
+<li><a href="https://daemoniolabs.wordpress.com/tag/comando-mkfifo/">https://daemoniolabs.wordpress.com/tag/comando-mkfifo/</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc9110.html#name-example-message-exchange">https://www.rfc-editor.org/rfc/rfc9110.html#name-example-message-exchange</a></li>
+<li><a href="https://github.com/dfletcher/tsws">https://github.com/dfletcher/tsws</a></li>
+<li><a href="https://gavilan.blog/2019/01/03/anatomy-of-an-http-request/">https://gavilan.blog/2019/01/03/anatomy-of-an-http-request/</a></li>
+<li><a href="https://tldp.org/LDP/abs/html/localvar.html">https://tldp.org/LDP/abs/html/localvar.html</a></li>
+<li><a href="https://forum.arduino.cc/t/http-header-lines-delineated-with-r-n-or-just-n-or-r/195640/2">https://forum.arduino.cc/t/http-header-lines-delineated-with-r-n-or-just-n-or-r/195640/2</a></li>
+<li><a href="https://en.wikipedia.org/wiki/List_of_HTTP_header_fields">https://en.wikipedia.org/wiki/List_of_HTTP_header_fields</a></li>
+<li><a href="https://stackoverflow.com/a/34376951">https://stackoverflow.com/a/34376951</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST">https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST</a></li>
+<li><a href="https://www.aosabook.org/en/500L/a-simple-web-server.html">https://www.aosabook.org/en/500L/a-simple-web-server.html</a></li>
+</ul>
+
+<p>Tags: <a href='tag_bash.html'>bash</a>, <a href='tag_http.html'>http</a></p>
+<!-- text end -->
+<!-- entry end -->
+</div>
+<footer id="footer">CC by-nc-nd <a href="https://github.com/guites">Guilherme Garcia</a> &mdash; <a href="mailto:gui&#46;garcia67&#64;gmail&#46;com">gui&#46;garcia67&#64;gmail&#46;com</a><br/>
+Generated with <a href="https://github.com/cfenollosa/bashblog">bashblog</a>, a single bash script to easily create blogs like this one</footer>
+</div></div>
+</body></html>
