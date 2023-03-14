@@ -330,6 +330,7 @@ create_html_page() {
         if [[ $index == yes ]] && [ -n "$index_description_meta" ]; then
             echo "<meta name='description' content='$index_description_meta'>"
         fi
+        echo "<script data-goatcounter='https://guites.goatcounter.com/count' async src='//gc.zgo.at/count.js'></script>"
         echo "</head><body>"
         # stuff to add before the actual body content
         [[ -n $body_begin_file ]] && cat "$body_begin_file"
