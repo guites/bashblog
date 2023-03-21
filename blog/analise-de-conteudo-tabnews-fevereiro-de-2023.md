@@ -10,6 +10,8 @@ Optei por restringir a análise ao mês de fevereiro de 2023, onde o conjunto de
 
 Você pode acessar o código completo [neste notebook do kaggle](https://www.kaggle.com/guites/tabnews-analysis-february-2023).
 
+<hr/>
+
 ## Coleta de dados no intervalo 02/2023 até 03/2023
 
 Existe um [post](https://www.tabnews.com.br/GabrielSozinho/documentacao-da-api-do-tabnews) de referência como documentação da API. Usando ele como base, e tentando interpretar o [código fonte](https://github.com/filipedeschamps/tabnews.com.br/tree/main/pages/api/v1) dos endpoints, descobri o seguinte:
