@@ -2,8 +2,8 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
 <channel><title>Blog do guilherme</title><link>https://guilhermegarcia.dev/blog/index.html</link>
 <description>programação e outras coisas menos úteis</description><language>pt-br</language>
-<lastBuildDate>Mon, 20 Mar 2023 22:02:13 -0300</lastBuildDate>
-<pubDate>Mon, 20 Mar 2023 22:02:13 -0300</pubDate>
+<lastBuildDate>Wed, 22 Mar 2023 08:31:47 -0300</lastBuildDate>
+<pubDate>Wed, 22 Mar 2023 08:31:47 -0300</pubDate>
 <atom:link href="https://guilhermegarcia.dev/blog/feed.rss" rel="self" type="application/rss+xml" />
 <item><title>
 Análise de conteúdo tabnews (fevereiro de 2023)
@@ -24,7 +24,7 @@ Análise de conteúdo tabnews (fevereiro de 2023)
 ]]></description><link>https://guilhermegarcia.dev/blog/analise-de-conteudo-tabnews-fevereiro-de-2023.html</link>
 <guid>https://guilhermegarcia.dev/blog/./analise-de-conteudo-tabnews-fevereiro-de-2023.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
-<pubDate>Mon, 20 Mar 2023 21:55:00 -0300</pubDate></item>
+<pubDate>Wed, 22 Mar 2023 08:14:54 -0300</pubDate></item>
 <item><title>
 Servidor HTTP com netcat e bash
 </title><description><![CDATA[

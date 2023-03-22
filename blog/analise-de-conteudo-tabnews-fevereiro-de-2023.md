@@ -1120,7 +1120,7 @@ Esse acumulo de comentários pode ser visualizado plotando o percentual de posts
     comments_by_num_posts.sort_values(by=['percent_posts']).plot(kind='bar', x='percent_posts', y='percent_comments', title='Percentual de Posts vs Percentual de Comentários')
     plt.show()
 
-![percentual de postagens com percentual de comentários](./imgs/pct_posts_pct_comments-fs8.png "percentual de postagens com percentual de comentários")
+![percentual de postagens com percentual de comentários](./imgs/analise-de-conteudo-tabnews-fevereiro-de-2023/pct_posts_pct_comments-fs8.png "percentual de postagens com percentual de comentários")
 
 ## Encontrando tags nas postagens
 
@@ -1487,7 +1487,7 @@ Uma forma boa de visualizar essa distribuição é com um gráfico de barras hor
     ax.set_xlim(right=max(count) +5)
     plt.show()
 
-![Distribuição de tags por número de ocorrência](./imgs/tags-distribution-fs8.png "Distribuição de tags por número de ocorrência")
+![Distribuição de tags por número de ocorrência](./imgs/analise-de-conteudo-tabnews-fevereiro-de-2023/tags-distribution-fs8.png "Distribuição de tags por número de ocorrência")
 
 O gráfico nos dá uma boa visão geral da distribuição, mas como muitas tags aparecem uma única vez, e poucas tags aparecem muitas vezes, uma visão espacial pode nos dar um insight melhor sobre a frequência do seu uso.
 
@@ -1517,7 +1517,7 @@ A lib wordcloud espera uma string contendo a totalidade das palavras, e usa o es
     plt.imshow(wordcloud)
     plt.axis("off");
 
-![Wordcloud usando apenas tags de uma palavra](./imgs/wordcloud-one-word-tags-small-fs8.png "Wordcloud usando apenas tags de uma palavra")
+![Wordcloud usando apenas tags de uma palavra](./imgs/analise-de-conteudo-tabnews-fevereiro-de-2023/wordcloud-one-word-tags-small-fs8.png "Wordcloud usando apenas tags de uma palavra")
 
 ## Distribuição temporal das postagens
 
@@ -1612,9 +1612,107 @@ E agora podemos plotar a distribuição dos posts pelos dias da semana.
 
 Repare no `sort_values(by='day_numer')`. Como o campo é numérico, conseguimos uma ordenação que seria muito mais complicada usando o nome dos dias.
 
-![Distribuição dos posts por dia de semana](./imgs/posts-by-weekday.png "Distribuição dos posts por dia de semana")
+![Distribuição dos posts por dia de semana](./imgs/analise-de-conteudo-tabnews-fevereiro-de-2023/posts-by-weekday.png "Distribuição dos posts por dia de semana")
 
 Vemos um aumento nas postagens no meio da semana, e uma acalmada no fds... é como se a galera gostasse de usar o fórum em horário de trabalho. Será?
+
+### Distribuição por dias da semana ao longo do mês
+
+O user [rafael](https://www.tabnews.com.br/rafael) [comentou](https://www.tabnews.com.br/rafael/c98b34e3-9538-44e0-ba9e-624f8c983893) que uma boa forma de visualizar a interação na plataforma ao longo dos dias da semana é pela [página de status](https://www.tabnews.com.br/status).
+
+Como ficaria esse gráfico sem as contribuições da Newsletter?
+
+Vamos começar ordenando pela data de publicação, e conseguindo a contagem de posts por dia, além de salvar o dia da semana pra cada dia do mês.
+
+    sorted_by_date = df.sort_values(by='published_at', ascending = True) \
+    .groupby('post_date').agg({
+        "title": "count",
+        "day_of_week": "min"
+    }).reset_index() \
+    .rename(columns={"title": "quantity_posts"})
+
+Depois, vamos nos certificar de que o campo `post_date` está com o formato correto (`datetime64`).
+)
+
+    sorted_by_date['post_date'] = sorted_by_date["post_date"].astype('datetime64[ns]')
+    sorted_by_date.head()
+
+<div class="table-wrapper">
+    <table class="dataframe" border="1">
+      <thead>
+        <tr style="text-align: right;">
+          <th></th>
+          <th>post_date</th>
+          <th>quantity_posts</th>
+          <th>day_of_week</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>0</th>
+          <td>2023-02-01</td>
+          <td>34</td>
+          <td>Quarta-feira</td>
+        </tr>
+        <tr>
+          <th>1</th>
+          <td>2023-02-02</td>
+          <td>55</td>
+          <td>Quinta-feira</td>
+        </tr>
+        <tr>
+          <th>2</th>
+          <td>2023-02-03</td>
+          <td>33</td>
+          <td>Sexta-feira</td>
+        </tr>
+        <tr>
+          <th>3</th>
+          <td>2023-02-04</td>
+          <td>41</td>
+          <td>Sábado</td>
+        </tr>
+        <tr>
+          <th>4</th>
+          <td>2023-02-05</td>
+          <td>27</td>
+          <td>Domingo</td>
+        </tr>
+      </tbody>
+    </table>
+</div>
+
+Agora temos os dados no formato necessário para gerar o gráfico da distribuição de posts por dia do mês de fevereiro.
+
+    # format post_date field as day/month (01/02, 02/02, ...)
+    post_date_fmt = [post_date.strftime("%d/%m") for post_date in sorted_by_date['post_date']]
+
+    fig, ax = plt.subplots()
+
+    # Sets figure size
+    fig.set_size_inches(10,6)
+
+    hue_order = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado', 'Domingo']
+    barplot = sns.barplot(
+        data=sorted_by_date,
+        ax=ax,
+        x='post_date',
+        y='quantity_posts',
+        hue="day_of_week",
+        hue_order=hue_order,
+        dodge=False
+    )
+
+    plt.xticks(rotation=45)
+    barplot.set_xticks(range(len(sorted_by_date.index)))
+    barplot.set_xticklabels(post_date_fmt)
+    barplot.set_xlabel("Dia do mês")
+    barplot.set_ylabel("Quantidade de posts")
+
+    plt.title("Quantidade de posts por dia do mês")
+    plt.show()
+
+![Quantidade de posts por dia do mês](./imgs/analise-de-conteudo-tabnews-fevereiro-de-2023/qtt-posts-dia-do-mes.png "Quantidade de posts por dia do mês")
 
 ### Distribuição por horário do dia 
 
@@ -1633,7 +1731,7 @@ Agora, agrupamos pelo número de postagens por hora e plotamos num gráfico de b
     .plot(kind="bar")
     plt.xticks(rotation=45)
 
-![Distribuição dos posts por hora do dia](./imgs/posts-by-hour.png "Distribuição dos posts por hora do dia")
+![Distribuição dos posts por hora do dia](./imgs/analise-de-conteudo-tabnews-fevereiro-de-2023/posts-by-hour.png "Distribuição dos posts por hora do dia")
 
 Temos um pico as 14h da tarde, seguidos por uma crescente entre as 16h e as 20h.
 
