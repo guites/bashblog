@@ -1697,8 +1697,7 @@ plt.xticks(rotation=45)
 .rename(columns={"title": "quantity_posts"})
 </code></pre>
 
-<p>Depois, vamos nos certificar de que o campo <code>post_date</code> está com o formato correto (<code>datetime64</code>).
-)</p>
+<p>Depois, vamos nos certificar de que o campo <code>post_date</code> está com o formato correto (<code>datetime64</code>).</p>
 
 <pre><code>sorted_by_date['post_date'] = sorted_by_date["post_date"].astype('datetime64[ns]')
 sorted_by_date.head()

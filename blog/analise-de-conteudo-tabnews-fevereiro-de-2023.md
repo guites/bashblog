@@ -1632,7 +1632,6 @@ Vamos começar ordenando pela data de publicação, e conseguindo a contagem de 
     .rename(columns={"title": "quantity_posts"})
 
 Depois, vamos nos certificar de que o campo `post_date` está com o formato correto (`datetime64`).
-)
 
     sorted_by_date['post_date'] = sorted_by_date["post_date"].astype('datetime64[ns]')
     sorted_by_date.head()
