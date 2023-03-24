@@ -83,6 +83,7 @@ img {
 /* makes anchor tags slightly taller */
 a {
     padding: 5px 0px;
+    line-break: anywhere;
 }
 
 /* makes horizontal rules black */
