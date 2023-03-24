@@ -1,9 +1,9 @@
-feed.rss<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
 <channel><title>Blog do guilherme</title><link>https://guilhermegarcia.dev/blog/index.html</link>
 <description>programação e outras coisas menos úteis</description><language>pt-br</language>
-<lastBuildDate>Wed, 22 Mar 2023 08:50:49 -0300</lastBuildDate>
-<pubDate>Wed, 22 Mar 2023 08:50:49 -0300</pubDate>
+<lastBuildDate>Fri, 24 Mar 2023 11:13:14 -0300</lastBuildDate>
+<pubDate>Fri, 24 Mar 2023 11:13:14 -0300</pubDate>
 <atom:link href="https://guilhermegarcia.dev/blog/feed.rss" rel="self" type="application/rss+xml" />
 <item><title>
 Análise de conteúdo tabnews (fevereiro de 2023)
@@ -21,6 +21,7 @@ Análise de conteúdo tabnews (fevereiro de 2023)
 
 <hr/>
 <p>Tags: <a href='tag_python.html'>python</a>, <a href='tag_pandas.html'>pandas</a>, <a href='tag_data-science.html'>data-science</a></p>
+</article>
 ]]></description><link>https://guilhermegarcia.dev/blog/analise-de-conteudo-tabnews-fevereiro-de-2023.html</link>
 <guid>https://guilhermegarcia.dev/blog/./analise-de-conteudo-tabnews-fevereiro-de-2023.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
@@ -49,6 +50,7 @@ Servidor HTTP com netcat e bash
 
 <hr/>
 <p>Tags: <a href='tag_bash.html'>bash</a>, <a href='tag_http.html'>http</a></p>
+</article>
 ]]></description><link>https://guilhermegarcia.dev/blog/servidor-http-com-netcat-e-bash.html</link>
 <guid>https://guilhermegarcia.dev/blog/./servidor-http-com-netcat-e-bash.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
@@ -65,6 +67,7 @@ O mínimo para manter a sanidade com tabs no vim
 
 <hr/>
 <p>Tags: <a href='tag_vim.html'>vim</a></p>
+</article>
 ]]></description><link>https://guilhermegarcia.dev/blog/o-minimo-para-manter-a-sanidade-com-tabs-no-vim.html</link>
 <guid>https://guilhermegarcia.dev/blog/./o-minimo-para-manter-a-sanidade-com-tabs-no-vim.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
@@ -95,7 +98,10 @@ Optando pelo fork
 
 <p>Tags: <a href='tag_open-source.html'>open-source</a>, <a href='tag_git.html'>git</a>, <a href='tag_github.html'>github</a></p>
 
+
+
 <!-- text end -->
+</article>
 ]]></description><link>https://guilhermegarcia.dev/blog/optando-pelo-fork.html</link>
 <guid>https://guilhermegarcia.dev/blog/./optando-pelo-fork.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
@@ -112,6 +118,7 @@ Usando submódulos do git em pipelines do Azure DevOps
 
 <hr/>
 <p>Tags: <a href='tag_azure.html'>azure</a>, <a href='tag_git.html'>git</a>, <a href='tag_ci.html'>ci</a></p>
+</article>
 ]]></description><link>https://guilhermegarcia.dev/blog/usando-submodulos-do-git-em-pipelines-do-azure-devops.html</link>
 <guid>https://guilhermegarcia.dev/blog/./usando-submodulos-do-git-em-pipelines-do-azure-devops.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
@@ -217,7 +224,10 @@ Symlinking python3 for vim on macOS
 
 
 
+
+
 <!-- text end -->
+</article>
 ]]></description><link>https://guilhermegarcia.dev/blog/symlinking-python3-for-vim-on-macos.html</link>
 <guid>https://guilhermegarcia.dev/blog/./symlinking-python3-for-vim-on-macos.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
@@ -247,6 +257,7 @@ Remova os gifs do medium
 
 <hr/>
 <p>Tags: <a href='tag_bookmarklet.html'>bookmarklet</a></p>
+</article>
 ]]></description><link>https://guilhermegarcia.dev/blog/remova-os-gifs-do-medium.html</link>
 <guid>https://guilhermegarcia.dev/blog/./remova-os-gifs-do-medium.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
@@ -290,7 +301,10 @@ Sempre pode suas redes
 
 
 
+
+
 <!-- text end -->
+</article>
 ]]></description><link>https://guilhermegarcia.dev/blog/sempre-pode-suas-redes.html</link>
 <guid>https://guilhermegarcia.dev/blog/./sempre-pode-suas-redes.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
@@ -305,6 +319,7 @@ Making home of the WSL 2
 
 <hr/>
 <p>Tags: <a href='tag_windows.html'>windows</a>, <a href='tag_wsl.html'>wsl</a></p>
+</article>
 ]]></description><link>https://guilhermegarcia.dev/blog/making-home-of-the-wsl-2.html</link>
 <guid>https://guilhermegarcia.dev/blog/./making-home-of-the-wsl-2.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
@@ -333,6 +348,7 @@ House cleaning com git
 
 <hr/>
 <p>Tags: <a href='tag_git.html'>git</a></p>
+</article>
 ]]></description><link>https://guilhermegarcia.dev/blog/house-cleaning-com-git.html</link>
 <guid>https://guilhermegarcia.dev/blog/./house-cleaning-com-git.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>

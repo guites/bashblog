@@ -203,3 +203,6 @@ code{
 pre code{
     padding:0;
 }
+p > code {
+  line-break: anywhere;
+}
