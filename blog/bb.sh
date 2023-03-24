@@ -335,26 +335,24 @@ create_html_page() {
         # stuff to add before the actual body content
         [[ -n $body_begin_file ]] && cat "$body_begin_file"
         [[ $filename = $index_file* ]] && [[ -n $body_begin_file_index ]] && cat "$body_begin_file_index"
-        # body divs
-        echo '<div id="divbodyholder">'
-        echo '<div class="headerholder"><div class="header">'
+        echo '<header>'
         # blog title
-        echo '<div id="title">'
         cat .title.html
-        echo '</div></div></div>' # title, header, headerholder
-        echo '<div id="divbody"><div class="content">'
+        echo '</header>'
+        echo '<main>'
 
         file_url=${filename#./}
         file_url=${file_url%.rebuilt} # Get the correct URL when rebuilding
         # one blog entry
         if [[ $index == no ]]; then
             echo '<!-- entry begin -->' # marks the beginning of the whole post
-            echo "<h3><a class=\"ablack\" href=\"$file_url\">"
+            echo "<article>"
+            echo "<h2><a class=\"ablack\" href=\"$file_url\">"
             # remove possible <p>'s on the title because of markdown conversion
             title=${title//<p>/}
             title=${title//<\/p>/}
             echo "$title"
-            echo '</a></h3>'
+            echo "</a></h2>"
             if [[ -z $timestamp ]]; then
                 echo "<!-- $date_inpost: #$(LC_ALL=$date_locale date +"$date_format_timestamp")# -->"
             else
@@ -372,16 +370,14 @@ create_html_page() {
         cat "$content" # Actual content
         if [[ $index == no ]]; then
             echo -e '\n<!-- text end -->'
-
+            echo "</article>"
             echo '<!-- entry end -->' # absolute end of the post
         fi
 
-        echo '</div>' # content
+        echo '</main>'
 
         # page footer
         cat .footer.html
-        # close divs
-        echo '</div></div>' # divbody and divbodyholder 
         [[ -n $body_end_file ]] && cat "$body_end_file"
         echo '</body></html>'
     } > "$filename"
@@ -544,7 +540,8 @@ all_posts() {
     done
 
     {
-        echo "<h3>$template_archive_title</h3>"
+        echo "<article>"
+        echo "<h2>$template_archive_title</h2>"
         prev_month=""
         while IFS='' read -r i; do
             is_boilerplate_file "$i" && continue
@@ -556,7 +553,7 @@ all_posts() {
             month=$(LC_ALL=$date_locale date -r "$i" +"$date_allposts_header")
             if [[ $month != "$prev_month" ]]; then
                 [[ -n $prev_month ]] && echo "</ul>"  # Don't close ul before first header
-                echo "<h4 class='allposts_header'>$month</h4>"
+                echo "<h3 class='allposts_header'>$month</h3>"
                 echo "<ul>"
                 prev_month=$month
             fi
@@ -569,7 +566,8 @@ all_posts() {
         done < <(list_html_by_timestamp)
         echo "" 1>&3
         echo "</ul>"
-        echo "<div id=\"all_posts\"><a href=\"./$index_file\">$template_archive_index_page</a></div>"
+        echo "<div id=\"all_posts\"><p><a href=\"./$index_file\">$template_archive_index_page</a></p></div>"
+        echo "</article>"
     } 3>&1 >"$contentfile"
 
     create_html_page "$contentfile" "$archive_index.tmp" yes "$global_title &mdash; $template_archive_title" "$global_author"
@@ -587,7 +585,8 @@ all_tags() {
     done
 
     {
-        echo "<h3>$template_tags_title</h3>"
+        echo "<article>"
+        echo "<h2>$template_tags_title</h2>"
         echo "<ul>"
         for i in $prefix_tags*.html; do
             [[ -f "$i" ]] || break
@@ -604,7 +603,8 @@ all_tags() {
         done
         echo "" 1>&3
         echo "</ul>"
-        echo "<div id=\"all_posts\"><a href=\"./$index_file\">$template_archive_index_page</a></div>"
+        echo "<div id=\"all_posts\"><p><a href=\"./$index_file\">$template_archive_index_page</a></p></div>"
+        echo "</article>"
     } 3>&1 > "$contentfile"
 
     create_html_page "$contentfile" "$tags_index.tmp" yes "$global_title &mdash; $template_tags_title" "$global_author"
@@ -640,7 +640,7 @@ rebuild_index() {
 
         feed=$blog_feed
         if [[ -n $global_feedburner ]]; then feed=$global_feedburner; fi
-        echo "<div id=\"all_posts\"><a href=\"$archive_index\">$template_archive</a> &mdash; <a href=\"$tags_index\">$template_tags_title</a> &mdash; <a href=\"$feed\">$template_subscribe</a></div>"
+        echo "<article><div id=\"all_posts\"><p><a href=\"$archive_index\">$template_archive</a> &mdash; <a href=\"$tags_index\">$template_tags_title</a> &mdash; <a href=\"$feed\">$template_subscribe</a></p></div></article>"
     } 3>&1 >"$contentfile"
 
     echo ""
@@ -730,7 +730,7 @@ rebuild_tags() {
 #
 # $1 the html file
 get_post_title() {
-    awk '/<h3><a class="ablack" href=".+">/, /<\/a><\/h3>/{if (!/<h3><a class="ablack" href=".+">/ && !/<\/a><\/h3>/) print}' "$1"
+    awk '/<h2><a class="ablack" href=".+">/, /<\/a><\/h2>/{if (!/<h2><a class="ablack" href=".+">/ && !/<\/a><\/h2>/) print}' "$1"
 }
 
 # Return the post author
@@ -841,8 +841,8 @@ make_rss() {
 # generate headers, footers, etc
 create_includes() {
     {
-        echo "<h1 class=\"nomargin\"><a class=\"ablack\" href=\"$global_url/$index_file\">$global_title</a></h1>" 
-        echo "<div id=\"description\">$global_description</div>"
+        echo "<h1>$global_title <a class=\"awhite\" href=\"$global_url/$index_file\">#</a></h1>" 
+        echo "<span id=\"description\">$global_description</span>"
     } > ".title.html"
 
     if [[ -f $header_file ]]; then cp "$header_file" .header.html
@@ -864,8 +864,8 @@ create_includes() {
     else {
         protected_mail=${global_email//@/&#64;}
         protected_mail=${protected_mail//./&#46;}
-        echo "<footer id=\"footer\">$global_license <a href=\"$global_author_url\">$global_author</a> &mdash; <a href=\"mailto:$protected_mail\">$protected_mail</a><br/>"
-        echo 'Generated with <a href="https://github.com/cfenollosa/bashblog">bashblog</a>, a single bash script to easily create blogs like this one</footer>'
+        echo "<footer id=\"footer\"><span><small>$global_license <a href=\"$global_author_url\">$global_author</a> &mdash; <a href=\"mailto:$protected_mail\">$protected_mail</a></small><br/>"
+        echo '<small>Generated with <a href="https://github.com/cfenollosa/bashblog">bashblog</a>, a single bash script to easily create blogs like this one</small></span></footer>'
         } >> ".footer.html"
     fi
 }

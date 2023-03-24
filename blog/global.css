@@ -1,0 +1,205 @@
+:root {
+  --size-300: 0.75rem;
+  --size-350: 0.90rem;
+  --size-400: 1rem;
+  --size-500: 1.33rem;
+  --size-600: 1.77rem;
+  --size-700: 2.36rem;
+  --size-800: 3.15rem;
+  --size-900: 4.2rem;
+  --icon-external:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='rgb(115, 130, 140)' opacity='0.66' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6'%3E%3C/path%3E%3Cpolyline points='15 3 21 3 21 9'%3E%3C/polyline%3E%3Cline x1='10' y1='14' x2='21' y2='3'%3E%3C/line%3E%3C/svg%3E");
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+    line-height: 1.5;
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+    padding: 0.5rem 0;
+}
+
+body > header {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 175px;
+    background-color: #000;
+    color: #fff;
+}
+ body > header > h1 {
+    max-width: 100%;
+    margin-top: 0;
+ }
+
+body > footer {
+    text-align: center;
+}
+
+::selection {
+  color: #fff;
+  background: rgba(0, 0, 0, 0.99);
+}
+
+p,
+li{
+  max-width: 60ch;
+}
+
+h1 {
+  max-width: 15ch;
+}
+
+h2,
+h3 {
+  max-width: 25ch;
+}
+
+/* keeps headers close to content */
+h1, h2, h3 { margin-bottom: 0px; }
+
+article {
+  width: clamp(16rem, 90vw, 70rem);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+img {
+  max-width: min(55rem, 100%);
+}
+
+/* used on # archors to posts page */
+.ablack{
+  color: black;
+}
+.awhite {
+  color: #fff;
+}
+
+/* makes anchor tags slightly taller */
+a {
+    padding: 5px 0px;
+}
+
+/* makes horizontal rules black */
+hr {
+  border: 1px solid black;
+  max-width: 60ch;
+  margin-left: 0;
+}
+
+/* indicates links that point outside of the current domain */
+a[href*="//"]:not([href*="https://guilhermegarcia.dev"], [role])::after {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  background-image: var(--icon-external);
+  background-position: top center;
+  background-size: .66rem auto;
+  background-repeat: no-repeat;
+  content: "";
+}
+
+/* adds left border to quotes */
+blockquote {
+  padding: 0 1em;
+  color: #444;
+  border-left: 0.25em solid #dfe2e5;
+}
+
+/* basic table styling */
+.table-wrapper {
+    max-height: 280px;
+    overflow-y: scroll;
+}
+table {
+    color: #000;
+    overflow-x: auto;
+    padding: 0.4em;
+    -webkit-box-flex: 1;
+    -moz-box-flex: 1;
+    box-flex: 1;
+    flex: 1;
+    max-width: calc(100% - 14ex);
+    border: none;
+    border-collapse: collapse;
+    border-spacing: 0;
+    font-size: 14px;
+    table-layout: fixed;
+}
+thead {
+    border-bottom: 1px solid black;
+    vertical-align: bottom;
+}
+tr, th, td {
+    text-align: right;
+    vertical-align: middle;
+    padding: 0.5em 0.5em;
+    line-height: normal;
+    white-space: normal;
+    max-width: none;
+    border: none;
+}
+tbody tr:nth-child(2n+1) {
+    background: #f5f5f5;
+}
+tbody tr th:only-of-type {
+    vertical-align: middle;
+}
+tbody tr th {
+    vertical-align: top;
+}
+thead th {
+    text-align: right;
+}
+
+/* optimize font size for larger screens */
+@media (min-width: 45em) {
+  h1 {
+    font-size: var(--size-900);
+  }
+
+  h2 {
+    font-size: var(--size-700);
+  }
+
+  p, li {
+    font-size: var(--size-500);
+  }
+
+  small {
+    font-size: var(--size-400);
+  }
+}
+
+@media (max-width: 45em) {
+  small {
+    font-size: var(--size-350);
+  }
+}
+
+/* styling for code blocks */
+pre{
+    font-family:monospace;
+    margin-bottom:20px;
+    overflow-x:auto;
+    padding:15px 20px;
+    background:#ECECE9;
+    color:#222;
+    line-height:1.5;
+    border:none;
+    border-radius:0;
+    letter-spacing:normal;
+}
+code{
+    background: #ECECE9;
+    color: #222;
+    padding: 2px 5px;
+}
+pre code{
+    padding:0;
+}
