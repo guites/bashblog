@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang='pt-br'><head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="global.css" type="text/css" />
+<link rel="alternate" type="application/rss+xml" title="Inscrever-se nesta página..." href="feed.rss" />
+<title>Blog do guilherme &mdash; Posts marcados com "acessibilidade"</title>
+<meta name='description' content='Leia sobre as aventuras de Guilherme Garcia na programação e fora dela: contém tutoriais, dicas e desabafos'>
+<script data-goatcounter='https://guites.goatcounter.com/count' async src='//gc.zgo.at/count.js'></script>
+</head><body>
+<header>
+<h1>Blog do guilherme <a class="awhite" href="https://guilhermegarcia.dev/blog/index.html">#</a></h1>
+<span id="description">programação e outras coisas menos úteis</span>
+</header>
+<main>
+<article>
+<h2><a class="ablack" href="otimizando-acessibilidade-e-legibilidade.html">
+Otimizando acessibilidade e legibilidade
+</a></h2>
+<!-- bashblog_timestamp: #202303241153.46# -->
+<div class="subtitle">março 24, 2023 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p><abbr title="muito grande;nem li">mg;nl</abbr>: neste post trago um levantamento das alterações que fiz no css e html do blog pra deixá-lo mais acessível e legível.</p>
+
+<p>O objetivo principal de um blog é disponibilizar texto escrito. Faz sentido que o layout dele seja otimizado pra leitura, assim como num livro.</p>
+
+<p>A internet, porém, costuma aproximar os blogs mais da ideia de uma revista, onde o conteúdo escrito é permeado de anúncios e precisa competir com distrações como links externos e <a href="https://en.wikipedia.org/wiki/Call_to_action_(marketing)">CTAs</a> tentando puxar sua atenção para atividades mais "rentáveis".</p>
+
+<p>Um dos <em>meus</em> objetivos com esse blog é mantê-lo o mais direto ao ponto possível, pra que os leitores consigam extrair as informações e ir embora, sem nenhum passo intermediário.</p>
+
+<p>Pensando nisso fiz algumas mudanças no css utilizado e na disposição do conteúdo, na busca de aumentar a legibilidade e acessibilidade do blog.</p>
+
+<p><img src="./imgs/otimizando-acessibilidade-e-legibilidade/layout-compare.png" alt="Comparação layout antigo vs. novo" title="Comparação layout antigo vs. novo" /></p>
+
+<p>Mapeei os seguintes problemas com o layout antigo:</p>
+
+<ul>
+<li>HTML não semântico (usando <code>div</code>s em tudo!).</li>
+<li>Espaçamento entre linhas apertado.</li>
+<li>Má disposição do conteúdo (pouco aproveitamento do espaço de tela).</li>
+<li>CSS quebrando normas de acessibilidade.</li>
+</ul>
+
+<p>Junto com alguns apontamentos que encontrei no search console do google quanto à usabilidade do blog em dispositivos mobile:</p>
+
+<ul>
+<li>Fonte muito pequena.</li>
+<li>Elementos clicáveis muito próximos.</li>
+<li>Conteúdo mais largo que a tela.</li>
+</ul>
+
+<p>Abaixo eu explico as alterações realizadas e como elas resolvem os problemas listados.</p>
+
+<p class="readmore"><a href="otimizando-acessibilidade-e-legibilidade.html">Ler mais...</a></p>
+<p>Tags: <a href='tag_acessibilidade.html'>acessibilidade</a></p>
+</article>
+</main>
+<footer id="footer"><span><small>CC by-nc-nd <a href="https://github.com/guites">Guilherme Garcia</a> &mdash; <a href="mailto:gui&#46;garcia67&#64;gmail&#46;com">gui&#46;garcia67&#64;gmail&#46;com</a></small><br/>
+<small>Generated with <a href="https://github.com/cfenollosa/bashblog">bashblog</a>, a single bash script to easily create blogs like this one</small></span></footer>
+</body></html>

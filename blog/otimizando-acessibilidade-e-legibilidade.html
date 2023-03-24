@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang='pt-br'><head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="global.css" type="text/css" />
+<link rel="alternate" type="application/rss+xml" title="Inscrever-se nesta página..." href="feed.rss" />
+<title>Otimizando acessibilidade e legibilidade</title>
+<script data-goatcounter='https://guites.goatcounter.com/count' async src='//gc.zgo.at/count.js'></script>
+</head><body>
+<header>
+<h1>Blog do guilherme <a class="awhite" href="https://guilhermegarcia.dev/blog/index.html">#</a></h1>
+<span id="description">programação e outras coisas menos úteis</span>
+</header>
+<main>
+<!-- entry begin -->
+<article>
+<h2><a class="ablack" href="otimizando-acessibilidade-e-legibilidade.html">
+Otimizando acessibilidade e legibilidade
+</a></h2>
+<!-- bashblog_timestamp: #202303241153.46# -->
+<div class="subtitle">março 24, 2023 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p><abbr title="muito grande;nem li">mg;nl</abbr>: neste post trago um levantamento das alterações que fiz no css e html do blog pra deixá-lo mais acessível e legível.</p>
+
+<p>O objetivo principal de um blog é disponibilizar texto escrito. Faz sentido que o layout dele seja otimizado pra leitura, assim como num livro.</p>
+
+<p>A internet, porém, costuma aproximar os blogs mais da ideia de uma revista, onde o conteúdo escrito é permeado de anúncios e precisa competir com distrações como links externos e <a href="https://en.wikipedia.org/wiki/Call_to_action_(marketing)">CTAs</a> tentando puxar sua atenção para atividades mais "rentáveis".</p>
+
+<p>Um dos <em>meus</em> objetivos com esse blog é mantê-lo o mais direto ao ponto possível, pra que os leitores consigam extrair as informações e ir embora, sem nenhum passo intermediário.</p>
+
+<p>Pensando nisso fiz algumas mudanças no css utilizado e na disposição do conteúdo, na busca de aumentar a legibilidade e acessibilidade do blog.</p>
+
+<p><img src="./imgs/otimizando-acessibilidade-e-legibilidade/layout-compare.png" alt="Comparação layout antigo vs. novo" title="Comparação layout antigo vs. novo" /></p>
+
+<p>Mapeei os seguintes problemas com o layout antigo:</p>
+
+<ul>
+<li>HTML não semântico (usando <code>div</code>s em tudo!).</li>
+<li>Espaçamento entre linhas apertado.</li>
+<li>Má disposição do conteúdo (pouco aproveitamento do espaço de tela).</li>
+<li>CSS quebrando normas de acessibilidade.</li>
+</ul>
+
+<p>Junto com alguns apontamentos que encontrei no search console do google quanto à usabilidade do blog em dispositivos mobile:</p>
+
+<ul>
+<li>Fonte muito pequena.</li>
+<li>Elementos clicáveis muito próximos.</li>
+<li>Conteúdo mais largo que a tela.</li>
+</ul>
+
+<p>Abaixo eu explico as alterações realizadas e como elas resolvem os problemas listados.</p>
+
+<hr/>
+
+<h2>Detectando problemas de acessibilidade</h2>
+
+<p>Antes de pensar em estilização e legibilidade, busquei entender quais os maiores problemas de acessibilidade no layout antigo.</p>
+
+<p>Para isso, usei a ferramenta <a href="https://github.com/dequelabs/axe-core-npm/tree/develop/packages/cli">axe</a>. Se trata de uma lib open source que recebe URLs e acessa-as usando uma versão <em>headless</em> do google chrome.</p>
+
+<p>Você pode ver a minha implementação do axe <a href="https://github.com/guites/simple-axe-docker">nesse repositório</a>.</p>
+
+<p>Como resultado, ela gera uma lista de falhas encontradas na acessibilidade do site, devido ao mau uso do HTML e CSS.</p>
+
+<p>Comecei pelo index.html do blog, e recebi os seguintes apontamentos:</p>
+
+<ol>
+<li>Violation of "heading-order" with 1 occurrences! <a href="https://dequeuniversity.com/rules/axe/4.6/heading-order">Details</a></li>
+<li>Violation of "landmark-one-main" with 1 occurrences! <a href="https://dequeuniversity.com/rules/axe/4.6/landmark-one-main">Details</a></li>
+<li>Violation of "link-in-text-block" with 17 occurrences! <a href="https://dequeuniversity.com/rules/axe/4.6/link-in-text-block">Details</a></li>
+<li>Violation of "region" with 2 occurrences! <a href="https://dequeuniversity.com/rules/axe/4.6/region">Details</a></li>
+<li>Violation of "scrollable-region-focusable" with 5 occurrences! <a href="https://dequeuniversity.com/rules/axe/4.6/scrollable-region-focusable">Details</a></li>
+</ol>
+
+<h3>1. Violation of "heading-order" (violação da ordem dos títulos)</h3>
+
+<p>O primeiro erro encontrado se refere a ordem dos títulos (headings) usados no blog.</p>
+
+<blockquote>
+  <p>Ensures the order of headings is semantically correct. Correct invalid elements at:
+    - h3:nth-child(1)</p>
+</blockquote>
+
+<p>Basicamente, o html gerado pelo meu CMS estava pulando o cabeçalho de nível h2. O título do blog ("Blog do guilherme") tinha nível h1, e o título das postagens ia direto para h3.</p>
+
+<pre><code>&lt;body&gt;
+    &lt;div id="divbodyholder"&gt;
+        &lt;div class="headerholder"&gt;
+            &lt;div class="header"&gt;
+                &lt;div id="title"&gt;
+                    &lt;h1 class="nomargin"&gt; &lt;!-- título nível h1
+                        &lt;a class="ablack" href="https://guilhermegarcia.dev/blog/index.html"&gt;
+                        Blog do guilherme
+                        &lt;/a&gt;
+                    &lt;/h1&gt;
+                    &lt;div id="description"&gt;programação e outras coisas menos úteis&lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div id="divbody"&gt;
+            &lt;div class="content"&gt;
+                &lt;h3&gt; &lt;!--- título nível h3!
+                    &lt;a class="ablack" href="analise-de-conteudo-tabnews-fevereiro-de-2023.html"&gt;
+                        Análise de conteúdo tabnews (fevereiro de 2023)
+                    &lt;/a&gt;
+                &lt;/h3&gt;
+</code></pre>
+
+<p>Isso tem um impacto negativo para usuários de leitores de tela, pois os aplicativos costumam usar os títulos (headings) para navegar entre seções do texto.</p>
+
+<p>Esse erro é de impacto <strong>moderado</strong> e afeta usuários que sofrem com problemas de visão, audição e mobilidade.</p>
+
+<h3>2. Violation of "landmark-one-main" (o documento deve ter um marco principal)</h3>
+
+<p>O segundo erro se refere ao uso da tag <code>main</code> como base do conteúdo principal da página.</p>
+
+<blockquote>
+  <p>Ensures the document has a main landmark. Correct invalid elements at:
+    - html</p>
+</blockquote>
+
+<p>O layout antigo colocava o conteúdo principal da página (que é a listagem dos ultimos posts com o seu resumo) dentro de uma <code>div</code>com a classe <code>divbody</code>.</p>
+
+<p>Leitores de página utilizam os marcos de uma página (tags como <code>header</code>, <code>main</code>, <code>footer</code>) para agilizar a navegação dos usuários.</p>
+
+<p>Esse problema também tem impacto moderado para usuários de leitores de tela.</p>
+
+<h3>3. Violation of "link-in-text-block" (violação de links em bloco de texto)</h3>
+
+<p>O terceiro erro me surpreendeu. Um link deve ser distinguivel do corpo do texto onde se encontra por outros fatores além da sua cor.</p>
+
+<blockquote>
+  <p>Ensure links are distinguished from surrounding text in a way that does not rely on color.</p>
+</blockquote>
+
+<p>Por exemplo, no parágrafo abaixo, vamos estilizar os links de duas maneiras diferentes. Na primeira, apenas com a cor, e na segunda, usando a propriedade <code>text-decoration</code>.</p>
+
+<blockquote>
+  <p>O link a seguir possui apenas a cor como diferencial: <a href="" style="text-decoration: none;">primeiro link</a>. Este próximo link também possui um decorador (o underline): <a href="" style="text-decoration: underline wavy red">segundo link</a>.</p>
+</blockquote>
+
+<p>Usuários com problemas de visão possuem dificuldade em notar trocas sutis de contraste, e podem não entender que uma palavra contém um link se utilizarmos apenas a mudança de cor como indicativo.</p>
+
+<p>Esse é um erro de impacto <strong>alto</strong> e afeta usuários com problema de visão e daltonismo.</p>
+
+<h3>4. Violation of "region" (não utilização de marcos para elementos com função definida)</h3>
+
+<p>O quarto erro é muito parecido com o segundo. No layout antigo, eram utilizadas <code>div</code>s para o cabeçalho do blog e para o corpo do texto.</p>
+
+<pre><code>&lt;body&gt;
+    &lt;div id="divbodyholder"&gt;
+        &lt;div class="headerholder"&gt; &lt;!-- isso deveria ser um &lt;header&gt;!
+         ...
+         &lt;/div&gt;
+         &lt;div id="divbody"&gt; &lt;!-- isso deveria ser um &lt;main&gt;!
+         ...
+         &lt;/div&gt;
+</code></pre>
+
+<p>Novamente, isso vai dificultar leitores de tela a diferenciar entre o conteúdo principal da página de conteúdos auxiliares, como o nome e descrição do blog no cabeçalho.</p>
+
+<h3>5. Violation of "scrollable-region-focusable" (regiões com scroll não são focáveis)</h3>
+
+<p>Esse também foi novidade pra mim:</p>
+
+<blockquote>
+  <p>Ensure elements that have scrollable content are accessible by keyboard.</p>
+</blockquote>
+
+<p>Os itens apontados como causando os erros foram</p>
+
+<blockquote>
+  <ul>
+<li>pre:nth-child(55)</li>
+<li>pre:nth-child(57)</li>
+<li>pre:nth-child(60)</li>
+<li>pre:nth-child(62)</li>
+<li>pre:nth-child(76)</li>
+</ul>
+</blockquote>
+
+<p>Que são justamente os blocos <code>&lt;pre&gt;&lt;code&gt;</code> que eu utilizo pra postar blocos compridos de código.</p>
+
+<p>Acontece que <strong>usuários que navegam exclusivamente pelo teclado precisam conseguir focar em elementos que possuem scroll horizontal</strong>, se não eles não tem como ler todo o conteúdo.</p>
+
+<p>Como exemplo, vamos analisar o bloco de código abaixo. Vou criá-lo com a propriedade <code>tabindex=-1</code>, ou seja, vou impedir que ele seja focado com o teclado.</p>
+
+<pre tabindex=-1><code>Você não vai conseguir ler o resto disso daqui sem usar o mouse! >:) "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?</code></pre>
+
+<p>Como você scrollaria o bloco acima sem usar o mouse? É impossível.</p>
+
+<pre tabindex=0><code>Você pode me scrollar dando tab aqui pra dentro! :D "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?</code></pre>
+
+<p>Esse último bloco é acessível usando <kbd>tab</kbd> ou <kbd>shift + tab</kbd>, e então você consegue usar a barra de scroll com as setinhas do teclado.</p>
+
+<p>Pra isso, você precisa se certificar de que <strong>todo elemento com scroll horizontal possua a propriedade <code>tabindex=0</code></strong>!</p>
+
+<p>Nota: o firefox parece adicionar essa propriedade nos blocos com scroll horizontal por padrão, enquanto com o google chrome eu só consegui focar os elementos nos quais eu coloquei a propriedade de forma explícita.</p>
+
+<h2>Resolvendo problemas de layout</h2>
+
+<p>Os problemas específicos do layout antigo eram os seguintes:</p>
+
+<ol>
+<li>Espaçamento entre linhas apertado.</li>
+<li>Pouco aproveitamento do espaço de tela.</li>
+<li>Fonte muito pequena.</li>
+<li>Elementos clicáveis muito próximos.</li>
+<li>Conteúdo mais largo que a tela.</li>
+</ol>
+
+<p>São todos problemas que podem ser resolvidos usando regras simples de CSS.</p>
+
+<h3>1. Espaçamento entre linhas apertado</h3>
+
+<p>A propriedade que define a distância entre linhas no texto é <code>line-height</code>. Não existe um valor "melhor", mas valores mais altos geram uma sensação de maior conforto durante a leitura.</p>
+
+<blockquote style="line-height:normal;">Esse bloco de texto possui altura de linhas normal<br/>que utiliza o valor padrão dos navegadores.<br/>O texto tende a ficar meio acavalado.</blockquote>
+
+<p>Optei por utilizar 1.5 e o resultado é bem agradável:</p>
+
+<blockquote style="line-height:1.5;">Esse bloco de texto possui altura de linhas 1.5<br/>que é um pouco maior que o normal.<br/>O texto fica com uma separação mais natural.</blockquote>
+
+<h3>2. Pouco aproveitamento do espaço de tela</h3>
+
+<p>Esse é um problema que atinge usuários de celular e telas pequenas com maior intensidade.</p>
+
+<p>Em uma tela pequena, o uso de <code>padding</code> e <code>margin</code> horizontais pode constringir o texto a um percentual muito baixo da tela.</p>
+
+<p>Usando como exemplo o tamanho de tela do iPhone 12 Pro (com 390px de largura!), a diferença fica bem clara:</p>
+
+<p><img src="./imgs/otimizando-acessibilidade-e-legibilidade/layout-antigo-p-size.jpg" alt="Uso do espaço de tela no layout antigo" title="Uso do espaço de tela no layout antigo" /></p>
+
+<p>No layout antigo os blocos de texto acupam até 244px, ou seja, ~63% da tela.</p>
+
+<p>Reduzindo um pouco o padding, conseguimos utilizar até ~78% do espaço da tela, sem sacrificar o uso das margens.</p>
+
+<p><img src="./imgs/otimizando-acessibilidade-e-legibilidade/layout-novo-p-size.png" alt="Uso do espaço de tela no layout novo" title="Uso do espaço de tela no layout novo" /></p>
+
+<h3>3. Fonte muito pequena</h3>
+
+<p>Isso se deve parcialmente ao meu apego à tag <code>&lt;small&gt;</code>. Pra resolver isso, subi um pouco o tamanho de fonte usado nessa tag em dispositivos mobile (de 13px para ~14.5px).</p>
+
+<h3>4. Elementos clicáveis muito próximos</h3>
+
+<p>Quando usamos tags <code>&lt;a&gt;</code> dentro de parágrafos de texto, caso o texto utilizado no link for pequeno, os links acabam ficando muito próximos, o que pode dificultar um usuário de celular a clicar no link correto. (Conhecido como <a href="https://ux.stackexchange.com/a/119397">problema do dedão gordo</a>)</p>
+
+<p>Como os links precisam ficar dentro do fluxo do texto, não temos muita liberdade quanto a aumentar sua largura, mas utilizei dois métodos que facilitam o acerto por parte dos usuários.</p>
+
+<p>Primeiro, adicionei uma propriedade <code>padding: 5px 0</code>, que aumenta a altura clicável do link em 10px, sem interferir na altura das linhas do parágrafo.</p>
+
+<p><style>
+  #showcase-link-icon {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    background-image: var(--icon-external);
+    background-position: top center;
+    background-size: 0.66rem auto;
+    background-repeat: no-repeat;
+    content: "";
+  }
+</style>
+Depois, adicionei um indicador (este cara: <span id="showcase-link-icon"></span>) para links externos, que adiciona um espaço clicável de 16x16, além de ajudar a distinguir links que vão te tirar do blog.</p>
+
+<h3>5. Conteúdo mais largo que a tela</h3>
+
+<p>Esse é um erro clássico, mas acabei deixando passar por falta de testar o layout no google chrome.</p>
+
+<p><img src="./imgs/otimizando-acessibilidade-e-legibilidade/content-overflow.png" alt="Conteúdo de tags code saindo da tela" title="Conteúdo de tags code saindo da tela" /></p>
+
+<p>Pode ser resolvido facilmente adicionando um tamanho máximo (<code>max-width</code>) nas tags de texto, como o <code>&lt;p&gt;</code>.</p>
+
+<h2>Conclusão</h2>
+
+<p>Layout simples e minimalistas são interessantes pois conferem um visual mais clean às interfaces. Mas eles não podem conflitar com funcionalidades básicas dos navegadores, que estão aí pra permitir o acesso ao conteúdo por qualquer pessoa, independente de suas limitações ou capacidades.</p>
+
+<p><details>
+<summary>Você pode verificar o css final do blog clicando aqui.</summary></p>
+
+<pre tabindex="0"><code>
+:root {
+  --size-300: 0.75rem;
+  --size-350: 0.90rem;
+  --size-400: 1rem;
+  --size-500: 1.33rem;
+  --size-600: 1.77rem;
+  --size-700: 2.36rem;
+  --size-800: 3.15rem;
+  --size-900: 4.2rem;
+  --icon-external:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='rgb(115, 130, 140)' opacity='0.66' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6'%3E%3C/path%3E%3Cpolyline points='15 3 21 3 21 9'%3E%3C/polyline%3E%3Cline x1='10' y1='14' x2='21' y2='3'%3E%3C/line%3E%3C/svg%3E");
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+    line-height: 1.5;
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+    padding: 0.5rem 0;
+}
+
+body > header {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 175px;
+    background-color: #000;
+    color: #fff;
+}
+
+body > header > h1 {
+    max-width: 100%;
+    margin-top: 0;
+}
+
+body > footer {
+    text-align: center;
+}
+
+::selection {
+  color: #fff;
+  background: rgba(0, 0, 0, 0.99);
+}
+
+p,
+li{
+  max-width: 60ch;
+}
+
+h1 {
+  max-width: 15ch;
+}
+
+h2,
+h3 {
+  max-width: 25ch;
+}
+
+/* keeps headers close to content */
+h1, h2, h3 { margin-bottom: 0px; }
+
+article {
+  width: clamp(16rem, 90vw, 70rem);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+img {
+  max-width: min(55rem, 100%);
+}
+
+/* used on # archors to posts page */
+.ablack{
+  color: black;
+}
+.awhite {
+  color: #fff;
+}
+
+/* makes anchor tags slightly taller */
+a {
+    padding: 5px 0px;
+}
+
+/* prevent links from overflowing the page when inside li's */
+li a {
+  line-break: anywhere;
+}
+
+/* makes horizontal rules black */
+hr {
+  border: 1px solid black;
+  max-width: 60ch;
+  margin-left: 0;
+}
+
+/* indicates links that point outside of the current domain */
+a[href*="//"]:not([href*="https://guilhermegarcia.dev"], [role])::after {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  background-image: var(--icon-external);
+  background-position: top center;
+  background-size: .66rem auto;
+  background-repeat: no-repeat;
+  content: "";
+}
+
+/* adds left border to quotes */
+blockquote {
+  padding: 0 1em;
+  color: #444;
+  border-left: 0.25em solid #dfe2e5;
+}
+
+/* optimize font size for larger screens */
+@media (min-width: 45em) {
+  h1 {
+    font-size: var(--size-900);
+  }
+
+  h2 {
+    font-size: var(--size-700);
+  }
+
+  p, li {
+    font-size: var(--size-500);
+  }
+
+  small {
+    font-size: var(--size-400);
+  }
+}
+
+@media (max-width: 45em) {
+  small {
+    font-size: var(--size-350);
+  }
+}
+
+/* styling for code blocks */
+pre{
+    font-family:monospace;
+    margin-bottom:20px;
+    overflow-x:auto;
+    padding:15px 20px;
+    background:#ECECE9;
+    color:#222;
+    line-height:1.5;
+    border:none;
+    border-radius:0;
+    letter-spacing:normal;
+}
+code{
+    background: #ECECE9;
+    color: #222;
+    padding: 2px 5px;
+}
+pre code{
+    padding:0;
+}
+p > code {
+  line-break: anywhere;
+}
+</code></pre>
+
+<p></details></p>
+
+<p>Espero que tenha curtido a análise e o novo visual do blog. :)</p>
+
+<p>Abraço!</p>
+
+<p>Referências:</p>
+
+<ul>
+<li><a href="https://piccalil.li/tutorial/improve-the-readability-of-the-content-on-your-website/">https://piccalil.li/tutorial/improve-the-readability-of-the-content-on-your-website/</a></li>
+<li><a href="https://niklasfasching.de/posts/just-enough-css">https://niklasfasching.de/posts/just-enough-css</a></li>
+<li><a href="https://learnlayout.com/about.html">https://learnlayout.com/about.html</a></li>
+<li><a href="https://practicaltypography.com/typography-in-ten-minutes.html">https://practicaltypography.com/typography-in-ten-minutes.html</a></li>
+<li><a href="https://practicaltypography.com/summary-of-key-rules.html">https://practicaltypography.com/summary-of-key-rules.html</a></li>
+<li><a href="https://github.com/dhg/Skeleton">https://github.com/dhg/Skeleton</a></li>
+<li><a href="https://picocss.com">https://picocss.com</a></li>
+</ul>
+
+<p>Tags: <a href='tag_acessibilidade.html'>acessibilidade</a></p>
+<!-- text end -->
+</article>
+<!-- entry end -->
+</main>
+<footer id="footer"><span><small>CC by-nc-nd <a href="https://github.com/guites">Guilherme Garcia</a> &mdash; <a href="mailto:gui&#46;garcia67&#64;gmail&#46;com">gui&#46;garcia67&#64;gmail&#46;com</a></small><br/>
+<small>Generated with <a href="https://github.com/cfenollosa/bashblog">bashblog</a>, a single bash script to easily create blogs like this one</small></span></footer>
+</body></html>

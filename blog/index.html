@@ -14,6 +14,50 @@
 </header>
 <main>
 <article>
+<h2><a class="ablack" href="otimizando-acessibilidade-e-legibilidade.html">
+Otimizando acessibilidade e legibilidade
+</a></h2>
+<!-- bashblog_timestamp: #202303241153.46# -->
+<div class="subtitle">março 24, 2023 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p><abbr title="muito grande;nem li">mg;nl</abbr>: neste post trago um levantamento das alterações que fiz no css e html do blog pra deixá-lo mais acessível e legível.</p>
+
+<p>O objetivo principal de um blog é disponibilizar texto escrito. Faz sentido que o layout dele seja otimizado pra leitura, assim como num livro.</p>
+
+<p>A internet, porém, costuma aproximar os blogs mais da ideia de uma revista, onde o conteúdo escrito é permeado de anúncios e precisa competir com distrações como links externos e <a href="https://en.wikipedia.org/wiki/Call_to_action_(marketing)">CTAs</a> tentando puxar sua atenção para atividades mais "rentáveis".</p>
+
+<p>Um dos <em>meus</em> objetivos com esse blog é mantê-lo o mais direto ao ponto possível, pra que os leitores consigam extrair as informações e ir embora, sem nenhum passo intermediário.</p>
+
+<p>Pensando nisso fiz algumas mudanças no css utilizado e na disposição do conteúdo, na busca de aumentar a legibilidade e acessibilidade do blog.</p>
+
+<p><img src="./imgs/otimizando-acessibilidade-e-legibilidade/layout-compare.png" alt="Comparação layout antigo vs. novo" title="Comparação layout antigo vs. novo" /></p>
+
+<p>Mapeei os seguintes problemas com o layout antigo:</p>
+
+<ul>
+<li>HTML não semântico (usando <code>div</code>s em tudo!).</li>
+<li>Espaçamento entre linhas apertado.</li>
+<li>Má disposição do conteúdo (pouco aproveitamento do espaço de tela).</li>
+<li>CSS quebrando normas de acessibilidade.</li>
+</ul>
+
+<p>Junto com alguns apontamentos que encontrei no search console do google quanto à usabilidade do blog em dispositivos mobile:</p>
+
+<ul>
+<li>Fonte muito pequena.</li>
+<li>Elementos clicáveis muito próximos.</li>
+<li>Conteúdo mais largo que a tela.</li>
+</ul>
+
+<p>Abaixo eu explico as alterações realizadas e como elas resolvem os problemas listados.</p>
+
+<p class="readmore"><a href="./otimizando-acessibilidade-e-legibilidade.html">Ler mais...</a></p>
+<p>Tags: <a href='tag_acessibilidade.html'>acessibilidade</a></p>
+</article>
+<article>
 <h2><a class="ablack" href="analise-de-conteudo-tabnews-fevereiro-de-2023.html">
 Análise de conteúdo tabnews (fevereiro de 2023)
 </a></h2>
@@ -283,55 +327,6 @@ Guilherme Garcia
 
 <p class="readmore"><a href="./remova-os-gifs-do-medium.html">Ler mais...</a></p>
 <p>Tags: <a href='tag_bookmarklet.html'>bookmarklet</a></p>
-</article>
-<article>
-<h2><a class="ablack" href="sempre-pode-suas-redes.html">
-Sempre pode suas redes
-</a></h2>
-<!-- bashblog_timestamp: #202211231639.35# -->
-<div class="subtitle">novembro 23, 2022 &mdash; 
-Guilherme Garcia
-</div>
-<!-- text begin -->
-
-<p>Sério, sempre pode suas redes. Docker networks abandonadas, desligadas de qualquer container podem destruir sua internet.</p>
-
-<p>Eu fiquei duas semanas com problema na internet da minha máquina: por algum motivo, na rede de casa, a conexão do ubuntu ficava falhando.</p>
-
-<p>Hora penava pra resolver DNSs, hora parava de funcionar completamente. Mas às vezes (geralmente quando eu pedia ajuda) ela funcionava.</p>
-
-<p>Tentei desabilitar o IPV6 nas configurações de rede, desinstalar o <code>systemd-resolved</code>, mexer com o network manager, editar o /etc/resolv.conf diretamente.</p>
-
-<p>Nada.</p>
-
-<p>Em outras redes, na casa de amigos, na cafeteria, a internet funcionava. Eu cheguei a achar que meu provedor estava de sacanagem.</p>
-
-<p>Até que tive que ficar num airBnb, e o problema voltou.</p>
-
-<p>Olhei pro roteador, e era o mesmo <code>d-link</code> que eu tinha em casa. Já comecei a desenvolver uma crendice.</p>
-
-<p>Acabou que não pude ir até o fim, pois um dia rodei um <code>docker network ls</code> e notei que tinha muita coisa na listagem.</p>
-
-<pre><code>    docker network prune
-    &gt;Yes
-</code></pre>
-
-<p>E problema resolvido.</p>
-
-<p>Se alguém souber mais sobre isso, ou como reproduzir o problema, por favor, <a href="mailto:gui.garcia67@gmail.com">entre em contato</a>.</p>
-
-<p>Mas lembre-se: sempre pode suas redes.</p>
-
-<p>Tags: <a href='tag_docker.html'>docker</a>, <a href='tag_dns.html'>dns</a>, <a href='tag_networking.html'>networking</a></p>
-
-
-
-
-
-
-
-
-<!-- text end -->
 </article>
 <article><div id="all_posts"><p><a href="todos_posts.html">Ver mais posts</a> &mdash; <a href="todas_tags.html">Todas as tags</a> &mdash; <a href="feed.rss">RSS feed</a></p></div></article>
 </main>

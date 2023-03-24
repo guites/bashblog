@@ -1,6 +1,8 @@
 https://guilhermegarcia.dev/blog/todas_tags.html
 https://guilhermegarcia.dev/blog/todos_posts.html
 https://guilhermegarcia.dev/blog/index.html
+https://guilhermegarcia.dev/blog/tag_acessibilidade.html
+https://guilhermegarcia.dev/blog/otimizando-acessibilidade-e-legibilidade.html
 https://guilhermegarcia.dev/blog/tag_pandas.html
 https://guilhermegarcia.dev/blog/tag_data-science.html
 https://guilhermegarcia.dev/blog/tag_http.html
