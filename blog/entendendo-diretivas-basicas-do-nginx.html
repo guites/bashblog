@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang='pt-br'><head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="global.css" type="text/css" />
+<link rel="alternate" type="application/rss+xml" title="Inscrever-se nesta página..." href="feed.rss" />
+<title>Entendendo diretivas básicas do nginx</title>
+<script data-goatcounter='https://guites.goatcounter.com/count' async src='//gc.zgo.at/count.js'></script>
+</head><body>
+<header>
+<h1>Blog do guilherme <a class="awhite" href="https://guilhermegarcia.dev/blog/index.html">#</a></h1>
+<span id="description">programação e outras coisas menos úteis</span>
+</header>
+<main>
+<!-- entry begin -->
+<article>
+<h2><a class="ablack" href="entendendo-diretivas-basicas-do-nginx.html">
+Entendendo diretivas básicas do nginx
+</a></h2>
+<!-- bashblog_timestamp: #202307040842.27# -->
+<div class="subtitle">Julho 04, 2023 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p>Esse post tem um levantamento sobre alguns valores usados no arquivo de configuração do nginx, que geralmente são copiados e colados de um lado pro outro sem muita reflexão:</p>
+
+<ul>
+<li>server_name</li>
+<li>try_file</li>
+<li>fastcgi_pass </li>
+<li>fastcgi_param</li>
+</ul>
+
+<hr/>
+
+<h2>server_name</h2>
+
+<p>O uso da diretativa <code>server_name</code> está ligada ao jeito com o qual o nginx processa o recebimento de requisições. Com o nginx, podemos rodar vários projetos (<code>server</code>s) em uma mesma porta, com diferentes nomes.</p>
+
+<p>Um exemplo básico é um arquivo <code>default.conf</code> com os seguintes valores:</p>
+
+<pre><code>server {
+    listen      80;
+    server_name example.org www.example.org;
+    ...
+}
+
+server {
+    listen      80;
+    server_name example.net www.example.net;
+    ...
+}
+
+server {
+    listen      80;
+    server_name example.com www.example.com;
+    ...
+}
+</code></pre>
+
+<p>Digamos que essa configuração está rodando numa máquina virtual de IP fixo, por exemplo, <code>52.58.199.22</code>. A escolha do <code>server</code> que vai retornar a requisição é baseada no cabeçalho <code>Host</code>.</p>
+
+<p>Por exemplo, o request</p>
+
+<pre><code>curl -H "Host: example.net" 52.58.199.22
+</code></pre>
+
+<p>vai ser direcionado para o segundo bloco <code>server</code> definido na configuração.</p>
+
+<p>Um exemplo mais prático (o ip fixo acima é inventado) é usando o domínio do próprio blog, que é hospedado no GitHub Pages (que parece <a href="https://github.blog/2015-05-27-rearchitecting-github-pages/">usar nginx</a>).</p>
+
+<p><details>
+<summary>Outra forma de verificar que o github pages usa nginx é forçando um redirect</summary>
+Como o github pages possui uma opção para forçar o redirecionamento de http para https, podemos visualizar um <em>rastro</em> do nginx ao fazer um request na porta :80.</p>
+
+<p><img src="./imgs/entendendo-diretivas-basicas-do-nginx/force_https_github_pages.png" alt="Opção para forçar redirect https no github pages" title="Opção para forçar redirect https no github pages" /></p>
+
+<pre><code>curl http://guilhermegarcia.dev
+
+guites@macos blog % curl http://guilhermegarcia.dev
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;301 Moved Permanently&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;center&gt;&lt;h1&gt;301 Moved Permanently&lt;/h1&gt;&lt;/center&gt;
+&lt;hr&gt;&lt;center&gt;nginx&lt;/center&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<p></details></p>
+
+<p>O IP fixo do blog é <code>185.199.111.153</code>. Você pode verificar com</p>
+
+<pre><code>dig guilhermegarcia.dev +short
+185.199.111.153
+</code></pre>
+
+<p>Se tentarmos um acesso com um Host diferente do definido na sua configuração, o acesso não vai ser encontrado:</p>
+
+<pre><code>curl -i -H "Host: notguilhermegarcia.dev" 185.199.111.153
+
+HTTP/1.1 404 Not Found
+
+...
+..
+&lt;h1&gt;404&lt;/h1&gt;
+  &lt;p&gt;&lt;strong&gt;There isn't a GitHub Pages site here.&lt;/strong&gt;&lt;/p&gt;
+.
+.
+</code></pre>
+
+<p>Mas, com o Host esperado, funciona:</p>
+
+<pre><code>curl -i -H "Host guilhermegarcia.dev" 185.199.111.153
+
+HTTP/1.1 301 Moved Permanently
+Location: https://guilhermegarcia.dev/
+
+...
+..
+&lt;head&gt;&lt;title&gt;301 Moved Permanently&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;center&gt;&lt;h1&gt;301 Moved Permanently&lt;/h1&gt;&lt;/center&gt;
+</code></pre>
+
+<p>(e somos redirecionados pra versão https do site).</p>
+
+<p><aside>O GitHub pages serve diversos sites em cada IP fixo, então existem muitos outros domínios que vão funcionar pra esse mesmo IP!</aside></p>
+
+<p>mais informações: <a href="http://nginx.org/en/docs/http/request_processing.html">http://nginx.org/en/docs/http/request_processing.html</a></p>
+
+<h2>try_file</h2>
+
+<p>Essa diretiva testa a url acessada uma vez em cada caminho definido, em relação ao <code>root</code> definido na configuração, e aceita um valor de <em>fallback</em>, ou seja, uma url ou arquivo a ser carregado caso o arquivo não seja encontrado em nenhum dos caminhos.</p>
+
+<p>Para uma configuração como a abaixo</p>
+
+<pre><code>server {
+    listen 80;
+    server_name localhost;
+    root /var/www/html;
+
+    index index.html;
+
+    charset utf-8;
+
+    location / {
+        try_files /app/$uri $uri =404;
+    }
+}
+</code></pre>
+
+<p>e uma requisição assim</p>
+
+<pre><code>curl localhost/arquivo.html
+</code></pre>
+
+<p>O servidor vai tentar achar um arquivo para a url acessada na seguinte ordem:</p>
+
+<ul>
+<li>/var/www/html/app/arquivo.html</li>
+<li>/var/www/html/arquivo.html</li>
+</ul>
+
+<p>E, se não encontrar, vai mostrar o erro 404 padrão do nginx.</p>
+
+<p>Na seguinte estrutura de arquivos,</p>
+
+<pre><code>/var/www/html
+/var/www/html/app
+/var/www/html/app/app.html
+/var/www/html/index.html
+</code></pre>
+
+<p>Uma requisição em <code>localhost/app.html</code> iria funcionar, assim como uma em <code>localhost/index.html</code>.</p>
+
+<p>mais informações: <a href="https://serverfault.com/a/329970">https://serverfault.com/a/329970</a></p>
+
+<h2>diretivas fastcgi_</h2>
+
+<p>Para sites dinâmicos (geralmente em PHP ou perl) o nginx é usado em conjunto com o FastCGI para interpretar os arquivos acessados como scripts ao invés de serví-los como texto (expondo o código fonte na página).</p>
+
+<p>O FastCGI dispara processos que completam a lógica da requisição e retornam seu resultado pro servidor HTTP, que no caso do nginx, serve o resultado como html.</p>
+
+<p>Pra gerenciar isso, são usadas as diretivas <code>fastcgi_</code>, e as mais comuns são:</p>
+
+<ul>
+<li>fastcgi_pass: define para qual processo o nginx deve enviar a requisição usando o protocolo fastCGI. Geralmente aponta pra um servidor rodando <code>php-fpm</code>.</li>
+<li>fastcgi_param: define informações extras que devem ser enviadas junto com a requisição pelo protocolo fastCGI. Geralmente são enviadas aqui informações sobre os cabeçalhos HTTP da requisição e o arquivo acessado (URI da requisição).</li>
+</ul>
+
+<p>A configuração para deploy <a href="https://laravel.com/docs/10.x/deployment#nginx">recomendada como ponto de partida pelo Laravel</a> tem o seguinte:</p>
+
+<pre><code>location ~ \.php$ {
+    fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+    include fastcgi_params;
+}
+</code></pre>
+
+<p>Ou seja, requisições direcionadas a arquivos .php vão ser repassadas para o socket rodando o <code>php-fpm</code> na máquina, junto com o caminho para o arquivo requisitado (<code>$realpath_root</code> é o caminho absoluto até o arquivo acessado e <code>$fastcgi_script_name</code> é a URI da requisição).</p>
+
+<p>mais informações: <a href="https://en.wikipedia.org/wiki/FastCGI">https://en.wikipedia.org/wiki/FastCGI</a>, <a href="https://www.php.net/manual/en/install.fpm.php">https://www.php.net/manual/en/install.fpm.php</a>, <a href="https://pt.stackoverflow.com/a/134473/289428">https://pt.stackoverflow.com/a/134473/289428</a>, <a href="https://www.linode.com/docs/guides/how-to-configure-nginx/">https://www.linode.com/docs/guides/how-to-configure-nginx/</a></p>
+
+<h2>Outras referências</h2>
+
+<ul>
+<li><a href="http://nginx.org/en/docs/http/ngx_http_core_module.html">http://nginx.org/en/docs/http/ngx_http_core_module.html</a></li>
+<li><a href="https://www.digitalocean.com/community/tutorials/understanding-and-implementing-fastcgi-proxying-in-nginx">https://www.digitalocean.com/community/tutorials/understanding-and-implementing-fastcgi-proxying-in-nginx</a></li>
+</ul>
+
+<p>Tags: <a href='tag_nginx.html'>nginx</a>, <a href='tag_php.html'>php</a></p>
+<!-- text end -->
+</article>
+<!-- entry end -->
+</main>
+<footer id="footer"><span><small>CC by-nc-nd <a href="https://github.com/guites">Guilherme Garcia</a> &mdash; <a href="mailto:gui&#46;garcia67&#64;gmail&#46;com">gui&#46;garcia67&#64;gmail&#46;com</a></small><br/>
+<small>Generated with <a href="https://github.com/cfenollosa/bashblog">bashblog</a>, a single bash script to easily create blogs like this one</small></span></footer>
+</body></html>

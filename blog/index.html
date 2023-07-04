@@ -14,6 +14,28 @@
 </header>
 <main>
 <article>
+<h2><a class="ablack" href="entendendo-diretivas-basicas-do-nginx.html">
+Entendendo diretivas básicas do nginx
+</a></h2>
+<!-- bashblog_timestamp: #202307040842.27# -->
+<div class="subtitle">Julho 04, 2023 &mdash; 
+Guilherme Garcia
+</div>
+<!-- text begin -->
+
+<p>Esse post tem um levantamento sobre alguns valores usados no arquivo de configuração do nginx, que geralmente são copiados e colados de um lado pro outro sem muita reflexão:</p>
+
+<ul>
+<li>server_name</li>
+<li>try_file</li>
+<li>fastcgi_pass </li>
+<li>fastcgi_param</li>
+</ul>
+
+<p class="readmore"><a href="./entendendo-diretivas-basicas-do-nginx.html">Ler mais...</a></p>
+<p>Tags: <a href='tag_nginx.html'>nginx</a>, <a href='tag_php.html'>php</a></p>
+</article>
+<article>
 <h2><a class="ablack" href="otimizando-acessibilidade-e-legibilidade.html">
 Otimizando acessibilidade e legibilidade
 </a></h2>
@@ -295,38 +317,6 @@ Guilherme Garcia
 
 
 <!-- text end -->
-</article>
-<article>
-<h2><a class="ablack" href="remova-os-gifs-do-medium.html">
-Remova os gifs do medium
-</a></h2>
-<!-- bashblog_timestamp: #202212152027.42# -->
-<div class="subtitle">dezembro 15, 2022 &mdash; 
-Guilherme Garcia
-</div>
-<!-- text begin -->
-
-<p>A plataforma medium tem muito conteúdo bom, mas infelizmente muitas postagens ótimas são permeadas de gifs super coloridos, que eu considero distrativos.</p>
-
-<p>Quando eu tô procurando direcionamento sobre um tópico, e finalmente acho um post sobre o assunto, eu não gosto muito da mudança de tom que os gifs trazem, inseridos a cada parágrafo, tipo um comic relief desnecessário (<a href="https://www.google.com/search?channel=fs&amp;client=ubuntu&amp;q=jar+jar+binks">ahem</a>).</p>
-
-<p>Daí esse snippet esconde todos os gifs e põe um botãozinho pra mostrar/esconder, aí você pode dar uma olhada e desligar a coisa.</p>
-
-<p><img src="./imgs/remova-os-gifs-do-medium/adding-bookmarklet.png" alt="Aba dos favoritos no firefox" title="Aba dos favoritos no firefox" /></p>
-
-<p>Você pode ir "Add Bookmarks" e adicionar o seguinte, com um nome tipo "hide-medium-gifs":</p>
-
-<pre><code>    javascript:(function() {const doc_imgs=document.querySelectorAll('img');function toggleImgVisibility(e){let prevSibling=e.target.previousElementSibling;while(prevSibling){if(prevSibling.classList.contains('hidden-g0f')){if(prevSibling.style.visibility=='hidden'){prevSibling.style.visibility='visible';}else{prevSibling.style.visibility='hidden';}break;}prevSibling=prevSibling.previousElementSibling;}}function createToggleBtn(){const button=document.createElement("BUTTON");button.innerText="Toggle gif visibility";button.addEventListener("click",toggleImgVisibility);return button;}doc_imgs.forEach((img) =&gt; {if (!img.src.includes('.gif')) return;img.classList.add("hidden-g0f");img.style.visibility = "hidden";img.parentElement.appendChild(createToggleBtn());});}())
-</code></pre>
-
-<p>Daí, em qualquer página do medium (por <a href="https://medium.com/perry-street-software-engineering/clean-api-architecture-2b57074084d5">exemplo...</a>), basta clicar no favorito criado, e pronto: gifs pausáveis.</p>
-
-<p><video controls style="width:100%;height:100%;"src="./imgs/remova-os-gifs-do-medium/hide-g0fs.mp4"></p>
-
-<p>Abaixo eu explico melhor a função.</p>
-
-<p class="readmore"><a href="./remova-os-gifs-do-medium.html">Ler mais...</a></p>
-<p>Tags: <a href='tag_bookmarklet.html'>bookmarklet</a></p>
 </article>
 <article><div id="all_posts"><p><a href="todos_posts.html">Ver mais posts</a> &mdash; <a href="todas_tags.html">Todas as tags</a> &mdash; <a href="feed.rss">RSS feed</a></p></div></article>
 </main>
