@@ -2,9 +2,24 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
 <channel><title>Blog do guilherme</title><link>https://guilhermegarcia.dev/blog/index.html</link>
 <description>programação e outras coisas menos úteis</description><language>pt-br</language>
-<lastBuildDate>Tue, 04 Jul 2023 08:43:02 -0300</lastBuildDate>
-<pubDate>Tue, 04 Jul 2023 08:43:02 -0300</pubDate>
+<lastBuildDate>Wed, 20 Sep 2023 22:39:49 -0300</lastBuildDate>
+<pubDate>Wed, 20 Sep 2023 22:39:49 -0300</pubDate>
 <atom:link href="https://guilhermegarcia.dev/blog/feed.rss" rel="self" type="application/rss+xml" />
+<item><title>
+Modificando listas in place / interagindo com memória em python
+</title><description><![CDATA[
+
+<p><abbr title="muito grande;nem li">mg;nl</abbr>: entrei num buraco de minhoca tentando enviar uma resposta envolvendo modificar listas in place no LeetCode. Aqui relato a diferença entre um assignment usando <code>=</code> e um <code>slice</code> assignment quando se trata de sobrescrever listas.</p>
+
+<p>Post originalmente escrito pro fórum do <a href="https://matehackers.org/">matehackers</a> em 06/09/2023.</p>
+
+<hr>
+<p>Tags: <a href='tag_python.html'>python</a>, <a href='tag_algorithms.html'>algorithms</a></p>
+</article>
+]]></description><link>https://guilhermegarcia.dev/blog/modificando-listas-in-place--interagindo-com-memoria-em-python.html</link>
+<guid>https://guilhermegarcia.dev/blog/./modificando-listas-in-place--interagindo-com-memoria-em-python.html</guid>
+<dc:creator>Guilherme Garcia</dc:creator>
+<pubDate>Wed, 20 Sep 2023 22:39:07 -0300</pubDate></item>
 <item><title>
 Entendendo diretivas básicas do nginx
 </title><description><![CDATA[
@@ -324,51 +339,4 @@ Remova os gifs do medium
 <guid>https://guilhermegarcia.dev/blog/./remova-os-gifs-do-medium.html</guid>
 <dc:creator>Guilherme Garcia</dc:creator>
 <pubDate>Thu, 15 Dec 2022 20:27:42 -0300</pubDate></item>
-<item><title>
-Sempre pode suas redes
-</title><description><![CDATA[
-
-<p>Sério, sempre pode suas redes. Docker networks abandonadas, desligadas de qualquer container podem destruir sua internet.</p>
-
-<p>Eu fiquei duas semanas com problema na internet da minha máquina: por algum motivo, na rede de casa, a conexão do ubuntu ficava falhando.</p>
-
-<p>Hora penava pra resolver DNSs, hora parava de funcionar completamente. Mas às vezes (geralmente quando eu pedia ajuda) ela funcionava.</p>
-
-<p>Tentei desabilitar o IPV6 nas configurações de rede, desinstalar o <code>systemd-resolved</code>, mexer com o network manager, editar o /etc/resolv.conf diretamente.</p>
-
-<p>Nada.</p>
-
-<p>Em outras redes, na casa de amigos, na cafeteria, a internet funcionava. Eu cheguei a achar que meu provedor estava de sacanagem.</p>
-
-<p>Até que tive que ficar num airBnb, e o problema voltou.</p>
-
-<p>Olhei pro roteador, e era o mesmo <code>d-link</code> que eu tinha em casa. Já comecei a desenvolver uma crendice.</p>
-
-<p>Acabou que não pude ir até o fim, pois um dia rodei um <code>docker network ls</code> e notei que tinha muita coisa na listagem.</p>
-
-<pre><code>    docker network prune
-    &gt;Yes
-</code></pre>
-
-<p>E problema resolvido.</p>
-
-<p>Se alguém souber mais sobre isso, ou como reproduzir o problema, por favor, <a href="mailto:gui.garcia67@gmail.com">entre em contato</a>.</p>
-
-<p>Mas lembre-se: sempre pode suas redes.</p>
-
-<p>Tags: <a href='tag_docker.html'>docker</a>, <a href='tag_dns.html'>dns</a>, <a href='tag_networking.html'>networking</a></p>
-
-
-
-
-
-
-
-
-<!-- text end -->
-</article>
-]]></description><link>https://guilhermegarcia.dev/blog/sempre-pode-suas-redes.html</link>
-<guid>https://guilhermegarcia.dev/blog/./sempre-pode-suas-redes.html</guid>
-<dc:creator>Guilherme Garcia</dc:creator>
-<pubDate>Wed, 23 Nov 2022 16:39:35 -0300</pubDate></item>
 </channel></rss>

@@ -1,8 +1,11 @@
 https://guilhermegarcia.dev/blog/todas_tags.html
 https://guilhermegarcia.dev/blog/todos_posts.html
 https://guilhermegarcia.dev/blog/index.html
-https://guilhermegarcia.dev/blog/tag_nginx.html
+https://guilhermegarcia.dev/blog/tag_python.html
+https://guilhermegarcia.dev/blog/tag_algorithms.html
+https://guilhermegarcia.dev/blog/modificando-listas-in-place--interagindo-com-memoria-em-python.html
 https://guilhermegarcia.dev/blog/tag_php.html
+https://guilhermegarcia.dev/blog/tag_nginx.html
 https://guilhermegarcia.dev/blog/entendendo-diretivas-basicas-do-nginx.html
 https://guilhermegarcia.dev/blog/tag_wsl.html
 https://guilhermegarcia.dev/blog/tag_windows.html
@@ -12,7 +15,6 @@ https://guilhermegarcia.dev/blog/tag_vim.html
 https://guilhermegarcia.dev/blog/tag_streaming.html
 https://guilhermegarcia.dev/blog/tag_seo.html
 https://guilhermegarcia.dev/blog/tag_react.html
-https://guilhermegarcia.dev/blog/tag_python.html
 https://guilhermegarcia.dev/blog/tag_puppeteer.html
 https://guilhermegarcia.dev/blog/tag_poc.html
 https://guilhermegarcia.dev/blog/tag_pandas.html
